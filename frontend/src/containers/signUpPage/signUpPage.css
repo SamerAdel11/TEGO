@@ -1,0 +1,114 @@
+/* signUpPage.css */
+.suplier-signUp {
+  margin: 0 12rem;
+}
+
+.gradient__text {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.gradient__text h1{
+  font-size: 50px;
+  text-align: center;
+  font-family: var(--font-family);
+}
+.form-group {
+    margin-bottom: 0.5rem;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    color: #ffffff;
+    font-family: 'Droid Arabic Naskh', serif;
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+option,select,input {
+    flex: 2 1;
+    width: 100%;
+    min-height: 50px;
+    font-family: var(--font-family);
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 28px;
+    background: var(--color-footer);
+    border: 2px solid var(--color-footer);
+    padding: 0 1rem;
+    outline: none;
+    color: var(--color-text);
+    border-radius: 10px;
+}
+
+button {
+  flex: 0.6;
+  width: 100%;
+  min-height: 50px;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 28px;
+  text-align: center; /* Align text to the right */
+  background: #FF4820;
+  border: 2px solid #FF4820;
+  padding: 0 2rem; /* Adjust padding to ensure text is centered horizontally */
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+  margin: 0 auto;
+  border-radius: 10px;
+}
+
+button[type="submit"]:hover {
+  background-color: #ac1f00;
+  border: 2px solid #ac1f00;
+} 
+
+h2{
+  margin: 1.5rem;
+  font-size: 35px;
+  text-align: center;
+  font-family: 'Lateef', serif;
+  color : #71E5FF;
+}
+hr {
+  border-color: white; /* Set border color to white */
+}
+.Add_button{
+  width : 17%;
+  margin: 1rem 0; 
+  font-size: 16px;
+}
+button[type="button"]:hover {
+  background-color: #ac1f00;
+  border: 2px solid #ac1f00;
+} 
+.file{
+  color:white;
+  font-size: 24px;
+}
+.files{
+  display:flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.Add_button_files{
+  max-width: 13%;
+  margin: 0.5rem 1rem; 
+  font-size: 14px;
+}
+.red{
+  color:#ff3434;
+  font-size: 18px;
+}
+.account_h1{
+  margin:3rem 0 1rem 0 ;
+}
+.submit_button{
+  width: 50%;
+  display: block;
+  margin: 2rem auto;
+  justify-content: center;
+}
