@@ -41,15 +41,9 @@ const SignUpPage = () => {
     }));
   };
   const [repeatBranchRows, setRepeatBranchRows] = useState(1);
-  const [repeatOwnerRows, setRepeatOwnerRows] = useState(1);
   const handleAddBranchRow = () => {
     if (repeatBranchRows < 3) {
       setRepeatBranchRows((prevRepeatRows) => prevRepeatRows + 1);
-    }
-  };
-  const handleAddOwnerRow = () => {
-    if (repeatOwnerRows < 3) {
-      setRepeatOwnerRows((prevRepeatRows) => prevRepeatRows + 1);
     }
   };
   const [repeatActivityRows, setRepeatActivityRows] = useState(1); // State for repeated activity rows
@@ -62,20 +56,23 @@ const SignUpPage = () => {
       const postData = {
         name: formData.companyName,
         location: formData.address,
-        commercial_registration_number: formData.commercialRegistrationNumber,
-        tax_card_number: formData.taxCardNumber,
+        city: formData.registrationAuthority,
         mobile: formData.mobile,
         landline: formData.landline,
         fax_number: formData.fax,
-        company_type: formData.companyType,
-        company_capital: formData.capital,
+        is_supplier: true,
+        supplier: {
+          tax_card_number: formData.taxCardNumber,
+          commercial_registration_number: formData.commercialRegistrationNumber,
+          company_type: formData.companyType,
+          company_capital: formData.capital,
+        },
         company_fields: [...Array(repeatActivityRows)].map((_, index) => ({
           primary_field: formData[`Main_activity_${index}`],
           secondary_field: formData[`Sub_activity_${index}`],
         })),
         user: {
           first_name: formData.owner_name,
-          last_name: 'Adel', // Add last name if available
           email: formData.email,
           mobile_number: formData.mobile,
           password: formData.passWord,
@@ -123,7 +120,7 @@ const SignUpPage = () => {
         <div className="gpt3__navbar-sign">
           <p>تسجيل الدخول</p>
           {/* Use Link here */}
-          <Link to="/signup"><button type="button">انشاء حساب جديد</button></Link>
+          <Link to="/sign"><button type="button">انشاء حساب جديد</button></Link>
         </div>
       </div>
       <div className="suplier-signUp section__padding">
@@ -204,7 +201,7 @@ const SignUpPage = () => {
           </div>
           <div className="row">
             <div className="form-group col-md-6">
-              <label htmlFor="companyType">جهة استخراج السجل التجاري
+              <label htmlFor="companyType">نوع الشركة
                 <select name="companyType" id="companyType" value={formData.companyType} onChange={handleChange}>
                   <option value="">اختر نوع الشركة</option>
                   <option value="اجنبية">اجنبية</option>
@@ -267,52 +264,6 @@ const SignUpPage = () => {
             <i data-v-7e013592="" className="fa fa-plus" />اضافة مالك اخر
           </button>
           <hr data-v-7e013592 />
-          <h2>فروع الشركة</h2>
-          {[...Array(repeatOwnerRows)].map((_, index) => (
-            <div key={index} className="row">
-              <div className="form-group col-md-8">
-                <label htmlFor={`Company_branches_address_${index}`}>عنوان
-                  <input type="text" name={`Company_branches_address_${index}`} id={`Company_branches_address_${index}`} value={formData[`Company_branches_address_${index}`]} onChange={handleChange} />
-                </label>
-              </div>
-              <div className="form-group col-md-4">
-                <label htmlFor={`Company_branches_governorate_${index}`}>المحافظة
-                  <select name={`Company_branches_governorate_${index}`} id={`Company_branches_governorate_${index}`} value={formData[`Company_branches_governorate_${index}`]} onChange={(e) => handleChange(e, index)}>
-                    <option value="">اختر الجهة</option>
-                    <option value="القاهرة">القاهرة</option>
-                    <option value="الإسكندرية">الإسكندرية</option>
-                    <option value="الجيزة">الجيزة</option>
-                    <option value="القليوبية">القليوبية</option>
-                    <option value="الدقهلية">الدقهلية</option>
-                    <option value="الشرقية">الشرقية</option>
-                    <option value="الغربية">الغربية</option>
-                    <option value="الإسماعيلية">الإسماعيلية</option>
-                    <option value="البحيرة">البحيرة</option>
-                    <option value="كفر الشيخ">كفر الشيخ</option>
-                    <option value="دمياط">دمياط</option>
-                    <option value="بورسعيد">بورسعيد</option>
-                    <option value="السويس">السويس</option>
-                    <option value="شمال سيناء">شمال سيناء</option>
-                    <option value="جنوب سيناء">جنوب سيناء</option>
-                    <option value="الفيوم">الفيوم</option>
-                    <option value="بني سويف">بني سويف</option>
-                    <option value="المنوفية">المنوفية</option>
-                    <option value="أسيوط">أسيوط</option>
-                    <option value="الوادي الجديد">الوادي الجديد</option>
-                    <option value="سوهاج">سوهاج</option>
-                    <option value="قنا">قنا</option>
-                    <option value="الأقصر">الأقصر</option>
-                    <option value="أسوان">أسوان</option>
-                    <option value="البحر الأحمر">البحر الأحمر</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-          ))}
-          <button type="button" className="Add_button" onClick={handleAddOwnerRow}>
-            <i className="fa fa-plus" /> اضافة فرع آخر
-          </button>
-          <hr data-v-7e013592 />
           <h2>انشطة الشركة</h2>
           {[...Array(repeatActivityRows)].map((_, index) => (
             <div key={index} className="row">
@@ -331,14 +282,6 @@ const SignUpPage = () => {
           <button type="button" className="Add_button" onClick={handleAddActivityRow}>
             <i className="fa fa-plus" /> اضافة نشاط آخر
           </button>
-          <hr data-v-7e013592 />
-          <div className="files">
-            <p className="file">المرفقات</p>
-            <button type="button" className="Add_button_files" onClick={handleChange}>
-              <i className="fa fa-plus" /> choose file
-            </button>
-          </div>
-          <p className="red">جميع المرفقات يجب ان تكون فى ملف واحد من نوع PDF بمساحه 10MB كحد اقصى . للتعرف عالى المطلوب فى المرفق من فضلك</p>
           <hr data-v-7e013592 />
           <div className="gradient__text">
             <h1 className="account_h1">بيانات الحساب</h1>
