@@ -1,61 +1,75 @@
 from rest_framework import serializers
-from .models import CustomUser, Company, Owner,CompanyField,Branch
+from .models import CustomUser, Company, Owner, CompanyField, Branch
 from rest_framework.authtoken.models import Token
 from rest_framework import serializers
 
+
 class UserSerializer(serializers.ModelSerializer):
-    password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
-    
+    password2 = serializers.CharField(
+        style={'input_type': 'password'}, write_only=True)
+
     class Meta:
         model = CustomUser
         fields = ['first_name', 'last_name',
-                'email','password','password2']
+                  'email', 'password', 'password2']
         extra_kwargs = {
             'password': {'write_only': True}
         }
 
-    
-    def validate(self,data):
+    def validate(self, data):
         password = data['password']
         password2 = data['password2']
         if password != password2:
             raise serializers.ValidationError('Passwords do\'nt match')
-        else: 
+        else:
             return data
+
     def create(self, validated_data):
         validated_data.pop('password2')
-        user=CustomUser.objects.create(**validated_data)
-        user.set_password(validated_data['password'])                                                                                                                                                             
+        user = CustomUser.objects.create(**validated_data)
+        user.set_password(validated_data['password'])
         user.save()
         return validated_data
+
 
 class OwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Owner
         exclude = ['company']
 
+    def update(self, instace, validated_data):
+        instace.name = validated_data.get('name', instace.name)
+        instace.owner_id = validated_data.get('owner_id',
+                                                            instace.owner_id)
+
+        instace.owner_position = validated_data.get('onwer_position',
+                                                                    instace.onwer_position)
+
+        instace.address = validated_data.get('address',
+                                                            instace.address)
+
+
 class CompanyFieldSerializer(serializers.ModelSerializer):
-        class Meta:
-            model = CompanyField
-            exclude = ['id','company']
+    class Meta:
+        model = CompanyField
+        exclude = ['id', 'company']
+
 
 class CompanySerializer(serializers.ModelSerializer):
     owners = OwnerSerializer(many=True)
-    company_fields=CompanyFieldSerializer(many=True)
+    company_fields = CompanyFieldSerializer(many=True)
     user = UserSerializer(many=False)
-
 
     class Meta:
         model = Company
         fields = "__all__"
 
-
-    def validate(self,data):
+    def validate(self, data):
         password = data['user']['password']
         password2 = data['user']['password2']
         if password != password2:
             raise serializers.ValidationError('Passwords don\'t match')
-        else: 
+        else:
             return data
 
     def create(self, validated_data):
@@ -68,10 +82,10 @@ class CompanySerializer(serializers.ModelSerializer):
         user.save()
         # create token for that user
         token = Token.objects.create(user=user)
-        
-        #extract other entities 
+
+        # extract other entities
         owners = validated_data.pop('owners')
-        company_fields=validated_data.pop('company_fields')
+        company_fields = validated_data.pop('company_fields')
 
         # create company instance
         company = Company.objects.create(**validated_data, user=user)
@@ -80,10 +94,10 @@ class CompanySerializer(serializers.ModelSerializer):
         print(owners)
         for owner in owners:
             Owner.objects.create(**owner, company=company)
-        
-        #iterate over fields and create instances
+
+        # iterate over fields and create instances
         for field in company_fields:
-            CompanyField.objects.create(**field,company=company)
+            CompanyField.objects.create(**field, company=company)
 
         # add token to the serializer
         company_data = CompanySerializer(company).data
@@ -91,8 +105,7 @@ class CompanySerializer(serializers.ModelSerializer):
         return company_data
 
     def update(self, instace, validated_data):
-        owners = validated_data.pop('owners')
-        company = Company.objects.create(**validated_data)
+        print('entered update method')
         instace.name = validated_data.get('name', instace.name)
         instace.location = validated_data.get('location', instace.name)
         instace.commercial_registration_number = validated_data.get(
@@ -108,6 +121,18 @@ class CompanySerializer(serializers.ModelSerializer):
             'company_type', instace.company_type)
         instace.company_capital = validated_data.get(
             'company_capital', instace.company_capital)
-
         instace.save()
+
+        owners = validated_data.get('owners')
+        for owner in owners:
+            owner_id = owner.get('id')
+            if owner_id is None:
+                print('owner id isn\'t found')
+                Owner.objects.create(**owner)
+            else:
+                print(f"owner id is found and it = {owner_id}")
+                owner_instance = Owner.objects.get(id=owner_id)
+                serializer=OwnerSerializer(instance=owner_instance,data=owner)
+                serializer.update(owner_instance,owner)
+                owner_instance.save()
         return instace

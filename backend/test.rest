@@ -13,56 +13,35 @@ Content-Type: application/json
 ###
 
 
-POST  http://localhost:8000/companies/
+put  http://localhost:8000/companies/
 Content-Type: application/json
 
 {
     "owners": [
         {
-            "name": "Samer A1111111del",
-            "owner_id": "3123123",
-            "onwer_position": "manager",
-            "address": "street xyz"
-        },
-        {
-            "name": "Bassem Adel",
-            "owner_id": "123",
-            "onwer_position": "CEO",
-            "address": "street xyz"
-        },
-        {
-            "name": "Adel",
-            "owner_id": "96767",
+            "id":44,
+            "name": "Not Philib",
+            "owner_id": "3020525234234",
             "onwer_position": "not manager",
-            "address": "street xyz"
-        }
-    ],
-    "branches": [
-        {
-            "address": "sillicon valley",
-            "city": "newyork"
-        },
-        {
-            "address": "miami egypt",
-            "city": "alexandria"
+            "address": "not street xyz"
         }
     ],
     "company_fields": [
         {
-            "primary_field": "electronic",
-            "secondary_field": "not electronic"
+            "primary_field": "furniture",
+            "secondary_field": "not furniture"
         }
     ],
     "user": {
-        "first_name": "Samer",
-        "last_name": "Adel",
-        "email": "fqwe@gmail.com",
+        "first_name": "nardin",
+        "last_name": "philib",
+        "email": "tego@gmail.com",
         "mobile_number": "0123654654",
         "password": "sameradel",
         "password2":"sameradel"
     },
     "name": "Samerco inc",
-    "location": "Miami",
+    "location": "not miami",
     "commercial_registration_number": "6345346464",
     "tax_card_number": "423423",
     "mobile": "23423",
@@ -74,3 +53,11 @@ Content-Type: application/json
 
 ###
 
+POST  http://localhost:8000/login/
+Content-Type: application/json
+
+{
+
+    "email": "sameradel789@gmail.com",
+    "password": "sameradel"
+}
