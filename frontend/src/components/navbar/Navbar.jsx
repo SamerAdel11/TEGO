@@ -24,7 +24,7 @@ const Navbar = () => {
       <div className="gpt3__navbar-sign">
         <p>تسجيل الدخول</p>
         {/* Use Link here */}
-        <Link to="/signup"><button type="button">انشاء حساب جديد</button></Link>
+        <Link to="/sign"><button type="button">انشاء حساب جديد</button></Link>
       </div>
       <div className="gpt3__navbar-menu">
         {toggleMenu

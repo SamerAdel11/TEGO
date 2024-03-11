@@ -1,0 +1,79 @@
+.container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+  height: 80vh; /* Adjust height as needed */
+  }
+  
+.card {
+    border: 2px solid #71E5FF;
+    border-radius: 10px;
+    padding: 40px;
+    width: 400px; /* Adjust the width as needed */
+    text-align: center;
+    background-color: #071c3d; /* Adjust background color */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+button.submit_button {
+    width: 50%;
+    display: block;
+    margin: 1rem auto;
+    justify-content: center;
+    min-height: 50px;
+    font-family: var(--font-family);
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 28px;
+    text-align: center;
+    background: #FF4820;
+    border: 2px solid #FF4820;
+    padding: 0 2rem;
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+    border-radius: 10px;
+}
+
+button.submit_button:hover {
+    background-color: #ac1f00;
+    border: 2px solid #ac1f00;
+}
+
+h1.gradient__text {
+    font-size: 40px;
+    text-align: center;
+    font-family: 'Lateef', serif;
+    color: #71E5FF;
+    font-family: var(--font-family);
+    padding :20px;
+    font-weight: 600;
+}
+.icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px; /* Adjust spacing between icon and heading */
+}
+
+/* Apply white color to the icon */
+.icon svg {
+    color: rgb(255, 255, 255);
+    font-size: 90px;
+}
+.p-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Ensure the container takes up the full height */
+  }
+  
+  .p-content {
+    font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 24px;
+    color: var(--color-text);
+  }
+  
