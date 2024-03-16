@@ -112,3 +112,9 @@ class CompanyField(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
     def __str__(self):
         return self.primary_field
+
+class Notes(models.Model):
+    user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    body=models.TextField()
+    def __str__(self):
+        return self.body

@@ -65,13 +65,15 @@ Content-Type: application/json
         }
     ],
     "user": {
-        "first_name": "nardin",
-        "last_name": "philib",
-        "email": "qweqw@gmail.com",
+        "first_name": "samer",
+        "last_name": "adel",
+        "email": "9090@gmail.com",
         "mobile_number": "0123654654",
         "password": "sameradel",
         "password2":"sameradel"
     },
+    "city":"alexandria",
+    "is_supplier":false,
     "name": "Samerco inc",
     "location": "not miami",
     "mobile": "23423",
