@@ -1,8 +1,9 @@
 from rest_framework import serializers
-from .models import CustomUser, Company, Owner, CompanyField, Branch, Supplier
+from .models import CustomUser, Company, Owner, CompanyField, Branch, Supplier,Notes
 from rest_framework.authtoken.models import Token
 from rest_framework import serializers
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 class UserSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(
@@ -155,3 +156,19 @@ class CompanySerializer(serializers.ModelSerializer):
     #             serializer.update(owner_instance,owner)
     #             owner_instance.save()
     #     return instace
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token['email'] = user.email
+        # ...
+
+        return token
+
+class NoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Notes
+        fields = '__all__'
