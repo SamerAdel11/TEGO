@@ -53,23 +53,21 @@ class CustomUser(AbstractUser):
 
 
 class Company(models.Model):
-    name = models.CharField(max_length=100)
-    location = models.TextField()
-    commercial_registration_number = models.CharField(max_length=255)
-    tax_card_number = models.CharField(max_length=255)
+    name = models.CharField(max_length=100) #
+    location = models.TextField() #
+    city=models.CharField(max_length=255)
+    fax_number = models.CharField(max_length=255)
     mobile = models.CharField(max_length=255)
     landline = models.CharField(max_length=255)
-    fax_number = models.CharField(max_length=255)
-    company_type = models.CharField(max_length=255)
-    company_capital= models.IntegerField()
+    is_supplier=models.BooleanField()
     user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     def __str__(self):
-        return self.name
+        return f"company {self.name}"
 
     @property
     def owners(self):
         return self.owner_set.all()
-    
+
     @property
     def branches(self):
         return self.branch_set.all()
@@ -77,7 +75,20 @@ class Company(models.Model):
     @property
     def company_fields(self):
         return self.companyfield_set.all()
+    @property
+    def supplier(self):
+        return self.supplier_set.first()
 
+
+class Supplier(models.Model):
+    company=models.OneToOneField(Company,on_delete=models.CASCADE)
+    tax_card_number = models.CharField(max_length=255)
+    commercial_registration_number = models.CharField(max_length=255)
+    company_type = models.CharField(max_length=255)
+    company_capital= models.IntegerField()
+
+    def __str__(self):
+        return f"supplier {self.company.name}"
 
 class Owner(models.Model):
     name = models.CharField(max_length=100)

@@ -56,20 +56,23 @@ const SignUpPage = () => {
       const postData = {
         name: formData.companyName,
         location: formData.address,
-        commercial_registration_number: formData.commercialRegistrationNumber,
-        tax_card_number: formData.taxCardNumber,
+        city: formData.registrationAuthority,
         mobile: formData.mobile,
         landline: formData.landline,
         fax_number: formData.fax,
-        company_type: formData.companyType,
-        company_capital: formData.capital,
+        is_supplier: true,
+        supplier: {
+          tax_card_number: formData.taxCardNumber,
+          commercial_registration_number: formData.commercialRegistrationNumber,
+          company_type: formData.companyType,
+          company_capital: formData.capital,
+        },
         company_fields: [...Array(repeatActivityRows)].map((_, index) => ({
           primary_field: formData[`Main_activity_${index}`],
           secondary_field: formData[`Sub_activity_${index}`],
         })),
         user: {
           first_name: formData.owner_name,
-          last_name: 'Adel', // Add last name if available
           email: formData.email,
           mobile_number: formData.mobile,
           password: formData.passWord,
@@ -115,7 +118,9 @@ const SignUpPage = () => {
           </div>
         </div>
         <div className="gpt3__navbar-sign">
-          <p>تسجيل الدخول</p>
+          <Link to="/signin">
+            <p type="btn">تسجيل الدخول</p>
+          </Link>
           {/* Use Link here */}
           <Link to="/sign"><button type="button">انشاء حساب جديد</button></Link>
         </div>
@@ -198,7 +203,7 @@ const SignUpPage = () => {
           </div>
           <div className="row">
             <div className="form-group col-md-6">
-              <label htmlFor="companyType">جهة استخراج السجل التجاري
+              <label htmlFor="companyType">نوع الشركة
                 <select name="companyType" id="companyType" value={formData.companyType} onChange={handleChange}>
                   <option value="">اختر نوع الشركة</option>
                   <option value="اجنبية">اجنبية</option>

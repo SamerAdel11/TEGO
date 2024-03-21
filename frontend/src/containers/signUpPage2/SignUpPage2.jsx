@@ -9,6 +9,7 @@ import logo from '../../assets/Logo4.png';
 
 const SignUpPage2 = () => {
   const [formData, setFormData] = useState({
+    companyName: '',
     UserName: '',
     // address: '',
     First_Name: '',
@@ -49,23 +50,25 @@ const SignUpPage2 = () => {
     e.preventDefault();
     try {
       const postData = {
-        name: formData.UserName,
-        commercial_registration_number: formData.First_Name,
-        tax_card_number: formData.Second_Name,
-        Password: formData.Password,
-        Password2: formData.Password2,
-        email_number: formData.email,
         company_fields: [...Array(repeatActivityRows)].map((_, index) => ({
           primary_field: formData[`Main_activity_${index}`],
           secondary_field: formData[`Sub_activity_${index}`],
         })),
         user: {
-          address: formData.address,
-          registrationAuthority: formData.registrationAuthority,
-          fax: formData.fax,
-          mobile: formData.mobile,
-          phone: formData.phone,
+          first_name: formData.First_Name,
+          last_name: formData.Second_Name,
+          email: formData.email,
+          password: formData.Password,
+          password2: formData.Password2,
         },
+        is_supplier: false,
+        name: formData.companyName,
+        location: formData.address,
+        fax_number: formData.fax,
+        mobile: formData.mobile,
+        landline: formData.phone,
+        city: formData.registrationAuthority,
+        company_type: 'buyer',
       };
       // Make POST request
       const response = await fetch('http://localhost:8000/companies/', {
@@ -100,7 +103,9 @@ const SignUpPage2 = () => {
           </div>
         </div>
         <div className="gpt3__navbar-sign">
-          <p>تسجيل الدخول</p>
+          <Link to="/signin">
+            <p type="btn">تسجيل الدخول</p>
+          </Link>
           {/* Use Link here */}
           <Link to="/sign"><button type="button">انشاء حساب جديد</button></Link>
         </div>
@@ -166,6 +171,11 @@ const SignUpPage2 = () => {
           <hr data-v-7e013592 />
           <div className="gradient__text">
             <h1 className="account_h1">معلومات الاتصال</h1>
+          </div>
+          <div className="form-group">
+            <label htmlFor="address">اسم الشركه
+              <input type="text" name="companyName" id="companyName" value={formData.companyName} onChange={handleChange} />
+            </label>
           </div>
           <div className="form-group">
             <label htmlFor="address">العنوان

@@ -94,7 +94,11 @@ a {
     color: wheat;
 
   }
-  
+/* here i will add the syle of pages i added */
+.host_side{
+  display: flex;
+  direction: rtl;
+}
 
 @-webkit-keyframes scale-up-center {
   0% {

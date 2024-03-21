@@ -22,7 +22,9 @@ const Navbar = () => {
         </div>
       </div>
       <div className="gpt3__navbar-sign">
-        <p>تسجيل الدخول</p>
+        <Link to="/signin">
+          <p type="btn">تسجيل الدخول</p>
+        </Link>
         {/* Use Link here */}
         <Link to="/sign"><button type="button">انشاء حساب جديد</button></Link>
       </div>

@@ -1,0 +1,14 @@
+.container_signin{
+    margin: 10rem  18rem ;
+}
+
+.gradient__text h1{
+    font-size: 50px;
+    text-align: center;
+    font-family: "Alexandria", sans-serif;
+}
+.button_signin {
+    width: 50%;
+    display: block;
+    margin: 2rem auto; /* Centers the button horizontally */
+  }
