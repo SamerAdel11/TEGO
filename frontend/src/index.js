@@ -6,8 +6,6 @@ import './index.css';
 // import './containers/sidebar/sidebar.css';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <App />,
   document.getElementById('root'),
 );

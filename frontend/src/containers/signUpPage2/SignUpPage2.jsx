@@ -60,15 +60,15 @@ const SignUpPage2 = () => {
           email: formData.email,
           password: formData.Password,
           password2: formData.Password2,
+          company_type: 'buyer',
+
         },
-        is_supplier: false,
         name: formData.companyName,
         location: formData.address,
         fax_number: formData.fax,
         mobile: formData.mobile,
         landline: formData.phone,
         city: formData.registrationAuthority,
-        company_type: 'buyer',
       };
       // Make POST request
       const response = await fetch('http://localhost:8000/companies/', {
