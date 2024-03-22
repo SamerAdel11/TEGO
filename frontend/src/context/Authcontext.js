@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react'; // Added React import
 import { jwtDecode } from 'jwt-decode';
+import { useHistory } from 'react-router-dom';
 
 const AuthContext = createContext();
 
@@ -10,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const initialAuthTokens = storedAuthTokens ? JSON.parse(storedAuthTokens) : null;
   const [authTokens, setAuthTokens] = useState(initialAuthTokens);
   const [loading, setLoading] = useState(true);
+  const history = useHistory();
 
   const loginUser = async (e) => {
     e.preventDefault();
@@ -28,6 +30,7 @@ export const AuthProvider = ({ children }) => {
       console.log(jwtDecode(tokens.access));
       setUser(jwtDecode(tokens.access));
       localStorage.setItem('authTokens', JSON.stringify(tokens));
+      history.push('/host');
     } else {
       alert('something went wrong');
     }
@@ -37,6 +40,7 @@ export const AuthProvider = ({ children }) => {
     setAuthTokens(null);
     setUser(null);
     localStorage.removeItem('authTokens');
+    history.push('/signin');
   };
 
   const updateToken = async () => {
@@ -69,8 +73,8 @@ export const AuthProvider = ({ children }) => {
   const contextData = {
     user,
     authTokens,
-    loginUser,
-    logoutUser,
+    login: loginUser,
+    logout: logoutUser,
   };
 
   useEffect(() => {
@@ -89,7 +93,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={contextData}>
-      {children}
+      { children}
     </AuthContext.Provider>
   );
 };
