@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Company, Owner, CompanyField, Branch, Supplier,Notes
-from rest_framework.authtoken.models import Token
+from .models import CustomUser, Company, Owner, CompanyField, Supplier,Notes
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -88,15 +87,12 @@ class CompanySerializer(serializers.ModelSerializer):
         user = CustomUser.objects.create(**user)
         user.set_password(user.password)
         user.save()
-        # create token for that user
-        token = Token.objects.create(user=user)
-
         # extract other entities
         owners = validated_data.get('owners')
         if owners:
             validated_data.pop('owners')
         company_fields = validated_data.pop('company_fields')
-        if validated_data.get('is_supplier'):
+        if validated_data.get('company_type_tego')=='supplier':
             supplier = validated_data.pop('supplier')
             company = Company.objects.create(**validated_data, user=user)
             supplier = Supplier.objects.create(**supplier,company=company)
@@ -112,17 +108,7 @@ class CompanySerializer(serializers.ModelSerializer):
         # iterate over fields and create instances
         for field in company_fields:
             CompanyField.objects.create(**field, company=company)
-
-        # print(f'supplier is {validated_data.get("is_supplier")}')
-        # if validated_data.get('is_supplier'):
-        #     print(f"validated data is {validated_data} ")
-        #     supplier = Supplier.objects.create(
-        #         company=company,
-        #     )
-        # add token to the serializer
-        company_data = CompanySerializer(company).data
-        company_data['user']['token'] = token.key
-        return company_data
+        return validated_data
 
     # def update(self, instace, validated_data):
     #     print('entered update method')
@@ -164,6 +150,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # Add custom claims
         token['email'] = user.email
+        token['company_type'] = Company.objects.get(user=user).company_type_tego
         # ...
 
         return token
