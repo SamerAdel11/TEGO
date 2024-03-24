@@ -44,18 +44,6 @@ class CompanyView(APIView):
         return Response(CompanySerializer(instance).data)
 
 
-
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-
-        # Add custom claims
-        token['email'] = user.email
-        # ...
-
-        return token
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getNotes(request):

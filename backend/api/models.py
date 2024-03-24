@@ -43,7 +43,6 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
-    mobile_number = models.CharField(max_length=15)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     objects = CustomUserManager()
@@ -59,8 +58,8 @@ class Company(models.Model):
     fax_number = models.CharField(max_length=255)
     mobile = models.CharField(max_length=255)
     landline = models.CharField(max_length=255)
-    is_supplier=models.BooleanField()
     user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    company_type_tego=models.CharField(max_length=30)
     def __str__(self):
         return f"company {self.name}"
 
@@ -98,13 +97,6 @@ class Owner(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
     def __str__(self):
         return self.name
-
-class Branch(models.Model):
-    address=models.TextField()
-    city=models.CharField(max_length=255)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
-    def __str__(self):
-        return self.city
 
 class CompanyField(models.Model):
     primary_field=models.CharField(max_length=255)

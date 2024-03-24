@@ -1,0 +1,78 @@
+[
+    {
+        "title": "المناقصات",
+        "icon": "bi bi-envelope-open",
+        "childrens": [
+            {
+                "title": "انشاء مناقصة",
+                "icon": "bi bi-pen",
+                "path": "/"
+            },
+            {
+                "title": "المناقصات المنشوره",
+                "icon": "bi bi-newspaper",
+                "path": "/about"
+            }
+        ]
+    },
+    {
+        "title": "العقود",
+        "icon": "bi bi-card-heading",
+        "childrens": [
+            {
+                "title": "العقد الاول",
+                "path": "/login"
+            },
+            {
+                "title": "العقد الثاني",
+                "path": "/register"
+            }
+        ]
+    },
+    {
+        "title": "المسودات",
+        "icon": "bi bi-basket",
+        "childrens": [
+            {
+                "title": "المسودة رقم 1",
+                "path": "/profile"
+            },
+            {
+                "title": "مسودات اخري",
+                "childrens": [
+                    {
+                        "title": "مسودة رقم 2",
+                        "path": "/settings/account"
+                    },
+                    {
+                        "title": "مسودة رقم 3",
+                        "childrens": [
+                            {
+                                "title": "مسودة رقم 4",
+                                "path": "/settings/billing/payment"
+                            },
+                            {
+                                "title": "مسودة رقم 5",
+                                "path": "/settings/billing/subscription"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "القوالب",
+        "icon": "bi bi-box-seam",
+        "childrens": [
+            {
+                "title": "القالب الاول",
+                "path": "/search"
+            },
+            {
+                "title": "القالب الثاني",
+                "path": "/history"   
+            }
+        ]
+    }
+]

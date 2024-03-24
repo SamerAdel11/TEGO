@@ -60,7 +60,7 @@ const SignUpPage = () => {
         mobile: formData.mobile,
         landline: formData.landline,
         fax_number: formData.fax,
-        is_supplier: true,
+        company_type_tego: 'supplier',
         supplier: {
           tax_card_number: formData.taxCardNumber,
           commercial_registration_number: formData.commercialRegistrationNumber,
@@ -72,9 +72,9 @@ const SignUpPage = () => {
           secondary_field: formData[`Sub_activity_${index}`],
         })),
         user: {
-          first_name: formData.owner_name,
+          first_name: formData.First_Name,
+          last_name: formData.Second_Name,
           email: formData.email,
-          mobile_number: formData.mobile,
           password: formData.passWord,
           password2: formData.passWord_2,
         },
@@ -118,7 +118,9 @@ const SignUpPage = () => {
           </div>
         </div>
         <div className="gpt3__navbar-sign">
-          <p>تسجيل الدخول</p>
+          <Link to="/signin">
+            <p type="btn">تسجيل الدخول</p>
+          </Link>
           {/* Use Link here */}
           <Link to="/sign"><button type="button">انشاء حساب جديد</button></Link>
         </div>
@@ -126,7 +128,38 @@ const SignUpPage = () => {
       <div className="suplier-signUp section__padding">
         <form onSubmit={handleSubmit}>
           <div className="gradient__text">
-            <h1>بيانات المورد</h1>
+            <h1 className="account_h1">بيانات المورد</h1>
+          </div>
+          <div className="row">
+            <div className="form-group col-md-6">
+              <label htmlFor="First_Name">الاسم الاول
+                <input type="text" name="First_Name" id="First_Name" value={formData.First_Name} onChange={handleChange} />
+              </label>
+            </div>
+            <div className="form-group col-md-6">
+              <label htmlFor="Second_Name">الاسم الثاني
+                <input type="text" name="Second_Name" id="Second_Name" value={formData.Second_Name} onChange={handleChange} />
+              </label>
+            </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">البريد الالكتروني
+              <input type="text" name="email" id="email" value={formData.email} onChange={handleChange} />
+            </label>
+          </div>
+          <div className="form-group">
+            <label htmlFor="passWord">كلمة المرور
+              <input type="text" name="passWord" id="passWord" value={formData.passWord} onChange={handleChange} />
+            </label>
+          </div>
+          <div className="form-group">
+            <label htmlFor="passWord_2">تاكيد كلمة المرور
+              <input type="text" name="passWord_2" id="passWord_2" value={formData.passWord_2} onChange={handleChange} />
+            </label>
+          </div>
+          <hr data-v-7e013592 />
+          <div className="gradient__text">
+            <h1>بيانات الشركة</h1>
           </div>
           <div className="form-group">
             <label htmlFor="companyName">اسم الشركة
@@ -232,12 +265,7 @@ const SignUpPage = () => {
                     <input type="text" name={`owner_name_${index}`} id={`owner_name_${index}`} value={formData[`owner_name_${index}`]} onChange={(e) => handleChange(e, index)} />
                   </label>
                 </div>
-                <div className="form-group col-md-3">
-                  <label htmlFor={`The_owner_id_${index}`}>الرقم القومي
-                    <input type="text" name={`The_owner_id_${index}`} id={`The_owner_id_${index}`} value={formData[`The_owner_id_${index}`]} onChange={(e) => handleChange(e, index)} />
-                  </label>
-                </div>
-                <div className="form-group col-md-3">
+                <div className="form-group col-md-6">
                   <label htmlFor={`Position_of_owner_${index}`}>المنصب
                     <select name={`Position_of_owner_${index}`} id={`Position_of_owner_${index}`} value={formData[`Position_of_owner_${index}`]} onChange={(e) => handleChange(e, index)}>
                       <option value="">اختر المنصب</option>
@@ -250,6 +278,11 @@ const SignUpPage = () => {
                       <option value="زوج / زوجة رئيس مجلس الادارة">زوج / زوجة رئيس مجلس الادارة</option>
                       <option value="مندوب">مندوب</option>
                     </select>
+                  </label>
+                </div>
+                <div className="form-group col-md-12">
+                  <label htmlFor={`The_owner_id_${index}`}>الرقم القومي
+                    <input type="text" name={`The_owner_id_${index}`} id={`The_owner_id_${index}`} value={formData[`The_owner_id_${index}`]} onChange={(e) => handleChange(e, index)} />
                   </label>
                 </div>
                 <div className="form-group col-md-12">
@@ -282,30 +315,6 @@ const SignUpPage = () => {
           <button type="button" className="Add_button" onClick={handleAddActivityRow}>
             <i className="fa fa-plus" /> اضافة نشاط آخر
           </button>
-          <hr data-v-7e013592 />
-          <div className="gradient__text">
-            <h1 className="account_h1">بيانات الحساب</h1>
-          </div>
-          <div className="form-group">
-            <label htmlFor="userName">اسم المستخدم
-              <input type="text" name="userName" id="userName" value={formData.userName} onChange={handleChange} />
-            </label>
-          </div>
-          <div className="form-group">
-            <label htmlFor="email">البريد الالكتروني
-              <input type="text" name="email" id="email" value={formData.email} onChange={handleChange} />
-            </label>
-          </div>
-          <div className="form-group">
-            <label htmlFor="passWord">كلمة المرور
-              <input type="text" name="passWord" id="passWord" value={formData.passWord} onChange={handleChange} />
-            </label>
-          </div>
-          <div className="form-group">
-            <label htmlFor="passWord_2">تاكيد كلمة المرور
-              <input type="text" name="passWord_2" id="passWord_2" value={formData.passWord_2} onChange={handleChange} />
-            </label>
-          </div>
           <button type="submit" className="submit_button" onClick={handleSubmit}>Submit</button>
         </form>
       </div>

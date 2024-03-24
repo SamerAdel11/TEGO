@@ -22,7 +22,9 @@ function ToSign() {
           </div>
         </div>
         <div className="gpt3__navbar-sign">
-          <p>تسجيل الدخول</p>
+          <Link to="/signin">
+            <p type="btn">انشاء حساب جديد</p>
+          </Link>
           {/* Use Link here */}
           <Link to="/sign">
             <button type="button">انشاء حساب جديد</button>
