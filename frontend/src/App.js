@@ -8,6 +8,7 @@ import ToSign from './containers/ToSign/ToSign';
 import SignIn from './containers/signIn/SignIn.jsx';
 import HostHome from './containers/Buyer/HostHome.jsx';
 import { AuthProvider } from './context/Authcontext.js';
+import WebSocketExample from './containers/signUpPage/WebSocket.jsx';
 
 const App = () => (
 
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/sidebar" component={Sidebar} />
           <Route path="/signin" component={SignIn} />
           <Route path="/sign" component={ToSign} />
+          <Route path="/notification" component={WebSocketExample} />
           <Route path="/" exact>
             <div className="gradient__bg">
               <Navbar />

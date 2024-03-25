@@ -11,30 +11,7 @@ export const AuthProvider = ({ children }) => {
   const initialAuthTokens = storedAuthTokens ? JSON.parse(storedAuthTokens) : null;
   const [authTokens, setAuthTokens] = useState(initialAuthTokens);
   const [loading, setLoading] = useState(true);
-  const [notification, setNotification] = useState();
   const history = useHistory();
-
-  const getNotification = async () => {
-    if (authTokens) {
-      const response = await fetch('http://localhost:8000/notification/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authTokens.access}`,
-        },
-      });
-      const data = await response.json();
-      if (response.status === 200) {
-        setNotification(data);
-        console.log('Notification retrieved');
-        console.log(data);
-      } else if (response.statusText === 'Unauthorized') {
-        console.log('unauthorized so we logged you out');
-      } else {
-        console.log('there is an error', data);
-      }
-    }
-  };
 
   const loginUser = async (e) => {
     e.preventDefault();
@@ -55,7 +32,6 @@ export const AuthProvider = ({ children }) => {
       setUser(loggedUser);
       localStorage.setItem('authTokens', JSON.stringify(tokens));
       history.push('/host');
-      getNotification();
     } else if (response.status === 401) {
       alert(tokens.detail);
     } else {
@@ -104,29 +80,18 @@ export const AuthProvider = ({ children }) => {
     authTokens,
     login: loginUser,
     logout: logoutUser,
-    getNotification,
-    notification,
   };
-
   useEffect(() => {
-    if (loading) {
-      updateToken();
-      getNotification();
-    }
+    // if (loading) {
+    //   updateToken();
+    // }
     const delaytime = 1000 * 60 * 60 * 23;
     const interval = setInterval(() => {
       if (authTokens) {
         updateToken();
       }
     }, delaytime);
-
-    const interval1 = setInterval(() => {
-      if (authTokens) {
-        getNotification();
-      }
-    }, 100000);
     return () => {
-      clearInterval(interval1);
       clearInterval(interval);
     };
   }, [authTokens]);

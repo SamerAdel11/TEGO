@@ -119,9 +119,9 @@ class Notes(models.Model):
 
 
 class UserNotification(models.Model):
-    recipient = models.OneToOneField(
+    recipient = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name='recipient')
-    actor = models.OneToOneField(
+    actor = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, null=True, related_name='triggered')
     event = models.CharField(max_length=255, null=True)
     verb = models.CharField(max_length=255, null=True)
