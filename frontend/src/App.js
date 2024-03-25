@@ -7,7 +7,7 @@ import Sidebar from './containers/sidebar/Sidebar.js';
 import ToSign from './containers/ToSign/ToSign';
 import SignIn from './containers/signIn/SignIn.jsx';
 import CreateTender from './containers/Buyer_container/create_tender/CreateTender.jsx';
-import HostHome from './containers/Buyer/HostHome.jsx';
+import HostHome from './containers/Buyer_container/Buyer/HostHome.jsx';
 import { AuthProvider } from './context/Authcontext.js';
 import WebSocketExample from './containers/signUpPage/WebSocket.jsx';
 const App = () => (
