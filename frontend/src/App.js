@@ -6,7 +6,8 @@ import './App.css';
 import Sidebar from './containers/sidebar/Sidebar.js';
 import ToSign from './containers/ToSign/ToSign';
 import SignIn from './containers/signIn/SignIn.jsx';
-import HostHome from './containers/Buyer/HostHome.jsx';
+import HostHome from './containers/Buyer_container/Buyer/HostHome.jsx';
+import CreateTender from './containers/Buyer_container/create_tender/CreateTender.jsx';
 
 const App = () => (
 
@@ -35,6 +36,15 @@ const App = () => (
             <div className="host_side">
               <Sidebar />
               <HostHome />
+            </div>
+          </div>
+        </Route>
+        <Route path="/createtnder" exact>
+          <div className="">
+            <NavbarHost />
+            <div className="host_side">
+              <Sidebar />
+              <CreateTender />
             </div>
           </div>
         </Route>
