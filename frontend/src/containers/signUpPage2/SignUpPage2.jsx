@@ -61,14 +61,13 @@ const SignUpPage2 = () => {
           password: formData.Password,
           password2: formData.Password2,
         },
-        is_supplier: false,
         name: formData.companyName,
         location: formData.address,
         fax_number: formData.fax,
         mobile: formData.mobile,
         landline: formData.phone,
         city: formData.registrationAuthority,
-        company_type: 'buyer',
+        company_type_tego: 'buyer',
       };
       // Make POST request
       const response = await fetch('http://localhost:8000/companies/', {
@@ -115,11 +114,6 @@ const SignUpPage2 = () => {
           <div className="gradient__text">
             <h1>بيانات المشتري</h1>
           </div>
-          <div className="form-group">
-            <label htmlFor="UserName">اسم المستخدم
-              <input type="text" name="UserName" id="UserName" value={formData.UserName} onChange={handleChange} />
-            </label>
-          </div>
           <div className="row">
             <div className="form-group col-md-6">
               <label htmlFor="First_Name">الاسم الاول
@@ -132,45 +126,24 @@ const SignUpPage2 = () => {
               </label>
             </div>
           </div>
-          <div className="row">
-            <div className="form-group col-md-6">
-              <label htmlFor="Password">كلمة السر
-                <input type="text" name="Password" id="Password" value={formData.Password} onChange={handleChange} />
-              </label>
-            </div>
-            <div className="form-group col-md-6">
-              <label htmlFor="Password2">تاكيد كلمة السر
-                <input type="text" name="Password2" id="Password2" value={formData.Password2} onChange={handleChange} />
-              </label>
-            </div>
-          </div>
           <div className="form-group">
             <label htmlFor="email">البريد الالكتروني
               <input type="text" name="email" id="email" value={formData.email} onChange={handleChange} />
             </label>
           </div>
-          <hr data-v-7e013592 />
-          <h2>انشطة الشركة</h2>
-          {[...Array(repeatActivityRows)].map((_, index) => (
-            <div key={index} className="row">
-              <div className="form-group col-md-6">
-                <label htmlFor={`Main_activity_${index}`}>نشاط رئيسي
-                  <input type="text" name={`Main_activity_${index}`} id={`Main_activity_${index}`} value={formData[`Main_activity_${index}`]} onChange={handleChange} />
-                </label>
-              </div>
-              <div className="form-group col-md-6">
-                <label htmlFor={`Sub_activity_${index}`}>نشاط فرعي
-                  <input type="text" name={`Sub_activity_${index}`} id={`Sub_activity_${index}`} value={formData[`Sub_activity_${index}`]} onChange={handleChange} />
-                </label>
-              </div>
-            </div>
-          ))}
-          <button type="button" className="Add_button" onClick={handleAddActivityRow}>
-            <i className="fa fa-plus" /> اضافة نشاط آخر
-          </button>
+          <div className="form-group">
+            <label htmlFor="Password">كلمة السر
+              <input type="text" name="Password" id="Password" value={formData.Password} onChange={handleChange} />
+            </label>
+          </div>
+          <div className="form-group">
+            <label htmlFor="Password2">تاكيد كلمة السر
+              <input type="text" name="Password2" id="Password2" value={formData.Password2} onChange={handleChange} />
+            </label>
+          </div>
           <hr data-v-7e013592 />
           <div className="gradient__text">
-            <h1 className="account_h1">معلومات الاتصال</h1>
+            <h1 className="account_h1">بيانات الشركة</h1>
           </div>
           <div className="form-group">
             <label htmlFor="address">اسم الشركه
@@ -220,15 +193,34 @@ const SignUpPage2 = () => {
             </label>
           </div>
           <div className="form-group">
-            <label htmlFor="mobile">موبيل
+            <label htmlFor="mobile">موبايل
               <input type="text" name="mobile" id="mobile" value={formData.mobile} onChange={handleChange} />
             </label>
           </div>
           <div className="form-group">
-            <label htmlFor="phone">تليفون
+            <label htmlFor="phone">تليفون ارضي
               <input type="text" name="phone" id="phone" value={formData.phone} onChange={handleChange} />
             </label>
           </div>
+          <hr data-v-7e013592 />
+          <h2>انشطة الشركة</h2>
+          {[...Array(repeatActivityRows)].map((_, index) => (
+            <div key={index} className="row">
+              <div className="form-group col-md-6">
+                <label htmlFor={`Main_activity_${index}`}>نشاط رئيسي
+                  <input type="text" name={`Main_activity_${index}`} id={`Main_activity_${index}`} value={formData[`Main_activity_${index}`]} onChange={handleChange} />
+                </label>
+              </div>
+              <div className="form-group col-md-6">
+                <label htmlFor={`Sub_activity_${index}`}>نشاط فرعي
+                  <input type="text" name={`Sub_activity_${index}`} id={`Sub_activity_${index}`} value={formData[`Sub_activity_${index}`]} onChange={handleChange} />
+                </label>
+              </div>
+            </div>
+          ))}
+          <button type="button" className="Add_button" onClick={handleAddActivityRow}>
+            <i className="fa fa-plus" /> اضافة نشاط آخر
+          </button>
           <button type="submit" className="submit_button" onClick={handleSubmit}>Submit</button>
         </form>
       </div>

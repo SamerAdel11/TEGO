@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Navbar } from '../../components';
+import AuthContext from '../../context/Authcontext';
+
 import './signIn.css';
 
 function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useContext(AuthContext); // Destructure loginUser from the context
+  // const { getNotification, Notification } = useContext(AuthContext); // Destructure loginUser from the context
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
@@ -16,25 +20,8 @@ function SignIn() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    try {
-      const response = await fetch('http://your-django-server-url/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      if (response.ok) {
-        // Sign-in successful, you may redirect the user or perform other actions
-        console.log('Sign-in successful');
-      } else {
-        // Sign-in failed, handle the error response accordingly
-        const data = await response.json();
-        console.error('Sign-in failed:', data.error);
-      }
-    } catch (error) {
-      console.error('Error occurred while signing in:', error.message);
-    }
+    // Call loginUser function from the context
+    login(event); // Pass the event object to the loginUser function
   };
 
   return (
@@ -45,7 +32,7 @@ function SignIn() {
           <div className="gradient__text">
             <h1>تسجيل الدخول</h1>
           </div>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}> {/* Use handleSubmit for form submission */}
             <div>
               <label htmlFor="email">
                 البريد الالكتروني:
@@ -70,7 +57,7 @@ function SignIn() {
                 />
               </label>
             </div>
-            <button className="button_signin" type="submit">تسجل الدخول</button>
+            <button className="button_signin" type="submit">تسجيل الدخول</button>
           </form>
         </div>
       </div>

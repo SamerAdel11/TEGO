@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 // import { RiMenu3Line, RiCloseLine } from 'react-icons/ri';
 import { Link } from 'react-router-dom'; // Import Link
 import logo from '../../assets/Logo4.png';
 import './navbarHost.css';
+import AuthContext from '../../context/Authcontext';
 
 function Navbar() {
+  const { logout } = useContext(AuthContext); // Destructure loginUser from the context
+
   return (
     <div className="gpt3__navbar">
       <div className="gpt3__navbar-links">
@@ -22,7 +25,7 @@ function Navbar() {
           <p type="btn">تسجيل الخروج</p>
         </Link> */}
         {/* Use Link here */}
-        <Link to="/sign"><button type="button">تسجيل الخروج</button></Link>
+        <button onClick={logout} type="button">تسجيل الخروج</button>
       </div>
     </div>
   );
