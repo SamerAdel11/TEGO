@@ -60,8 +60,6 @@ const SignUpPage2 = () => {
           email: formData.email,
           password: formData.Password,
           password2: formData.Password2,
-          company_type: 'buyer',
-
         },
         name: formData.companyName,
         location: formData.address,
@@ -69,6 +67,7 @@ const SignUpPage2 = () => {
         mobile: formData.mobile,
         landline: formData.phone,
         city: formData.registrationAuthority,
+        company_type_tego: 'buyer',
       };
       // Make POST request
       const response = await fetch('http://localhost:8000/companies/', {

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react'; // Added React import
+import React, { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { useHistory } from 'react-router-dom';
 
@@ -8,12 +8,33 @@ export const AuthProvider = ({ children }) => {
   const storedAuthTokens = localStorage.getItem('authTokens');
   const initialUser = storedAuthTokens ? jwtDecode(storedAuthTokens) : null;
   const [user, setUser] = useState(initialUser);
-  const initialAuthTokens = storedAuthTokens
-    ? JSON.parse(storedAuthTokens)
-    : null;
+  const initialAuthTokens = storedAuthTokens ? JSON.parse(storedAuthTokens) : null;
   const [authTokens, setAuthTokens] = useState(initialAuthTokens);
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState();
   const history = useHistory();
+
+  const getNotification = async () => {
+    if (authTokens) {
+      const response = await fetch('http://localhost:8000/notification/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authTokens.access}`,
+        },
+      });
+      const data = await response.json();
+      if (response.status === 200) {
+        setNotification(data);
+        console.log('Notification retrieved');
+        console.log(data);
+      } else if (response.statusText === 'Unauthorized') {
+        console.log('unauthorized so we logged you out');
+      } else {
+        console.log('there is an error', data);
+      }
+    }
+  };
 
   const loginUser = async (e) => {
     e.preventDefault();
@@ -29,10 +50,12 @@ export const AuthProvider = ({ children }) => {
     const tokens = await response.json();
     if (response.status === 200) {
       setAuthTokens(tokens);
-      console.log(jwtDecode(tokens.access));
-      setUser(jwtDecode(tokens.access));
+      const loggedUser = jwtDecode(tokens.access);
+      console.log(loggedUser);
+      setUser(loggedUser);
       localStorage.setItem('authTokens', JSON.stringify(tokens));
       history.push('/host');
+      getNotification();
     } else if (response.status === 401) {
       alert(tokens.detail);
     } else {
@@ -81,11 +104,14 @@ export const AuthProvider = ({ children }) => {
     authTokens,
     login: loginUser,
     logout: logoutUser,
+    getNotification,
+    notification,
   };
 
   useEffect(() => {
     if (loading) {
       updateToken();
+      getNotification();
     }
     const delaytime = 1000 * 60 * 60 * 23;
     const interval = setInterval(() => {
@@ -94,7 +120,15 @@ export const AuthProvider = ({ children }) => {
       }
     }, delaytime);
 
-    return () => clearInterval(interval);
+    const interval1 = setInterval(() => {
+      if (authTokens) {
+        getNotification();
+      }
+    }, 100000);
+    return () => {
+      clearInterval(interval1);
+      clearInterval(interval);
+    };
   }, [authTokens]);
 
   return (

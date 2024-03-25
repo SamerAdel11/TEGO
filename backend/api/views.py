@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from .models import CustomUser, Company, Notes
+from .models import CustomUser, Company, Notes,UserNotification
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .serializer import UserSerializer, CompanySerializer, NoteSerializer
+from .serializer import UserSerializer, CompanySerializer, NoteSerializer, NotificationnSerializer
 from rest_framework import generics, status
 from rest_framework import serializers
 from rest_framework.views import APIView
@@ -24,6 +24,7 @@ import datetime
 
 
 class CompanyView(APIView):
+    permission_classes = [] 
     def post(self, request, *args, **kwargs):
         serializer = CompanySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -44,15 +45,26 @@ class CompanyView(APIView):
         return Response(CompanySerializer(instance).data)
 
 
+class NotificationView(generics.ListAPIView):
+    serializer_class = NotificationnSerializer
+
+    def get_queryset(self):
+        # Filter the queryset based on the currently authenticated user
+        user = self.request.user
+        return UserNotification.objects.filter(recipient=user)
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getNotes(request):
-    user=request.user
+    user = request.user
     notes = Notes.objects.filter(user=user)
     print(notes)
     serializer = NoteSerializer(notes, many=True)
     return Response(serializer.data)
-
 
 
 # class UserView(APIView):
@@ -175,4 +187,3 @@ def getNotes(request):
 #             'refresh': refresh_token
 #         }
 #         return response
-

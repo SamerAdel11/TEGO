@@ -8,6 +8,7 @@ function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useContext(AuthContext); // Destructure loginUser from the context
+  // const { getNotification, Notification } = useContext(AuthContext); // Destructure loginUser from the context
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
