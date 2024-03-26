@@ -1,0 +1,83 @@
+.gradient__text h1{
+    font-size: 50px;
+    text-align: center;
+    font-family: var(--font-family);
+}
+  
+.container_create_tender {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    margin: 0; /* Removed auto margin */
+    width: 100%; /* Adjust width as needed */
+    margin: 0 4rem; /* Center horizontally */
+}
+
+.button-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 100%;
+  margin: 2rem 0;
+}
+
+.button {
+  flex: 0.6;
+  width: 50px;
+  min-height: 50px;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 28px;
+  text-align: center; /* Align text to the right */
+  background: #ff4820;
+  border: 2px solid #ff4820;
+  padding: 0.75rem 0.5rem; /* Adjust padding to ensure text is centered horizontally */
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+  margin: 0 10px;
+  border-radius: 10px;
+}
+
+button[type="submit"]:hover {
+  background-color: #ac1f00;
+  border: 2px solid #ac1f00;
+}
+
+.button.cancel {
+  background-color: #fa142b;
+  border-color: #ac1f00;
+}
+
+/* createtender-table.css */
+.table-container {
+  margin-top: 20px;
+}
+
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-container th,
+.table-container td {
+  padding: 8px;
+  border: 1px solid var(--color-text); /* Using color-text for borders */
+  text-align: center;
+  color: var(--color-text2); /* Text color */
+  font-size: 2rem;      
+}
+
+.table-container th {
+  background-color: var(--color-blog); /* Background color for table header */
+}
+/* second table  */
+.condition{
+  width: 20%;
+  margin: 1rem;
+}
+.condition-field{
+  margin: 1rem;
+}

@@ -12,6 +12,6 @@ urlpatterns = [
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('notes/', views.getNotes),
-    path('notification/', views.NotificationView.as_view()),
+    path('',views.home,name='index')
     # path('stakeholders/',views.Stakeholders.as_view())
 ]

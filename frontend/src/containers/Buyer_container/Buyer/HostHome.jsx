@@ -1,6 +1,7 @@
 import React from 'react';
 // import { Link } from 'react-router-dom'; // Import Link
 import './hostHome.css';
+import WebSocketExample from '../../signUpPage/WebSocket.jsx';
 
 function HostHome() {
   return (
@@ -24,6 +25,7 @@ function HostHome() {
         </div>
         <hr data-v-7e013592 className="full-width" />
         <h1 className="gradient__text">الاشعارات</h1>
+        <WebSocketExample />
       </div>
     </>
   );

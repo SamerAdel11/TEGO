@@ -56,6 +56,9 @@ class NotificationView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
+def home(request):
+    return render(request,'index.html')
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
