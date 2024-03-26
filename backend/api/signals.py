@@ -8,11 +8,12 @@ from .models import UserNotification
 def notification_created(sender, instance, created, **kwargs):
     if created:
         print(f"here is notification created ",instance.message)
+        
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             'public_room',
             {
-                "type": "send_notification",
-                "message": instance.message
+                "type": "send_notification2",
+                "message": instance
             }
         )

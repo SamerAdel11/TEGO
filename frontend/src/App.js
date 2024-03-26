@@ -2,14 +2,15 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Footer, Blog, Possibility, Features, WhatGPT3, Header, SignUpPage, SignUpPage2 } from './containers';
 import { Navbar, NavbarHost } from './components';
+import { AuthProvider } from './context/Authcontext.js';
 import './App.css';
 import Sidebar from './containers/sidebar/Sidebar.js';
 import ToSign from './containers/ToSign/ToSign';
 import SignIn from './containers/signIn/SignIn.jsx';
-import CreateTender from './containers/Buyer_container/create_tender/CreateTender.jsx';
 import HostHome from './containers/Buyer_container/Buyer/HostHome.jsx';
-import { AuthProvider } from './context/Authcontext.js';
+import CreateTender from './containers/Buyer_container/create_tender/CreateTender.jsx';
 import WebSocketExample from './containers/signUpPage/WebSocket.jsx';
+
 const App = () => (
 
   <Router>
@@ -27,17 +28,31 @@ const App = () => (
               <Navbar />
               <Header />
             </div>
+            <WhatGPT3 />
+            <Features />
+            <Possibility />
+            <Blog />
+            <Footer />
           </Route>
-        <Route path="/createtnder" exact>
-          <div className="">
-            <NavbarHost />
-            <div className="host_side">
-              <Sidebar />
-              <CreateTender />
+          <Route path="/host" exact>
+            <div className="">
+              <NavbarHost />
+              <div className="host_side">
+                <Sidebar />
+                <HostHome />
+              </div>
             </div>
-          </div>
-        </Route>
-      </Switch>
+          </Route>
+          <Route path="/createtnder" exact>
+            <div className="">
+              <NavbarHost />
+              <div className="host_side">
+                <Sidebar />
+                <CreateTender />
+              </div>
+            </div>
+          </Route>
+        </Switch>
       </AuthProvider>
     </div>
   </Router>

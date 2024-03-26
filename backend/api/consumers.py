@@ -20,26 +20,28 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
         # Fetch all existing notifications and send them to the client
         notifications = await self.get_all_notifications()
-        print('get notification well')
         for notification in notifications:
-            print(f"notification is {notification.message}")
             await self.send_notification(notification.message)
-        print('exit the for loop')
     
     async def get_all_notifications(self):
         self.user = await self.authenticate_user(self.scope)
-        print("**************************************************USER********************************")
-        print(self.user)
         if not self.user:
             print('that use is anonymous or not found')
             await self.close()
-        print(self.user)
         # Fetch all notifications from the database
         return UserNotification.objects.filter(recipient=self.user)
     
     async def send_notification(self, message):
         print("message from notification is",message)
         await self.send(text_data=json.dumps({'message': message}))
+
+    async def send_notification2(self,message):
+        print("message from notification22 is",message)
+        if(self.user==message['message'].recipient):
+            print('yes they are equal')
+            await self.send(text_data=json.dumps({'message': message['message'].message}))
+        else:
+            print('they are not equal')
 
     async def authenticate_user(self, scope):
         # Extract the token from the query parameters

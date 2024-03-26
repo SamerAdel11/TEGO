@@ -44,7 +44,6 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     objects = CustomUserManager()
-
     def __str__(self):
         return self.email
 
@@ -121,10 +120,8 @@ class Notes(models.Model):
 class UserNotification(models.Model):
     recipient = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name='recipient')
-    actor = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, null=True, related_name='triggered')
-    event = models.CharField(max_length=255, null=True)
-    verb = models.CharField(max_length=255, null=True)
     message = models.CharField(max_length=255, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     seen = models.BooleanField(default=False)
+    def __str__(self):
+        return f"{self.message}->{self.recipient}"
