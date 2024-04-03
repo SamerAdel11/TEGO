@@ -8,6 +8,7 @@ function CreateTender() {
   const [descriptions, setDescriptions] = useState(['']);
   const [index, setIndex] = useState(1);
   const [conditions, setConditions] = useState([{ id: 1, value: '' }]);
+  const [privateconditions, setPrivateConditions] = useState([{ id: 1, value: '' }]);
 
   const handleAddProduct = () => {
     const newProduct = { id: index + 1, title: '', unit: '', quantity: '' };
@@ -39,11 +40,23 @@ function CreateTender() {
     setConditions([...conditions, newCondition]);
   };
 
+  const handleAddPrivateCondition = () => {
+    const newCondition = { id: privateconditions.length + 1, value: '' };
+    setPrivateConditions([...privateconditions, newCondition]);
+  };
+
   const handleConditionChange = (idx, value) => {
     const updatedConditions = [...conditions];
     updatedConditions[idx].value = value;
     setConditions(updatedConditions);
   };
+
+  const handlePrivateConditionChange = (idx, value) => {
+    const updatedConditions = [...conditions];
+    updatedConditions[idx].value = value;
+    setPrivateConditions(updatedConditions);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -73,6 +86,13 @@ function CreateTender() {
     <>
       <div className="container_create_tender">
         <form onSubmit={handleSubmit}>
+          <div className="gradient__text">
+            <h1>إعلان  المناقصة</h1>
+          </div>
+
+          <div className="gradient__text">
+            <h1>مسوؤلي المناقصة</h1>
+          </div>
           <div className="gradient__text">
             <h1>عمل مناقصة جديدة</h1>
           </div>
@@ -178,7 +198,7 @@ function CreateTender() {
           </div>
           <hr data-v-7e013592 />
           <div className="gradient__text m-3">
-            <h1>الشروط الرئيسية</h1>
+            <h1>الشروط العامه</h1>
           </div>
 
           {/* Conditions section */}
@@ -197,6 +217,33 @@ function CreateTender() {
               type="button"
               className="button condition"
               onClick={handleAddCondition}
+            >
+              اضافة شرط
+            </button>
+          </div>
+
+          <hr data-v-7e013592 />
+
+          <div className="gradient__text m-4">
+            <h1>الشروط الخاصة</h1>
+          </div>
+
+          {/* Conditions section */}
+          <div className="condition-section">
+            {privateconditions.map((condition, idx) => (
+              <div key={idx} className="condition-field">
+                <input
+                  type="text"
+                  value={condition.value}
+                  onChange={(e) => handlePrivateConditionChange(idx, e.target.value)}
+                  placeholder={` الشرط رقم ${idx + 1}`}
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              className="button condition"
+              onClick={handleAddPrivateCondition}
             >
               اضافة شرط
             </button>
