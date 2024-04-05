@@ -2,6 +2,22 @@ import React, { useState } from 'react';
 import './createtender.css';
 
 function CreateTender() {
+  const [officials, setOfficials] = useState([
+    { id: 1, name: '', position: '' },
+  ]);
+  const [officialIndex, setOfficialIndex] = useState(1);
+
+  const handleAddOfficial = () => {
+    const newOfficial = { id: officialIndex + 1, name: '', position: '' };
+    setOfficials([...officials, newOfficial]);
+    setOfficialIndex(officialIndex + 1);
+  };
+
+  const handleOfficialChange = (idx, field, value) => {
+    const updatedOfficials = [...officials];
+    updatedOfficials[idx][field] = value;
+    setOfficials(updatedOfficials);
+  };
   const [products, setProducts] = useState([
     { id: 1, title: '', unit: '', quantity: '' },
   ]);
@@ -86,16 +102,73 @@ function CreateTender() {
     <>
       <div className="container_create_tender">
         <form onSubmit={handleSubmit}>
-          <div className="gradient__text">
-            <h1>إعلان  المناقصة</h1>
+          <div className="tender_announcement">
+            <div className="gradient__text">
+              <h1>إعلان  المناقصة</h1>
+            </div>
+            <div className="form-fields">
+              <label htmlFor="tenderTitle">عنوان المناقصة
+                <input type="text" id="tenderTitle" />
+              </label>
+            </div>
+            <div className="form-fields">
+              <label htmlFor="tenderSubject">موضوع المناقصة
+                <input type="text" id="tenderSubject" />
+              </label>
+            </div>
+            <div className="form-fields">
+              <label htmlFor="tenderOpeningDate">معاد فتح المظاريف
+                <input type="date" id="tenderOpeningDate" />
+              </label>
+            </div>
+          </div>
+          <div className="bidding_officials">
+            <div className="gradient__text">
+              <h1>مسوؤلي المناقصة</h1>
+            </div>
+            {officials.map((official, idx) => (
+              <div key={idx} className="form-fields row">
+                <div className="col-md-6">
+                  <label htmlFor={`officialName_${idx}`}>الاسم
+                    <input
+                      type="text"
+                      id={`officialName_${idx}`}
+                      value={official.name}
+                      onChange={(e) => handleOfficialChange(idx, 'name', e.target.value)}
+                    />
+                  </label>
+                </div>
+                <div className="col-md-6">
+                  <label htmlFor={`officialPosition_${idx}`}>الوظيفة
+                    <input
+                      type="text"
+                      id={`officialPosition_${idx}`}
+                      value={official.position}
+                      onChange={(e) => handleOfficialChange(idx, 'position', e.target.value)}
+                    />
+                  </label>
+                </div>
+              </div>
+            ))}
+            <button
+              type="button"
+              className="button condition"
+              onClick={handleAddOfficial}
+            >
+              إضافة مسؤول مناقصة جديد
+            </button>
+          </div>
+          <div className="create_new_tender">
+            <div className="gradient__text">
+              <h1>عمل مناقصة جديدة</h1>
+            </div>
+            <div className="form-fields">
+              <label htmlFor="create_tender">التسعيرة الداخية
+                <input type="text" id="create_tender" />
+              </label>
+            </div>
           </div>
 
-          <div className="gradient__text">
-            <h1>مسوؤلي المناقصة</h1>
-          </div>
-          <div className="gradient__text">
-            <h1>عمل مناقصة جديدة</h1>
-          </div>
           <div className="table-container">
             <table>
               <thead>

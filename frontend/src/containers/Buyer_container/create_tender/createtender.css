@@ -2,6 +2,7 @@
     font-size: 50px;
     text-align: center;
     font-family: var(--font-family);
+    padding:1rem;
 }
   
 .container_create_tender {
@@ -80,4 +81,7 @@ button[type="submit"]:hover {
 }
 .condition-field{
   margin: 1rem;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(100%);
 }
