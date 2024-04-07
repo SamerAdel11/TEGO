@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, Company, Owner, Supplier,UserNotification
+from .models import CustomUser, Company, Owner, Supplier,UserNotification,Tender
 from django.contrib.auth.admin import UserAdmin
 # from django.contrib.auth.models import User
 
@@ -10,3 +10,4 @@ admin.site.register(Company)
 admin.site.register(Owner)
 admin.site.register(Supplier)
 admin.site.register(UserNotification)
+admin.site.register(Tender)

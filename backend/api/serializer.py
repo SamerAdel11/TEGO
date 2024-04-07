@@ -225,6 +225,17 @@ class TenderSerializer(serializers.ModelSerializer):
         print(original_data)
         return original_data
 
+class TenderRetrieveSerializer(serializers.ModelSerializer):
+    admins = TenderAdminSerializer(many=True, read_only=True)
+    public_conditions = TenderPublicConditionsSerializer(many=True, read_only=True)
+    private_conditions = TenderPrivateConditionsSerializer(many=True, read_only=True)
+    ad = TenderAdSerializer(read_only=True)
+    products = TenderProductSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Tender
+        fields = ['id','initial_price', 'status', 'admins', 'public_conditions', 'private_conditions', 'ad', 'products']
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):

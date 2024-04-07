@@ -1,9 +1,8 @@
 from django.shortcuts import render
-from .models import CustomUser, Company,UserNotification
-from rest_framework.authtoken.models import Token
+from .models import CustomUser, Company,UserNotification,Tender
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .serializer import UserSerializer, CompanySerializer, NotificationnSerializer,TenderSerializer
+from .serializer import UserSerializer, CompanySerializer, NotificationnSerializer,TenderSerializer,TenderRetrieveSerializer
 from rest_framework import generics, status
 from rest_framework import serializers
 from rest_framework.views import APIView
@@ -51,6 +50,26 @@ class TenderCreateView(APIView):
             response=serializer.save()
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TenderGetView(generics.ListAPIView):
+    serializer_class=TenderSerializer
+    def get_queryset(self):
+        user=self.request.user
+        queryset = Tender.objects.filter(user=user)
+        return queryset
+    def get(self,request,*args,**kwargs):
+        return self.list(request,*args,**kwargs)
+
+
+class TenderRetrieveAPIView(generics.ListAPIView):
+    queryset = Tender.objects.all()
+    serializer_class = TenderRetrieveSerializer
+    def get_queryset(self):
+        user=self.request.user
+        print(user)
+        queryset = Tender.objects.filter(user=user)
+        return queryset
+
 
 class NotificationView(generics.ListAPIView):
     serializer_class = NotificationnSerializer
