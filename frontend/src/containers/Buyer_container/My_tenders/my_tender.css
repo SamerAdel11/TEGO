@@ -1,0 +1,44 @@
+.my-tenders-container {
+    font-family: var(--font-family);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    padding: 20px;
+  }
+  
+  .tender-title {
+    color: var(--color-text2);
+  }
+  
+  .tender-details,
+  .tender-admins,
+  .tender-conditions,
+  .tender-products {
+    margin-bottom: 20px;
+  }
+  
+  .tender-details p,
+  .tender-admins p,
+  .tender-conditions p,
+  .tender-products p {
+    margin: 5px 0;
+  }
+  
+  .tender-conditions h3,
+  .tender-products h2 {
+    margin-top: 10px;
+  }
+  
+  .tender-conditions ul,
+  .tender-products ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .tender-conditions li,
+  .tender-products li {
+    margin: 5px 0;
+  }
+  
+  .tender-initial-price {
+    color: var(--color-subtext);
+  }
