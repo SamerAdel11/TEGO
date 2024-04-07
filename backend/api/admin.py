@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, Company, Owner, Supplier, Notes,UserNotification
+from .models import CustomUser, Company, Owner, Supplier,UserNotification
 from django.contrib.auth.admin import UserAdmin
 # from django.contrib.auth.models import User
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Company, Owner, CompanyField, Supplier, Notes, UserNotification
+from .models import CustomUser, Company, Owner, CompanyField, Supplier, UserNotification, TenderAd, Tender, TenderAdmin, TenderPublicConditions, TenderPrivateConditions, TenderProduct
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -160,6 +160,70 @@ class CompanySerializer(serializers.ModelSerializer):
     #             owner_instance.save()
     #     return instace
 
+class TenderAdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TenderAd
+        fields = ['title', 'topic', 'deadline','field']
+
+class TenderAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TenderAdmin
+        fields = ['name', 'job_title']
+
+class TenderPublicConditionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TenderPublicConditions
+        fields = ['condition']
+
+class TenderPrivateConditionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TenderPrivateConditions
+        fields = ['condition']
+
+class TenderProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TenderProduct
+        fields = [ 'title', 'quantity_unit', 'quantity', 'description']
+
+class TenderSerializer(serializers.ModelSerializer):
+    admins=TenderAdminSerializer(many=True)
+    public_conditions=TenderPublicConditionsSerializer(many=True)
+    private_conditions=TenderPrivateConditionsSerializer(many=True)
+    ad=TenderAdSerializer(many=False)
+    products=TenderProductSerializer(many=True)
+    class Meta:
+        model = Tender
+        fields = ['initial_price','status','admins','public_conditions','private_conditions','ad','products']
+    
+    def create(self, validated_data):
+        original_data=validated_data.copy()
+        user = self.context['request'].user
+        admins_data = validated_data.pop('admins')
+        public_conditions_data = validated_data.pop('public_conditions')
+        private_conditions_data = validated_data.pop('private_conditions')
+        products_data = validated_data.pop('products')
+        ad_data=validated_data.pop('ad')
+
+        ad_instance=TenderAd.objects.create(**ad_data)
+
+        tender = Tender.objects.create(**validated_data,user=user,ad=ad_instance)
+
+        for admin_data in admins_data:
+            TenderAdmin.objects.create(tender=tender, **admin_data)
+
+        for public_condition_data in public_conditions_data:
+            TenderPublicConditions.objects.create(tender=tender, **public_condition_data)
+
+        for private_condition_data in private_conditions_data:
+            TenderPrivateConditions.objects.create(tender=tender, **private_condition_data)
+
+        for product_data in products_data:
+            TenderProduct.objects.create(tender=tender, **product_data)
+
+        tender.save()
+
+        print(original_data)
+        return original_data
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -173,9 +237,3 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         # ...
 
         return token
-
-
-class NoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Notes
-        fields = '__all__'

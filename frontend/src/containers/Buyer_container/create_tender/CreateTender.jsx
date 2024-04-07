@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import './createtender.css';
+import AuthContext from '../../../context/Authcontext';
 
 function CreateTender() {
+  const { authTokens } = useContext(AuthContext);
   const [officials, setOfficials] = useState([
     { id: 1, name: '', position: '' },
   ]);
@@ -25,6 +27,11 @@ function CreateTender() {
   const [index, setIndex] = useState(1);
   const [conditions, setConditions] = useState([{ id: 1, value: '' }]);
   const [privateconditions, setPrivateConditions] = useState([{ id: 1, value: '' }]);
+  const [selectedTender, setSelectedTender] = useState('');
+
+  const handleSelectChange = (event) => {
+    setSelectedTender(event.target.value);
+  };
 
   const handleAddProduct = () => {
     const newProduct = { id: index + 1, title: '', unit: '', quantity: '' };
@@ -68,32 +75,54 @@ function CreateTender() {
   };
 
   const handlePrivateConditionChange = (idx, value) => {
-    const updatedConditions = [...conditions];
-    updatedConditions[idx].value = value;
-    setPrivateConditions(updatedConditions);
+    const updatedPrivateConditions = [...privateconditions];
+    updatedPrivateConditions[idx].value = value;
+    setPrivateConditions(updatedPrivateConditions);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Create an array of promises for each product request
-      const productRequests = products.map(async (product) => {
-        const response = await fetch('http://your-django-server-url.com/api/endpoint', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ product, descriptions, conditions }),
-        });
-        if (response.ok) {
-          console.log('Data sent successfully for product:', product.id);
-          // You can reset form state or take other actions if needed
-        } else {
-          console.error('Failed to send data to server for product:', product.id);
-        }
+      const formData = {
+        ad: {
+          title: e.target.querySelector('#tenderTitle').value,
+          topic: e.target.querySelector('#tenderSubject').value,
+          deadline: e.target.querySelector('#tenderOpeningDate').value,
+          field: selectedTender,
+        },
+        admins: officials.map((official) => ({
+          name: official.name,
+          job_title: official.position,
+        })),
+        public_conditions: conditions.map((condition) => ({
+          condition: condition.value,
+        })),
+        private_conditions: privateconditions.map((condition) => ({
+          condition: condition.value,
+        })),
+        products: products.map((product, idx) => ({
+          title: product.title,
+          quantity_unit: e.target.querySelector(`#unit_${idx}`).value,
+          quantity: e.target.querySelector(`#quantity_${idx}`).value,
+          description: e.target.querySelector(`#description_${idx}`).value,
+        })),
+        initial_price: e.target.querySelector('#create_tender').value,
+        status: 'Open',
+      };
+      const response = await fetch('http://localhost:8000/create_tender/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authTokens.access}`,
+        },
+        body: JSON.stringify(formData),
       });
-      // Wait for all product requests to complete
-      await Promise.all(productRequests);
+      if (response.ok) {
+        console.log('Data sent successfully');
+        // You can reset form state or take other actions if needed
+      } else {
+        console.error(`Failed to send data to server ${response.json()}`);
+      }
     } catch (error) {
       console.error('Error:', error);
     }
@@ -114,6 +143,32 @@ function CreateTender() {
             <div className="form-fields">
               <label htmlFor="tenderSubject">موضوع المناقصة
                 <input type="text" id="tenderSubject" />
+              </label>
+            </div>
+            <div className="form-fields">
+              <label htmlFor="tenderSubject">مجال المناقصة
+                <select value={selectedTender} onChange={handleSelectChange}>
+                  <option value="">اختر مجال</option>
+                  <option value="اجهزه حاسب الي وسوفت وير">اجهزه حاسب الي وسوفت وير</option>
+                  <option value="اجهزه رياضيه والعاب ترفيهية">اجهزه رياضيه والعاب ترفيهية</option>
+                  <option value="اجهزه هيدورليك ومعدات ثقيله">اجهزه هيدورليك ومعدات ثقيله</option>
+                  <option value="منتجات غذائيه">منتجات غذائيه</option>
+                  <option value="منتجات مقاولات">منتجات مقاولات</option>
+                  <option value="خدمات ماليه وبنوك">خدمات ماليه وبنوك</option>
+                  <option value="منتجات الدعايه والاعلان">منتجات الدعايه والاعلان</option>
+                  <option value="منتجات اثاث">منتجات اثاث</option>
+                  <option value="ادوات مكتبيه">ادوات مكتبيه</option>
+                  <option value="معدات بحريه">معدات بحريه</option>
+                  <option value="مواد خام( معادن – اخشاب – نحاس – فضه – حديد -.....)">مواد خام( معادن – اخشاب – نحاس – فضه – حديد -.....)</option>
+                  <option value="محابس">محابس</option>
+                  <option value="اجهزه كهربائيه">اجهزه كهربائيه</option>
+                  <option value="اجهزه رياضيه">اجهزه رياضيه</option>
+                  <option value="اعلاف للحيوانات">اعلاف للحيوانات</option>
+                  <option value="عدد ومسلتزمات ورش">عدد ومسلتزمات ورش</option>
+                  <option value="منتجات الطاقه الشمسيه">منتجات الطاقه الشمسيه</option>
+                  <option value="ادوات النظافه">ادوات النظافه</option>
+                  <option value="منتجات التبريد والتكييف">منتجات التبريد والتكييف</option>
+                </select>
               </label>
             </div>
             <div className="form-fields">
@@ -271,10 +326,9 @@ function CreateTender() {
           </div>
           <hr data-v-7e013592 />
           <div className="gradient__text m-3">
-            <h1>الشروط العامه</h1>
+            <h1>الشروط العامة</h1>
           </div>
 
-          {/* Conditions section */}
           <div className="condition-section">
             {conditions.map((condition, idx) => (
               <div key={idx} className="condition-field">
@@ -295,21 +349,18 @@ function CreateTender() {
             </button>
           </div>
 
-          <hr data-v-7e013592 />
-
-          <div className="gradient__text m-4">
+          <div className="gradient__text m-3">
             <h1>الشروط الخاصة</h1>
           </div>
 
-          {/* Conditions section */}
           <div className="condition-section">
-            {privateconditions.map((condition, idx) => (
+            {privateconditions.map((privateCondition, idx) => (
               <div key={idx} className="condition-field">
                 <input
                   type="text"
-                  value={condition.value}
+                  value={privateCondition.value}
                   onChange={(e) => handlePrivateConditionChange(idx, e.target.value)}
-                  placeholder={` الشرط رقم ${idx + 1}`}
+                  placeholder={` الشرط الخاص رقم ${idx + 1}`}
                 />
               </div>
             ))}
@@ -329,7 +380,7 @@ function CreateTender() {
             <button type="button" className="button">
               حفظ كقالب
             </button>
-            <button type="submit" className="button">
+            <button type="submit" className="button" onSubmit={handleSubmit}>
               نشر
             </button>
             <button type="button" className="button cancel">
