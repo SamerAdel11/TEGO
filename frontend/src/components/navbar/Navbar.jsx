@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { RiMenu3Line, RiCloseLine } from 'react-icons/ri';
 import { Link } from 'react-router-dom'; // Import Link
 import logo from '../../assets/Logo4.png';
 import './navbar.css';
+import AuthContext from '../../context/Authcontext';
 
 const Navbar = () => {
   const [toggleMenu, setToggleMenu] = useState(false);
+  const { user, logout } = useContext(AuthContext);
 
+  if (user) {
+    console.log(user);
+  }
   return (
     <div className="gpt3__navbar">
       <div className="gpt3__navbar-links">
@@ -21,13 +26,19 @@ const Navbar = () => {
           <p><a href="#blog">الخاتمة</a></p>
         </div>
       </div>
-      <div className="gpt3__navbar-sign">
-        <Link to="/signin">
-          <p type="btn">تسجيل الدخول</p>
-        </Link>
-        {/* Use Link here */}
-        <Link to="/sign"><button type="button">انشاء حساب جديد</button></Link>
-      </div>
+      {!user ? (
+        <div className="gpt3__navbar-sign">
+          <Link to="/signin">
+            <p type="btn">تسجيل الدخول</p>
+          </Link>
+          {/* Use Link here */}
+          <Link to="/sign"><button type="button">انشاء حساب جديد</button></Link>
+        </div>
+      ) : (
+        <div>
+          <button type="button" onClick={logout}>تسجيل خروج</button>
+        </div>
+      )}
       <div className="gpt3__navbar-menu">
         {toggleMenu
           ? <RiCloseLine color="#fff" size={27} onClick={() => setToggleMenu(false)} />

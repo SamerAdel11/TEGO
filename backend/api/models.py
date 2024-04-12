@@ -114,8 +114,8 @@ class UserNotification(models.Model):
         return f"{self.message}->{self.recipient}"
 
 class TenderAd(models.Model):
-    title=models.CharField(max_length=255)
-    topic=models.CharField(max_length=255)
+    title=models.TextField()
+    topic=models.TextField()
     field=models.CharField(max_length=255)
     deadline=models.DateField()
 
@@ -137,7 +137,7 @@ class Tender(models.Model):
     @property
     def private_conditions(self):
         return self.privateconditions_set.all()
-    
+
     @property
     def products(self):
         return self.tenderproduct_set.all()

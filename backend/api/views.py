@@ -51,18 +51,7 @@ class TenderCreateView(APIView):
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class TenderGetView(generics.ListAPIView):
-    serializer_class=TenderSerializer
-    def get_queryset(self):
-        user=self.request.user
-        queryset = Tender.objects.filter(user=user)
-        return queryset
-    def get(self,request,*args,**kwargs):
-        return self.list(request,*args,**kwargs)
-
-
-class TenderRetrieveAPIView(generics.ListAPIView):
-    queryset = Tender.objects.all()
+class TenderListView(generics.ListAPIView):
     serializer_class = TenderRetrieveSerializer
     def get_queryset(self):
         user=self.request.user
@@ -70,10 +59,13 @@ class TenderRetrieveAPIView(generics.ListAPIView):
         queryset = Tender.objects.filter(user=user)
         return queryset
 
+    def get(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        print(response.data)  # Print the response data
+        return response
 
 class NotificationView(generics.ListAPIView):
     serializer_class = NotificationnSerializer
-
     def get_queryset(self):
         # Filter the queryset based on the currently authenticated user
         user = self.request.user

@@ -7,12 +7,11 @@ const WebSocketExample = () => {
   // WebSocketManager component responsible for managing WebSocket communication and state
   useEffect(() => {
     const url = `ws://localhost:8000/ws/notify/?token=${authTokens.access}`;
-    console.log(url);
+
     const ws = new WebSocket(url);
     ws.onmessage = (event) => {
       console.log('there is a message');
       const data = JSON.parse(event.data);
-      console.log(data.message);
       setMessages((prevMessages) => [...prevMessages, data.message]);
     };
 

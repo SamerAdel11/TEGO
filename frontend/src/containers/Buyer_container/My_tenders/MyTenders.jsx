@@ -10,15 +10,16 @@ const MyTenders = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log('fady');
         const response = await fetch('http://localhost:8000/get_tenders', {
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
           },
-        });
+        }).then((data) => data.json())
+          .then((d) => console.log(d));
+
         const data = await response.json();
-        console.log(data);
         setTenderData(data);
       } catch (error) {
         console.error('Error fetching data:', error);

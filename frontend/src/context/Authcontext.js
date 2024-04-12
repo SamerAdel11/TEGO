@@ -31,7 +31,13 @@ export const AuthProvider = ({ children }) => {
       console.log(loggedUser);
       setUser(loggedUser);
       localStorage.setItem('authTokens', JSON.stringify(tokens));
-      history.push('/host');
+      if (loggedUser.company_type === 'supplier') {
+        console.log('SUPPLIER');
+        history.push('/supplier');
+      } else {
+        console.log('HOST');
+        history.push('/host');
+      }
     } else if (response.status === 401) {
       alert(tokens.detail);
     } else {

@@ -194,17 +194,20 @@ class TenderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tender
         fields = ['initial_price','status','admins','public_conditions','private_conditions','ad','products']
-    
+
     def create(self, validated_data):
-        original_data=validated_data.copy()
+        original_data = validated_data.copy()
         user = self.context['request'].user
         admins_data = validated_data.pop('admins')
         public_conditions_data = validated_data.pop('public_conditions')
         private_conditions_data = validated_data.pop('private_conditions')
         products_data = validated_data.pop('products')
-        ad_data=validated_data.pop('ad')
 
+        ad_data = validated_data.pop('ad')
+        print(f"Advertisment Data is {ad_data}")
         ad_instance=TenderAd.objects.create(**ad_data)
+
+        print(f"Tender Data is {validated_data}")
 
         tender = Tender.objects.create(**validated_data,user=user,ad=ad_instance)
 
