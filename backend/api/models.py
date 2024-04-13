@@ -75,7 +75,7 @@ class CustomUser(AbstractUser):
 
     objects = CustomUserManager()
 
-    def __str__(self):
+    def _str_(self):
         return self.email
 
 
@@ -128,8 +128,7 @@ class Supplier(models.Model):
 
     company_capital = models.IntegerField()
 
-    def __str__(self):
-
+    def _str_(self):
         return f"supplier {self.company.name}"
 
 
@@ -145,7 +144,7 @@ class Owner(models.Model):
 
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
 
-    def __str__(self):
+    def _str_(self):
         return self.name
 
 
@@ -157,8 +156,7 @@ class CompanyField(models.Model):
 
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
 
-    def __str__(self):
-
+    def _str_(self):
         return self.primary_field
 
 
@@ -173,22 +171,15 @@ class UserNotification(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     seen = models.BooleanField(default=False)
-
-    def __str__(self):
-
+    def _str_(self):
         return f"{self.message}->{self.recipient}"
 
 
 class TenderAd(models.Model):
-
-    title = models.TextField()
-
-    topic = models.TextField()
-
-    field = models.CharField(max_length=255)
-
-    deadline = models.DateField()
-
+    title=models.TextField()
+    topic=models.TextField()
+    field=models.CharField(max_length=255)
+    deadline=models.DateField()
 
 class Tender(models.Model):
 

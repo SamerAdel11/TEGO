@@ -1,44 +1,119 @@
-.my-tenders-container {
-    font-family: var(--font-family);
+
+.tenders-container {
+  /* display: flex; */
+  flex-wrap: wrap;
+  margin: 0 auto; /* Center the container */
+  justify-content: center; /* Center the content horizontally */
+}
+
+  .tender-card {
+    width: auto;
+    background-color: var(--color-footer);
     color: var(--color-text);
-    background-color: var(--color-bg);
     padding: 20px;
+    border-radius: 10px;
+    margin:  40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    max-height: 200px; /* Adjust the value as needed */
+    overflow: hidden;
+  }  
+  .tender-card:hover {
+    transform: scale(1.04);
   }
   
-  .tender-title {
-    color: var(--color-text2);
+  .tender-card.expanded {
+    height: auto;
+    max-height: none; /* Reset max-height when expanded */
   }
-  
+  .tender-card.shrunk {
+    margin-bottom: 0; /* Adjusted margin for shrunk state */
+  }
+
+.tender-details{
+  font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 30px;
+    color: var(--color-text);
+}
+/* CSS for styling the table */
+.tender-admins {
+  margin-top: 20px;
+  display: flex;
+  text-align: center;
+  justify-content: center; /* Center content horizontally */
+}
+
+.tender-admins table {
+  width: 100%; /* Set table width to 70% */
+  border-collapse: collapse; /* Collapse table borders */
+}
+
+.tender-admins h2 {
+  color: var(--color-text2); /* Text color */
+  font-size: 2rem;
+}
+
+.tender-admins ul {
+  list-style-type: none;
+  padding: 0;
+  display: inline-block; 
+  color : var(--color-footer);
+
+}
+
+.tender-admins tr {
+  background-color: var(--color-blog); /* Background color for table header */
+}
+
+.tender-admins td, .tender-admins th {
+  padding: 8px;
+  padding: 8px 2.5rem;
+  border: 2px solid var(--color-footer); /* Using color-text for borders */
+  border-radius: 10px;
+  text-align: center;
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 30px;
+  color: #ffffff;
+}
+
+/* Additional styling */
+.condition {
+  width: 20%;
+  margin: 1rem;
+}
+
+.condition-field {
+  margin: 1rem;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(100%);
+}
+  .tender-card.expanded .tender-details,
+  .tender-card.expanded .tender-admins,
+  .tender-card.expanded .tender-products {
+    display: block;
+    margin: 0 2rem;
+  }
+
   .tender-details,
   .tender-admins,
-  .tender-conditions,
   .tender-products {
-    margin-bottom: 20px;
+    display: none;
   }
   
   .tender-details p,
   .tender-admins p,
-  .tender-conditions p,
   .tender-products p {
     margin: 5px 0;
   }
-  
-  .tender-conditions h3,
-  .tender-products h2 {
-    margin-top: 10px;
-  }
-  
-  .tender-conditions ul,
-  .tender-products ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .tender-conditions li,
-  .tender-products li {
-    margin: 5px 0;
-  }
-  
-  .tender-initial-price {
-    color: var(--color-subtext);
+
+  .gradient__text h3{
+    font-size: 25px;
+    text-align: center;
+    font-family: var(--font-family);
   }

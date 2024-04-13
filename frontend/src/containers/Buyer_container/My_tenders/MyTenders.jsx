@@ -3,10 +3,9 @@ import './my_tender.css';
 import AuthContext from '../../../context/Authcontext';
 
 const MyTenders = () => {
-  const [tenderData, setTenderData] = useState(null);
+  const [tendersData, setTendersData] = useState(null);
   const { authTokens } = useContext(AuthContext);
-  // console.log(authTokens.access + 'fady');
-  console.log('fady');
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -20,7 +19,7 @@ const MyTenders = () => {
           .then((d) => console.log(d));
 
         const data = await response.json();
-        setTenderData(data);
+        setTendersData(data);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -29,63 +28,78 @@ const MyTenders = () => {
     fetchData();
   }, [authTokens]);
 
+  const [expandedTender, setExpandedTender] = useState(null);
+
+  const toggleExpand = (index) => {
+    if (expandedTender === index) {
+      setExpandedTender(null);
+    } else {
+      setExpandedTender(index);
+    }
+  };
+
   return (
-    <div className="my-tenders-container">
-      {tenderData && (
-        <>
-          <h1 className="tender-title">{tenderData.ad?.title}</h1>
-          <div className="tender-details">
-            <p className="tender-topic">Topic: {tenderData.ad?.topic}</p>
-            <p className="tender-deadline">Deadline: {tenderData.ad?.deadline}</p>
-            <p className="tender-field">Field: {tenderData.ad?.field}</p>
-            <p className="tender-status">Status: {tenderData?.status}</p>
-          </div>
-          <div className="tender-admins">
-            <h2>Admins:</h2>
-            <ul>
-              {tenderData.admins.map((admin, index) => (
-                <li key={index}>
-                  <p>{admin.name}</p>
-                  <p>{admin.job_title}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="tender-conditions">
-            <h2>Conditions:</h2>
-            <div className="public-conditions">
-              <h3>Public Conditions:</h3>
+    <>
+      <div className="tenders-container">
+        <div className="gradient__text mytender">
+          <h1 className="first_title">المناقصات المنشورة</h1>
+        </div>
+        {tendersData
+        && tendersData.map((tender, index) => (
+          <div
+            key={index}
+            className={`tender-card ${
+              expandedTender === index ? 'expanded' : 'shrunk'
+            }`}
+            onClick={() => toggleExpand(index)}
+          >
+            <h1 className="tender-title gradient__text">
+              {tender.ad?.title}
+            </h1>
+            <div className="tender-details">
+              <p className="tender-topic">موضوع المناقصة : {tender.ad?.topic}</p>
+              <p className="tender-deadline">
+                موعد التسليم :  {tender.ad?.deadline}
+              </p>
+              <p className="tender-field">المجال :  {tender.ad?.field}</p>
+              <p className="tender-status">حالة المناقصة : {tender?.status}</p>
+            </div>
+            <div className="tender-admins">
+              <div className="gradient__text mytender">
+                <h3>الاعضاء</h3>
+              </div>
               <ul>
-                {tenderData.public_conditions.map((condition, index) => (
-                  <li key={index}>{condition.condition}</li>
+                {tender.admins.map((admin, adminIndex) => (
+                  <tr key={adminIndex}>
+                    <td>{admin.name}</td>
+                    <td>{admin.job_title}</td>
+                  </tr>
                 ))}
               </ul>
             </div>
-            <div className="private-conditions">
-              <h3>Private Conditions:</h3>
+            <div className="tender-admins">
+              <div className="gradient__text mytender">
+                <h3>المنتجات</h3>
+              </div>
               <ul>
-                {tenderData.private_conditions.map((condition, index) => (
-                  <li key={index}>{condition.condition}</li>
+                {tender.products.map((product, productIndex) => (
+                  <tr key={productIndex}>
+                    <td>{product.title}</td>
+                    <td>{product.quantity} {product.quantity_unit}</td>
+                    <td>{product.description}</td>
+                  </tr>
                 ))}
               </ul>
             </div>
+            {/* <p className="tender-initial-price">
+            </p> */}
+            <div className="gradient__text mytender">
+              <h3> السعر المبدائي : {tender.initial_price}</h3>
+            </div>
           </div>
-          <div className="tender-products">
-            <h2>Products:</h2>
-            <ul>
-              {tenderData.products.map((product, index) => (
-                <li key={index}>
-                  <p>{product.title}</p>
-                  <p>{product.quantity} {product.quantity_unit}</p>
-                  <p>{product.description}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <p className="tender-initial-price">Initial Price: {tenderData.initial_price}</p>
-        </>
-      )}
-    </div>
+        ))}
+      </div>
+    </>
   );
 };
 
