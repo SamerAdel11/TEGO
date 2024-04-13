@@ -45,7 +45,7 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = []
     objects = CustomUserManager()
 
-    def __str__(self):
+    def _str_(self):
         return self.email
 
 
@@ -59,7 +59,7 @@ class Company(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     company_type_tego = models.CharField(max_length=30)
 
-    def __str__(self):
+    def _str_(self):
         return f"company {self.name}"
 
     @property
@@ -82,7 +82,7 @@ class Supplier(models.Model):
     company_type = models.CharField(max_length=255)
     company_capital = models.IntegerField()
 
-    def __str__(self):
+    def _str_(self):
         return f"supplier {self.company.name}"
 
 
@@ -93,7 +93,7 @@ class Owner(models.Model):
     address = models.CharField(max_length=255)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
 
-    def __str__(self):
+    def _str_(self):
         return self.name
 
 class CompanyField(models.Model):
@@ -101,7 +101,7 @@ class CompanyField(models.Model):
     secondary_field = models.CharField(max_length=255)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
 
-    def __str__(self):
+    def _str_(self):
         return self.primary_field
 
 class UserNotification(models.Model):
@@ -110,12 +110,12 @@ class UserNotification(models.Model):
     message = models.CharField(max_length=255, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     seen = models.BooleanField(default=False)
-    def __str__(self):
+    def _str_(self):
         return f"{self.message}->{self.recipient}"
 
 class TenderAd(models.Model):
-    title=models.CharField(max_length=255)
-    topic=models.CharField(max_length=255)
+    title=models.TextField()
+    topic=models.TextField()
     field=models.CharField(max_length=255)
     deadline=models.DateField()
 
@@ -137,7 +137,7 @@ class Tender(models.Model):
     @property
     def private_conditions(self):
         return self.privateconditions_set.all()
-    
+
     @property
     def products(self):
         return self.tenderproduct_set.all()
