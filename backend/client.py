@@ -11,7 +11,7 @@ import pprint
 # if auth_response.status_code == 200:
 
 # token=auth_response.json()['token']
-endpoint = "http://localhost:8000/create_tender/"
+endpoint = "http://localhost:8000/add_response/"
 # data = {
 #     "ad": {
 #         "title": "Sample Tender",
@@ -63,6 +63,7 @@ endpoint = "http://localhost:8000/create_tender/"
 #     "status":"Open",
 # }
 
+#tender_data
 data={
   "ad": {
     "title": "توريد وتركيب أنظمة أمن متكاملة لمشروع مجمع النخبة السكني",
@@ -184,10 +185,44 @@ data={
   "status": "Open"
 }
 
+response_data={
+    "offered_price": 100000, 
+    "tender_id": 19, 
+    'status':'candidate_pool',
+    "offer_products": [
+        {
+            "productid": 36,
+            "provided_quantity": 10,
+            "product_price": 50,
+            "supplying_duration": "1 week",
+            "supplying_status": True,
+            "product_description": "Description of product 1"
+        },
+        {
+            "productid": 35,
+            "provided_quantity": 20,
+            "product_price": 30,
+            "supplying_duration": "2 weeks",
+            "supplying_status": True,
+            "product_description": "Description of product 2"
+        }
+    ],
+    "offer_conditions": [
+        {
+            "condition": "Condition 1"
+        },
+        {
+            "condition": "Condition 2"
+        }
+    ]
+}
 
 
-headers = {'Authorization': "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEyNjEwOTcyLCJpYXQiOjE3MTIxNzg5NzIsImp0aSI6IjQ1ZmQwODM1ZWFlNzRiYzFhNTYxMWZmNzZiMzRjNThmIiwidXNlcl9pZCI6NSwiZW1haWwiOiJzYW1lcmFkZWw3ODIyOUBnbWFpbC5jb20iLCJjb21wYW55X3R5cGUiOiJzdXBwbGllciJ9.zqGj2T6Bx5l8MT9t48aX2gmxvwQPx-MDugN6OgBX9zA"}
-response = requests.post(endpoint, headers=headers,json=data)
 
-print(response.json())
+endpoint = "http://localhost:8000/get_responses/"
+
+headers = {'Authorization': "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzMzMxOTkzLCJpYXQiOjE3MTI4OTk5OTMsImp0aSI6IjA5MTg2Mzc0MTQ4NjQ5ZTNiY2IyMzNjNzdkZWYzZmY5IiwidXNlcl9pZCI6OSwiZW1haWwiOiJzYW1lcmFkZWw3ODk5QGdtYWlsLmNvbSIsImNvbXBhbnlfdHlwZSI6InN1cHBsaWVyIn0.kSOVnLx-6zrsc8UIetDexml1cJVsqD9_obGPMqNb6ME"}
+response = requests.get(endpoint, headers=headers,json=response_data)
+
+pprint.pprint(response.json())
 
