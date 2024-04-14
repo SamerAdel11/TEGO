@@ -1,0 +1,24 @@
+.button {
+    width: 100%;
+    min-height: 50px;
+    height: 100%;
+    font-family: var(--font-family);
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 28px;
+    text-align: center; /* Align text to the right */
+    background: #FF4820;
+    border: 2px solid #FF4820;
+    padding: 1rem 2rem; /* Adjust padding to ensure text is centered horizontally */
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+    margin: 0 1rem;
+    border-radius: 10px;
+  }
+  
+  .button:hover {
+    background-color: #ac1f00;
+    border: 2px solid #ac1f00;
+    
+  } 

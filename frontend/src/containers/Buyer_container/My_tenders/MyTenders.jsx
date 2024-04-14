@@ -42,59 +42,85 @@ const MyTenders = () => {
           <h1 className="first_title">المناقصات المنشورة</h1>
         </div>
         {tendersData
-        && tendersData.map((tender, index) => (
-          <div
-            key={index}
-            className={`tender-card ${
-              expandedTender === index ? 'expanded' : 'shrunk'
-            }`}
-            onClick={() => toggleExpand(index)}
-          >
-            <h1 className="tender-title gradient__text">
-              {tender.ad?.title}
-            </h1>
-            <div className="tender-details">
-              <p className="tender-topic">موضوع المناقصة : {tender.ad?.topic}</p>
-              <p className="tender-deadline">
-                موعد التسليم :  {tender.ad?.deadline}
-              </p>
-              <p className="tender-field">المجال :  {tender.ad?.field}</p>
-              <p className="tender-status">حالة المناقصة : {tender?.status}</p>
-            </div>
-            <div className="tender-admins">
-              <div className="gradient__text mytender">
-                <h3>الاعضاء</h3>
+          && tendersData.map((tender, index) => (
+            <div
+              key={index}
+              className={`tender-card ${
+                expandedTender === index ? 'expanded' : 'shrunk'
+              }`}
+              onClick={() => toggleExpand(index)}
+            >
+              <h1 className="tender-title gradient__text">
+                {tender.ad?.title}
+              </h1>
+              <div className="tender-details">
+                <p className="tender-topic">موضوع المناقصة : {tender.ad?.topic}</p>
+                <p className="tender-deadline">
+                  موعد التسليم : {tender.ad?.deadline}
+                </p>
+                <p className="tender-field">المجال : {tender.ad?.field}</p>
+                <p className="tender-status">حالة المناقصة : {tender?.status}</p>
+                <div className="tender-conditions">
+                  <div className="gradient__text mytender">
+                    <h3>شروط العرض العامة</h3>
+                  </div>
+                  {tender.public_conditions && tender.public_conditions.length > 0 ? (
+                    <div>
+                      {tender.public_conditions.map((condition, conditionIndex) => (
+                        <p key={conditionIndex}>{condition.condition}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>No public conditions available</p>
+                  )}
+                </div>
+                <div className="tender-conditions">
+                  <div className="gradient__text mytender">
+                    <h3>شروط العرض الخاصة</h3>
+                  </div>
+                  {tender.private_conditions && tender.private_conditions.length > 0 ? (
+                    <div>
+                      {tender.private_conditions.map((condition, conditionIndex) => (
+                        <p key={conditionIndex}>{condition.condition}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>No private conditions available</p>
+                  )}
+                </div>
               </div>
-              <ul>
-                {tender.admins.map((admin, adminIndex) => (
-                  <tr key={adminIndex}>
-                    <td>{admin.name}</td>
-                    <td>{admin.job_title}</td>
-                  </tr>
-                ))}
-              </ul>
-            </div>
-            <div className="tender-admins">
-              <div className="gradient__text mytender">
-                <h3>المنتجات</h3>
+              <div className="tender-admins">
+                <div className="gradient__text mytender">
+                  <h3>الاعضاء</h3>
+                </div>
+                <ul>
+                  {tender.admins.map((admin, adminIndex) => (
+                    <tr key={adminIndex}>
+                      <td>{admin.name}</td>
+                      <td>{admin.job_title}</td>
+                    </tr>
+                  ))}
+                </ul>
               </div>
-              <ul>
-                {tender.products.map((product, productIndex) => (
-                  <tr key={productIndex}>
-                    <td>{product.title}</td>
-                    <td>{product.quantity} {product.quantity_unit}</td>
-                    <td>{product.description}</td>
-                  </tr>
-                ))}
-              </ul>
+              <div className="tender-admins">
+                <div className="gradient__text mytender">
+                  <h3>المنتجات</h3>
+                </div>
+                <ul>
+                  {tender.products.map((product, productIndex) => (
+                    <tr key={productIndex}>
+                      <td>{product.title}</td>
+                      <td>{product.quantity} {product.quantity_unit}</td>
+                      <td>{product.description}</td>
+                    </tr>
+                  ))}
+                </ul>
+              </div>
+              <div className="gradient__text mytender">
+                <h3> السعر المبدائي : {tender.initial_price}</h3>
+              </div>
             </div>
-            {/* <p className="tender-initial-price">
-            </p> */}
-            <div className="gradient__text mytender">
-              <h3> السعر المبدائي : {tender.initial_price}</h3>
-            </div>
-          </div>
-        ))}
+          ))}
       </div>
     </>
   );

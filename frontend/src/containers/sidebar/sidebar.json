@@ -9,9 +9,27 @@
                 "path": "/createtnder"
             },
             {
-                "title": "المناقصات المنشوره",
+                "title": "جميع المناقصات",
                 "icon": "bi bi-newspaper",
-                "path": "/mytender"
+                "childrens": [
+                    {
+                        "title": "قبل الموعد المحدد",
+                        "path": "/mytender"
+                    },
+                    {
+                        "title": "في انتظار القرارات",
+                        "path": "/pendingdecision"
+                    },
+                    {
+                        "title": "بانتظار التأكيد",
+                        "path": "/mytender"
+                    },
+                    {
+                        "title": "المناقصات الملغاه",
+                        "path": "/register"
+                    }
+                ]
+                
             }
         ]
     },
