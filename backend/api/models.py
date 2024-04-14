@@ -193,6 +193,9 @@ class Tender(models.Model):
 
     ad = models.OneToOneField(TenderAd, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f"{self.id}->{self.user}"
+
     @property
     def admins(self):
         return self.tenderadmin_set.all()
@@ -219,7 +222,8 @@ class TenderAdmin(models.Model):
     job_title = models.CharField(max_length=255)
 
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
-
+    def __str__(self):
+        return f"{self.name}->{self.tender}"
 
 class TenderPublicConditions(models.Model):
 
@@ -238,15 +242,12 @@ class TenderPrivateConditions(models.Model):
 class TenderProduct(models.Model):
 
     title = models.CharField(max_length=255)
-
     quantity_unit = models.CharField(max_length=255)
-
     quantity = models.CharField(max_length=255)
-
     description = models.TextField()
-
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
-
+    def __str__(self):
+        return f"{self.id}- {self.title}-> Tender {self.tender.id}"
 
 class TenderResponse(models.Model):
 
@@ -258,33 +259,38 @@ class TenderResponse(models.Model):
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
+    # class Meta:
+    #     unique_together = ('user', 'tender')
+
+    def __str__(self):
+        return f"{self.id}- {self.user}->Tender {self.tender.id}"
     @property
     def offer_products(self):
-
         return self.responseproductbid_set.all()
 
     @property
     def offer_conditions(self):
-
         return self.responseprivatecondition_set.all()
 
 
 class ResponseProductBid(models.Model):
 
-    product = models.ForeignKey(TenderProduct, on_delete=models.CASCADE)
+    product = models.OneToOneField(TenderProduct, on_delete=models.CASCADE)
 
-    provided_quantity = models.IntegerField()
+    provided_quantity = models.IntegerField(null=True)
 
-    product_price = models.IntegerField()
+    product_price = models.IntegerField(null=True)
 
-    supplying_duration = models.CharField(max_length=255)
+    supplying_duration = models.CharField(max_length=255,null=True)
 
     supplying_status = models.BooleanField()
 
-    product_description = models.TextField()
+    product_description = models.TextField(null=True)
 
     response = models.ForeignKey(TenderResponse, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f"{self.id}- {self.product.title} {self.product.id}-> Tender {self.response.tender.id}"
 
 class ResponsePrivateCondition(models.Model):
 
