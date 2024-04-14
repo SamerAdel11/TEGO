@@ -10,11 +10,14 @@ const MyTenders = () => {
     const fetchData = async () => {
       try {
         const response = await fetch('http://localhost:8000/get_tenders', {
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
           },
-        });
+        }).then((data) => data.json())
+          .then((d) => console.log(d));
+
         const data = await response.json();
         setTendersData(data);
       } catch (error) {

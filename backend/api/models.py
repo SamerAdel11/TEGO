@@ -1,48 +1,78 @@
 from django.db import models
+
 from django.contrib.auth.base_user import BaseUserManager
+
 from django.utils.translation import gettext_lazy as _
+
 from django.contrib.auth.models import AbstractUser, User
+
 # Create your views here.
 
 
 class CustomUserManager(BaseUserManager):
+
     """
+
     Custom user model manager where email is the unique identifiers
+
     for authentication instead of usernames.
+
     """
 
     def create_user(self, email, password, **extra_fields):
         """
+
         Create and save a user with the given email and password.
+
         """
+
         if not email:
+
             raise ValueError(_("The Email must be set"))
+
         email = self.normalize_email(email)
+
         user = self.model(email=email, **extra_fields)
+
         user.set_password(password)
+
         user.save()
         return user
 
     def create_superuser(self, email, password, **extra_fields):
         """
+
         Create and save a SuperUser with the given email and password.
+
         """
+
         extra_fields.setdefault("is_staff", True)
+
         extra_fields.setdefault("is_superuser", True)
+
         extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_staff") is not True:
+
             raise ValueError(_("Superuser must have is_staff=True."))
+
         if extra_fields.get("is_superuser") is not True:
+
             raise ValueError(_("Superuser must have is_superuser=True."))
+
         return self.create_user(email, password, **extra_fields)
 
 
 class CustomUser(AbstractUser):
+
     username = None
+
     email = models.EmailField(_("email address"), unique=True)
+
     USERNAME_FIELD = "email"
+
     REQUIRED_FIELDS = []
+
     objects = CustomUserManager()
 
     def _str_(self):
@@ -50,24 +80,35 @@ class CustomUser(AbstractUser):
 
 
 class Company(models.Model):
+
     name = models.CharField(max_length=100)
+
     location = models.TextField()
+
     city = models.CharField(max_length=255)
+
     fax_number = models.CharField(max_length=255)
+
     mobile = models.CharField(max_length=255)
+
     landline = models.CharField(max_length=255)
+
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+
     company_type_tego = models.CharField(max_length=30)
 
-    def _str_(self):
+    def __str__(self):
+
         return f"company {self.name}"
 
     @property
     def owners(self):
+
         return self.owner_set.all()
 
     @property
     def company_fields(self):
+
         return self.companyfield_set.all()
 
     @property
@@ -76,10 +117,15 @@ class Company(models.Model):
 
 
 class Supplier(models.Model):
+
     company = models.OneToOneField(Company, on_delete=models.CASCADE)
+
     tax_card_number = models.CharField(max_length=255)
+
     commercial_registration_number = models.CharField(max_length=255)
+
     company_type = models.CharField(max_length=255)
+
     company_capital = models.IntegerField()
 
     def _str_(self):
@@ -87,31 +133,47 @@ class Supplier(models.Model):
 
 
 class Owner(models.Model):
+
     name = models.CharField(max_length=100)
+
     owner_id = models.CharField(max_length=20)
+
     onwer_position = models.CharField(max_length=255)
+
     address = models.CharField(max_length=255)
+
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
 
     def _str_(self):
         return self.name
 
+
 class CompanyField(models.Model):
+
     primary_field = models.CharField(max_length=255)
+
     secondary_field = models.CharField(max_length=255)
+
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
 
     def _str_(self):
         return self.primary_field
 
+
 class UserNotification(models.Model):
+
     recipient = models.ForeignKey(
+
         CustomUser, on_delete=models.CASCADE, related_name='recipient')
+
     message = models.CharField(max_length=255, null=True)
+
     timestamp = models.DateTimeField(auto_now_add=True)
+
     seen = models.BooleanField(default=False)
     def _str_(self):
         return f"{self.message}->{self.recipient}"
+
 
 class TenderAd(models.Model):
     title=models.TextField()
@@ -120,11 +182,19 @@ class TenderAd(models.Model):
     deadline=models.DateField()
 
 class Tender(models.Model):
+
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    initial_price=models.IntegerField()
-    status=models.CharField(max_length=50)
-    date_created=models.DateTimeField(auto_now_add=True)
-    ad=models.OneToOneField(TenderAd,on_delete=models.CASCADE)
+
+    initial_price = models.IntegerField()
+
+    status = models.CharField(max_length=50)
+
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    ad = models.OneToOneField(TenderAd, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.id}->{self.user}"
 
     @property
     def admins(self):
@@ -132,33 +202,98 @@ class Tender(models.Model):
 
     @property
     def public_conditions(self):
+
         return self.publicconditions_set.all()
 
     @property
     def private_conditions(self):
+
         return self.privateconditions_set.all()
 
     @property
     def products(self):
         return self.tenderproduct_set.all()
-    
+
 
 class TenderAdmin(models.Model):
-    name=models.CharField(max_length=255)
-    job_title=models.CharField(max_length=255)
-    tender=models.ForeignKey(Tender,on_delete=models.CASCADE)
+
+    name = models.CharField(max_length=255)
+
+    job_title = models.CharField(max_length=255)
+
+    tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.name}->{self.tender}"
 
 class TenderPublicConditions(models.Model):
-    condition=models.TextField()
-    tender=models.ForeignKey(Tender,on_delete=models.CASCADE)
+
+    condition = models.TextField()
+
+    tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
+
 
 class TenderPrivateConditions(models.Model):
-    condition=models.TextField()
-    tender=models.ForeignKey(Tender,on_delete=models.CASCADE)
+
+    condition = models.TextField()
+
+    tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
+
 
 class TenderProduct(models.Model):
-    title=models.CharField(max_length=255)
-    quantity_unit=models.CharField(max_length=255)
-    quantity=models.CharField(max_length=255)
-    description=models.TextField()
-    tender=models.ForeignKey(Tender,on_delete=models.CASCADE)
+
+    title = models.CharField(max_length=255)
+    quantity_unit = models.CharField(max_length=255)
+    quantity = models.CharField(max_length=255)
+    description = models.TextField()
+    tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.id}- {self.title}-> Tender {self.tender.id}"
+
+class TenderResponse(models.Model):
+
+    offered_price = models.IntegerField()
+
+    status = models.CharField(max_length=255)
+
+    tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+
+    # class Meta:
+    #     unique_together = ('user', 'tender')
+
+    def __str__(self):
+        return f"{self.id}- {self.user}->Tender {self.tender.id}"
+    @property
+    def offer_products(self):
+        return self.responseproductbid_set.all()
+
+    @property
+    def offer_conditions(self):
+        return self.responseprivatecondition_set.all()
+
+
+class ResponseProductBid(models.Model):
+
+    product = models.OneToOneField(TenderProduct, on_delete=models.CASCADE)
+
+    provided_quantity = models.IntegerField(null=True)
+
+    product_price = models.IntegerField(null=True)
+
+    supplying_duration = models.CharField(max_length=255,null=True)
+
+    supplying_status = models.BooleanField()
+
+    product_description = models.TextField(null=True)
+
+    response = models.ForeignKey(TenderResponse, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.id}- {self.product.title} {self.product.id}-> Tender {self.response.tender.id}"
+
+class ResponsePrivateCondition(models.Model):
+
+    condition = models.TextField()
+
+    response = models.ForeignKey(TenderResponse, on_delete=models.CASCADE)
