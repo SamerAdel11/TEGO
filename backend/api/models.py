@@ -275,7 +275,7 @@ class TenderResponse(models.Model):
 
 class ResponseProductBid(models.Model):
 
-    product = models.OneToOneField(TenderProduct, on_delete=models.CASCADE)
+    product = models.ForeignKey(TenderProduct, on_delete=models.CASCADE)
 
     provided_quantity = models.IntegerField(null=True)
 

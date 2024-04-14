@@ -15,8 +15,7 @@ const MyTenders = () => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
           },
-        }).then((data) => data.json())
-          .then((d) => console.log(d));
+        });
 
         const data = await response.json();
         setTendersData(data);

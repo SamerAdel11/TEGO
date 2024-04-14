@@ -472,6 +472,14 @@ class ResponseSerializer(serializers.ModelSerializer):
                 response=response, **condition_data)
         return data
 
+class ResponseDetailSerializer(serializers.ModelSerializer):
+    offer_products = ProductResponseSerializer(many=True)
+    # Assuming you just want the string representation of conditions
+    offer_conditions = ResponsePrivateConditionSerializer(many=True)
+    class Meta:
+        model = TenderResponse
+        fields = ['id', 'offered_price',
+                'status', 'offer_products', 'offer_conditions']
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 

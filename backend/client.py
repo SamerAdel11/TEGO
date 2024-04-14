@@ -187,15 +187,23 @@ data={
 
 response_data={
     "offered_price": 90000, 
-    "tender_id": 19, 
-    'status':'open',
+    "tender_id": 3, 
+    'status':'candidate_pool',
     "offer_products": [
         {
-            "productid": 38,
+            "productid": 10,
             "supplying_status": False,
         },
         {
-            "productid": 36,
+            "productid": 9,
+            "supplying_status": False,
+        },
+        {
+            "productid": 8,
+            "supplying_status": False,
+        },
+        {
+            "productid": 6,
             "provided_quantity": 20,
             "product_price": 50,
             "supplying_duration": "15 working days",
@@ -208,7 +216,7 @@ response_data={
             """
         },
         {
-            "productid": 35,
+            "productid": 5,
             "provided_quantity": 100,
             "product_price": 30,
             "supplying_duration": "10 working days",
@@ -237,12 +245,15 @@ response_data={
 
 
 
-endpoint = "http://localhost:8000/add_response/"
+endpoint = "http://localhost:8000/get_responses/3"
 
 samer_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzMzMxOTkzLCJpYXQiOjE3MTI4OTk5OTMsImp0aSI6IjA5MTg2Mzc0MTQ4NjQ5ZTNiY2IyMzNjNzdkZWYzZmY5IiwidXNlcl9pZCI6OSwiZW1haWwiOiJzYW1lcmFkZWw3ODk5QGdtYWlsLmNvbSIsImNvbXBhbnlfdHlwZSI6InN1cHBsaWVyIn0.kSOVnLx-6zrsc8UIetDexml1cJVsqD9_obGPMqNb6ME'
-fady_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEyOTYxMDkyLCJpYXQiOjE3MTI1MjkwOTIsImp0aSI6ImNjYWNjNDdhMWE0OTQ0MmRhMTcwZDM2MzQ1MTlhMzg4IiwidXNlcl9pZCI6MSwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoiYnV5ZXIifQ.oo7F7sNo8XXAjR7JlFpvdCzPeuuOrgyaeE4a1FwbldY'
+fady_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNDc4ODk4LCJpYXQiOjE3MTMwNDY4OTgsImp0aSI6IjQ4ZTZlYWU5MDdiNjQyZTg4NTRmMzZkNDhjNmQ5MjVmIiwidXNlcl9pZCI6MSwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoiYnV5ZXIifQ.MdMaj2GxsPCQT2o3MSDWHeHPmrSDjbVnxn1G7x7oG7M'
 headers = {'Authorization': f"Bearer {fady_token}"}
-response = requests.post(endpoint, headers=headers,json=response_data)
+response = requests.get(endpoint, headers=headers,json=response_data)
 
 pprint.pprint(response.json())
 
+########################################################################IMPORAAAAAAAAAAAAAAAAAANT##################################
+# http://localhost:8000/get_responses/ --------> get all responses
+# http://localhost:8000/add_responses/ --------> add new response
