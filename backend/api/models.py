@@ -47,68 +47,44 @@ class CustomUserManager(BaseUserManager):
         """
 
         extra_fields.setdefault("is_staff", True)
-
         extra_fields.setdefault("is_superuser", True)
-
         extra_fields.setdefault("is_active", True)
-
         if extra_fields.get("is_staff") is not True:
-
             raise ValueError(_("Superuser must have is_staff=True."))
-
         if extra_fields.get("is_superuser") is not True:
-
             raise ValueError(_("Superuser must have is_superuser=True."))
-
         return self.create_user(email, password, **extra_fields)
 
 
 class CustomUser(AbstractUser):
-
     username = None
-
     email = models.EmailField(_("email address"), unique=True)
-
     USERNAME_FIELD = "email"
-
     REQUIRED_FIELDS = []
-
     objects = CustomUserManager()
-
     def _str_(self):
         return self.email
 
 
 class Company(models.Model):
-
-    name = models.CharField(max_length=100)
-
-    location = models.TextField()
-
-    city = models.CharField(max_length=255)
-
-    fax_number = models.CharField(max_length=255)
-
-    mobile = models.CharField(max_length=255)
-
-    landline = models.CharField(max_length=255)
-
+    name = models.CharField(max_length=100,null=True)
+    location = models.TextField(null=True)
+    city = models.CharField(max_length=255,null=True)
+    fax_number = models.CharField(max_length=255,null=True)
+    mobile = models.CharField(max_length=255,null=True)
+    landline = models.CharField(max_length=255,null=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-
-    company_type_tego = models.CharField(max_length=30)
+    company_type_tego = models.CharField(max_length=30,null=True)
 
     def __str__(self):
-
         return f"company {self.name}"
 
     @property
     def owners(self):
-
         return self.owner_set.all()
 
     @property
     def company_fields(self):
-
         return self.companyfield_set.all()
 
     @property
@@ -117,59 +93,38 @@ class Company(models.Model):
 
 
 class Supplier(models.Model):
-
     company = models.OneToOneField(Company, on_delete=models.CASCADE)
-
-    tax_card_number = models.CharField(max_length=255)
-
-    commercial_registration_number = models.CharField(max_length=255)
-
-    company_type = models.CharField(max_length=255)
-
-    company_capital = models.IntegerField()
-
+    tax_card_number = models.CharField(max_length=255,null=True)
+    commercial_registration_number = models.CharField(max_length=255,null=True)
+    company_type = models.CharField(max_length=255,null=True)
+    company_capital = models.IntegerField(null=True)
     def _str_(self):
         return f"supplier {self.company.name}"
 
 
 class Owner(models.Model):
-
-    name = models.CharField(max_length=100)
-
-    owner_id = models.CharField(max_length=20)
-
-    onwer_position = models.CharField(max_length=255)
-
-    address = models.CharField(max_length=255)
-
+    name = models.CharField(max_length=100,null=True)
+    owner_id = models.CharField(max_length=20,null=True)
+    onwer_position = models.CharField(max_length=255,null=True)
+    address = models.CharField(max_length=255,null=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
-
     def _str_(self):
         return self.name
 
 
 class CompanyField(models.Model):
-
-    primary_field = models.CharField(max_length=255)
-
-    secondary_field = models.CharField(max_length=255)
-
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
-
+    primary_field = models.CharField(max_length=255,null=True)
+    secondary_field = models.CharField(max_length=255,null=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE,null=True)
     def _str_(self):
         return self.primary_field
 
 
 class UserNotification(models.Model):
-
     recipient = models.ForeignKey(
-
         CustomUser, on_delete=models.CASCADE, related_name='recipient')
-
     message = models.CharField(max_length=255, null=True)
-
     timestamp = models.DateTimeField(auto_now_add=True)
-
     seen = models.BooleanField(default=False)
     def _str_(self):
         return f"{self.message}->{self.recipient}"
@@ -182,15 +137,10 @@ class TenderAd(models.Model):
     deadline=models.DateField()
 
 class Tender(models.Model):
-
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-
     initial_price = models.IntegerField()
-
     status = models.CharField(max_length=50)
-
     date_created = models.DateTimeField(auto_now_add=True)
-
     ad = models.OneToOneField(TenderAd, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -202,12 +152,10 @@ class Tender(models.Model):
 
     @property
     def public_conditions(self):
-
         return self.publicconditions_set.all()
 
     @property
     def private_conditions(self):
-
         return self.privateconditions_set.all()
 
     @property
@@ -216,11 +164,8 @@ class Tender(models.Model):
 
 
 class TenderAdmin(models.Model):
-
     name = models.CharField(max_length=255)
-
     job_title = models.CharField(max_length=255)
-
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
     def __str__(self):
         return f"{self.name}->{self.tender}"
@@ -228,14 +173,12 @@ class TenderAdmin(models.Model):
 class TenderPublicConditions(models.Model):
 
     condition = models.TextField()
-
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
 
 
 class TenderPrivateConditions(models.Model):
 
     condition = models.TextField()
-
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
 
 

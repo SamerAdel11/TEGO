@@ -149,15 +149,29 @@ class ResponseView(APIView):
 
 
 class ResponseListAPIView(generics.ListAPIView):
-
     serializer_class = ResponseSerializer
-
     def get_queryset(self):
         # Filter the queryset based on the currently authenticated user
         user = self.request.user
         return TenderResponse.objects.filter(user=user)
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+
+from . import serializer
+
+class ResponseDetailAPIView(generics.ListAPIView):
+    serializer_class = serializer.ResponseDetailSerializer
+    def get_queryset(self):
+        # Filter the queryset based on the currently authenticated user
+        user = self.request.user
+        tender_id = self.kwargs.get('pk')
+        tender_instance=Tender.objects.get(id=tender_id)
+        print(tender_instance)
+        return TenderResponse.objects.filter(user=user,tender=tender_instance)
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
 
 
 # class UserView(APIView):
