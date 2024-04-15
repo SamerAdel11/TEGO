@@ -11,14 +11,21 @@ function TenderDetails() {
 
   const handleSendResponse = async (tender) => {
     try {
-      const response = await fetch(`http://localhost:8000/send_response/${tender.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authTokens.access}`,
+      // Assign 'candidate_pool' to the status variable
+      const status = 'candidate_pool';
+
+      // Send only the status in the request body
+      const response = await fetch(
+        `http://localhost:8000/update_response/${tender.id}/`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+          body: JSON.stringify({ status }), // Send only the status
         },
-        body: JSON.stringify(tender),
-      });
+      );
 
       const data = await response.json();
       console.log('Response sent:', data); // Log the response from the backend
@@ -26,24 +33,27 @@ function TenderDetails() {
       console.error('Error sending response:', error);
     }
   };
-
   useEffect(() => {
     let isMounted = true; // علم لتتبع ما إذا كان المكون مركوبًا
 
     const fetchTenderDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/get_responses/${id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authTokens.access}`,
+        const response = await fetch(
+          `http://localhost:8000/get_responses/${id}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authTokens.access}`,
+            },
           },
-        });
+        );
 
         const data = await response.json();
         console.log('تفاصيل العطاء:', data); // تسجيل بيانات الاستجابة
 
-        if (isMounted) { // التحقق مما إذا كان المكون مركوبًا قبل تحديث الحالة
+        if (isMounted) {
+          // التحقق مما إذا كان المكون مركوبًا قبل تحديث الحالة
           setResponseDetails(data);
         }
       } catch (error) {
@@ -69,9 +79,11 @@ function TenderDetails() {
           <div>
             {responseDetails.map((tender) => (
               <div key={tender.id}>
-                <p className="response_p">الرد رقم :  {tender.id}</p>
+                <p className="response_p">الرد رقم : {tender.id}</p>
                 <p className="response_p">الحالة : {tender.status}</p>
-                <p className="response_p">السعر المعروض : {tender.offered_price}</p>
+                <p className="response_p">
+                  السعر المعروض : {tender.offered_price}
+                </p>
                 <div className="gradient__text">
                   <h4 className="response">منتجات العروض</h4>
                 </div>
@@ -113,18 +125,26 @@ function TenderDetails() {
                         </tr>
                       </thead>
                       <tbody>
-                        {tender.offer_conditions.map((condition, innerIndex) => (
-                          <tr key={innerIndex}>
-                            <td>{innerIndex + 1}</td>
-                            <td>{condition.condition}</td>
-                          </tr>
-                        ))}
+                        {tender.offer_conditions.map(
+                          (condition, innerIndex) => (
+                            <tr key={innerIndex}>
+                              <td>{innerIndex + 1}</td>
+                              <td>{condition.condition}</td>
+                            </tr>
+                          ),
+                        )}
                       </tbody>
                     </table>
                   </div>
                 )}
 
-                <button className="buton_resonpose" type="button" onClick={() => handleSendResponse(tender)}>إرسال الرد إلى المرشحين</button>
+                <button
+                  className="buton_resonpose"
+                  type="button"
+                  onClick={() => handleSendResponse(tender)}
+                >
+                  إرسال الرد إلى المرشحين
+                </button>
                 <hr data-v-7e013592 />
               </div>
             ))}
