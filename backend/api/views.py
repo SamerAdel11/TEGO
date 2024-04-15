@@ -135,16 +135,11 @@ def home(request):
 class ResponseView(APIView):
 
     def post(self, request, *args, **kwargs):
-
         serializer = ResponseSerializer(
             data=request.data, context={'request': request})
-
         if serializer.is_valid():
-
             response = serializer.save()
-
             return Response(response, status=status.HTTP_201_CREATED)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -172,7 +167,19 @@ class ResponseDetailAPIView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
+from .serializer import ResponseDetailSerializer
+class ResponseStatusUpdateAPIView(APIView):
+    def put(self, request, response_id, format=None):
+        try:
+            response_instance = TenderResponse.objects.get(pk=response_id)
+        except TenderResponse.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
+        serializer = ResponseDetailSerializer(response_instance, data=request.data,partial=True)
+        if serializer.is_valid():
+            serializer.save(instance=response_instance)  # Passing instance argument
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # class UserView(APIView):
 

@@ -23,10 +23,10 @@ function SignIn() {
     // Call loginUser function from the context
     const formData = {
       email: '',
-      password: '',
+      passWord: '',
     };
     formData.email = e.target.email.value;
-    formData.password = e.target.password.value;
+    formData.passWord = e.target.password.value;
     login(formData); // Pass the event object to the loginUser function
   };
 

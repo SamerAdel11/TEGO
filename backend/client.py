@@ -191,7 +191,15 @@ response_data={
     'status':'open',
     "offer_products": [
         {
+            "productid": 39,
+            "supplying_status": False,
+        },
+        {
             "productid": 38,
+            "supplying_status": False,
+        },
+        {
+            "productid": 37,
             "supplying_status": False,
         },
         {
@@ -237,12 +245,17 @@ response_data={
 
 
 
-endpoint = "http://localhost:8000/get_responses/20"
-
-samer_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzMzMxOTkzLCJpYXQiOjE3MTI4OTk5OTMsImp0aSI6IjA5MTg2Mzc0MTQ4NjQ5ZTNiY2IyMzNjNzdkZWYzZmY5IiwidXNlcl9pZCI6OSwiZW1haWwiOiJzYW1lcmFkZWw3ODk5QGdtYWlsLmNvbSIsImNvbXBhbnlfdHlwZSI6InN1cHBsaWVyIn0.kSOVnLx-6zrsc8UIetDexml1cJVsqD9_obGPMqNb6ME'
-fady_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEyOTYxMDkyLCJpYXQiOjE3MTI1MjkwOTIsImp0aSI6ImNjYWNjNDdhMWE0OTQ0MmRhMTcwZDM2MzQ1MTlhMzg4IiwidXNlcl9pZCI6MSwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoiYnV5ZXIifQ.oo7F7sNo8XXAjR7JlFpvdCzPeuuOrgyaeE4a1FwbldY'
+endpoint = "http://localhost:8000/update_response/48/"
+update={
+  "status":"can"
+}
+samer_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNTg2ODExLCJpYXQiOjE3MTMxNTQ4MTEsImp0aSI6IjgyYTAzMTNjNjhiYjQ2NmJhNTMxNWU2Yjg5ODhhMjUzIiwidXNlcl9pZCI6OSwiZW1haWwiOiJzYW1lcmFkZWw3ODk5QGdtYWlsLmNvbSIsImNvbXBhbnlfdHlwZSI6InN1cHBsaWVyIn0.CsPComCiSST6Yi2d_q0mws16k6QEioWhhfULVl9cQQs'
+fady_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNDc4ODk4LCJpYXQiOjE3MTMwNDY4OTgsImp0aSI6IjQ4ZTZlYWU5MDdiNjQyZTg4NTRmMzZkNDhjNmQ5MjVmIiwidXNlcl9pZCI6MSwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoiYnV5ZXIifQ.MdMaj2GxsPCQT2o3MSDWHeHPmrSDjbVnxn1G7x7oG7M'
 headers = {'Authorization': f"Bearer {samer_token}"}
-response = requests.get(endpoint, headers=headers,json=response_data)
+response = requests.put(endpoint, headers=headers,json=update)
 
 pprint.pprint(response.json())
 
+########################################################################IMPORAAAAAAAAAAAAAAAAAANT##################################
+# http://localhost:8000/get_responses/ --------> get all responses
+# http://localhost:8000/add_responses/ --------> add new response

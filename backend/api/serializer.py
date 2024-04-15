@@ -208,6 +208,7 @@ class TenderRetrieveSerializer(serializers.ModelSerializer):
         fields = ['id', 'initial_price', 'status', 'admins',
                 'public_conditions', 'private_conditions', 'ad', 'products']
 
+
 class ProductResponseSerializer(serializers.ModelSerializer):
     productid = serializers.CharField(write_only=True)
     class Meta:
@@ -239,26 +240,46 @@ class ResponseSerializer(serializers.ModelSerializer):
         tender = Tender.objects.get(id=validated_data['tender_id'])
         response = TenderResponse.objects.create(
             **validated_data, tender=tender, user=user)
+        respons_offer_products=[]
         for product_data in offer_products_data:
+            print(product_data)
             productid = product_data.pop('productid')
             product = TenderProduct.objects.get(id=productid)
-            print(product)
             ResponseProductBid.objects.create(
                 product=product, response=response, **product_data)
-
+            product_data['product_name']=product.title
+            respons_offer_products.append(product_data)
+        print("REsponses passed")
+        print(respons_offer_products)
         for condition_data in offer_conditions_data:
             ResponsePrivateCondition.objects.create(
                 response=response, **condition_data)
+
         return data
+class ProductResponseRetrieveSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='product.title', read_only=True)
+    product_id=serializers.CharField(source='product.id',read_only=True)
+    class Meta:
+        model = ResponseProductBid
+        fields = ['id', 'product_id','title' ,'provided_quantity', 'product_price',
+                'supplying_duration', 'supplying_status', 'product_description']
+
 
 class ResponseDetailSerializer(serializers.ModelSerializer):
-    offer_products = ProductResponseSerializer(many=True)
+    offer_products = ProductResponseRetrieveSerializer(many=True)
     # Assuming you just want the string representation of conditions
     offer_conditions = ResponsePrivateConditionSerializer(many=True)
     class Meta:
         model = TenderResponse
         fields = ['id', 'offered_price',
                 'status', 'offer_products', 'offer_conditions']
+    def update(self, instance, validated_data):
+        # Check if 'status' is present in validated_data
+        if 'status' in validated_data:
+            # Update only 'status' attribute
+            instance.status = validated_data['status']
+            instance.save(update_fields=['status'])  # Only update 'status' field
+        return instance
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod

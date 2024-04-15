@@ -11,6 +11,8 @@ import HostHome from './containers/Buyer_container/Buyer/HostHome.jsx';
 import CreateTender from './containers/Buyer_container/create_tender/CreateTender.jsx';
 import WebSocketExample from './containers/signUpPage/WebSocket.jsx';
 import MyTenders from './containers/Buyer_container/My_tenders/MyTenders.jsx';
+import PendingDecision from './containers/Buyer_container/pending_decision/PendingDecision.jsx';
+import TenderDetails from './containers/Buyer_container/pending_decision/TenderDetails.jsx';
 
 const App = () => (
 
@@ -62,6 +64,27 @@ const App = () => (
               </div>
             </div>
           </Route>
+
+          <Route path="/pendingdecision" exact>
+            <div className="">
+              <NavbarHost />
+              <div className="host_side">
+                <Sidebar />
+                <PendingDecision />
+              </div>
+            </div>
+          </Route>
+
+          <Route path="/tender_responses/:id" exact>
+            <div className="">
+              <NavbarHost />
+              <div className="host_side">
+                <Sidebar />
+                <TenderDetails />
+              </div>
+            </div>
+          </Route>
+
         </Switch>
       </AuthProvider>
     </div>

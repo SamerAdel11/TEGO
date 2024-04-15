@@ -152,11 +152,11 @@ class Tender(models.Model):
 
     @property
     def public_conditions(self):
-        return self.publicconditions_set.all()
+        return self.tenderpublicconditions_set.all()
 
     @property
     def private_conditions(self):
-        return self.privateconditions_set.all()
+        return self.tenderprivateconditions_set.all()
 
     @property
     def products(self):
@@ -218,19 +218,17 @@ class TenderResponse(models.Model):
 
 class ResponseProductBid(models.Model):
 
-    product = models.OneToOneField(TenderProduct, on_delete=models.CASCADE)
-
+    product = models.ForeignKey(TenderProduct, on_delete=models.CASCADE)
     provided_quantity = models.IntegerField(null=True)
-
     product_price = models.IntegerField(null=True)
-
     supplying_duration = models.CharField(max_length=255,null=True)
-
     supplying_status = models.BooleanField()
-
     product_description = models.TextField(null=True)
-
     response = models.ForeignKey(TenderResponse, on_delete=models.CASCADE)
+
+    # @property
+    # def original_product(self):
+    #     return self.product.
 
     def __str__(self):
         return f"{self.id}- {self.product.title} {self.product.id}-> Tender {self.response.tender.id}"
