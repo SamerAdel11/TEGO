@@ -77,10 +77,10 @@ function TenderDetails() {
         </div>
         {responseDetails !== null ? (
           <div>
-            {responseDetails.map((tender) => (
+            {responseDetails.filter((tender) => tender.status !== 'candidate_pool').map((tender) => (
               <div key={tender.id}>
                 <p className="response_p">الرد رقم : {tender.id}</p>
-                <p className="response_p">الحالة : {tender.status}</p>
+                <p className="response_p">الحالة : <span className="response_red">{tender.status}</span></p>
                 <p className="response_p">
                   السعر المعروض : {tender.offered_price}
                 </p>
