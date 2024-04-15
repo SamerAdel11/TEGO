@@ -1,15 +1,34 @@
 import React, { useState, useEffect, useContext } from 'react';
+import './TenderDetails.css';
 import { useParams } from 'react-router-dom';
 import AuthContext from '../../../context/Authcontext';
 
 function TenderDetails() {
-  const { id } = useParams(); // Get the tender ID from the route params
-  console.log('Tender ID:', id); // Log the tender ID
+  const { id } = useParams(); // الحصول على معرف العطاء من معلمات المسار
+  console.log('معرف العطاء:', id); // تسجيل معرف العطاء
   const [responseDetails, setResponseDetails] = useState(null);
   const { authTokens } = useContext(AuthContext);
 
+  const handleSendResponse = async (tender) => {
+    try {
+      const response = await fetch(`http://localhost:8000/send_response/${tender.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authTokens.access}`,
+        },
+        body: JSON.stringify(tender),
+      });
+
+      const data = await response.json();
+      console.log('Response sent:', data); // Log the response from the backend
+    } catch (error) {
+      console.error('Error sending response:', error);
+    }
+  };
+
   useEffect(() => {
-    let isMounted = true; // Flag to track if the component is mounted
+    let isMounted = true; // علم لتتبع ما إذا كان المكون مركوبًا
 
     const fetchTenderDetails = async () => {
       try {
@@ -22,62 +41,98 @@ function TenderDetails() {
         });
 
         const data = await response.json();
-        console.log('Tender Details:', data); // Log the response data
+        console.log('تفاصيل العطاء:', data); // تسجيل بيانات الاستجابة
 
-        if (isMounted) { // Check if the component is still mounted before updating state
+        if (isMounted) { // التحقق مما إذا كان المكون مركوبًا قبل تحديث الحالة
           setResponseDetails(data);
         }
       } catch (error) {
-        console.error('Error fetching tender details:', error);
+        console.error('خطأ في جلب تفاصيل العطاء:', error);
       }
     };
 
     fetchTenderDetails();
 
     return () => {
-      // Cleanup function to run when the component is unmounted
-      isMounted = false; // Update the mounted flag to false when unmounting
+      // دالة تنظيف لتشغيلها عند فك تركيب المكون
+      isMounted = false; // تحديث العلم المركوب إلى خطأ عند فك التركيب
     };
   }, [id, authTokens.access]);
 
   return (
     <div className="tender-details-container">
-      <h1>Response Details</h1>
-      {responseDetails ? (
-        <div>
-          {responseDetails.map((tender, outerIndex) => (
-            <div key={outerIndex}>
-              <p>Response ID: {tender.id}</p>
-              <p>Status: {tender.status}</p>
-              <p>Offered Price: {tender.offered_price}</p>
-              <h3>Offer Products:</h3>
-              {tender.offer_products.map((product, innerIndex) => (
-                <div key={innerIndex}>
-                  <p>Product ID: {product.id}</p>
-                  {product.supplying_status ? (
-                    <div>
-                      <p>Product Name:{product.title}</p>
-                      <p>Provided Quantity: {product.provided_quantity}</p>
-                      <p>Product Price: {product.product_price}</p>
-                      <p>Supplying Duration: {product.supplying_duration}</p>
-                      <p>Product Description: {product.product_description}</p>
-                    </div>
-                  ) : (
-                    <p>Supplying Status: False</p>
-                  )}
-                </div>
-              ))}
-              <h3>Offer Conditions:</h3>
-              {tender.offer_conditions.map((condition, innerIndex) => (
-                <p key={innerIndex}>Condition {innerIndex + 1}: {condition.condition}</p>
-              ))}
-              <h1>---------------------------------------------------------------------------------------------</h1>
-            </div>
-          ))}
+      <div className="center-content">
+        <div className="gradient__text mytender">
+          <h1 className="first_title">جميع الردود</h1>
         </div>
-      ) : (
-        <p>Loading tender details...</p>
-      )}
+        {responseDetails !== null ? (
+          <div>
+            {responseDetails.map((tender) => (
+              <div key={tender.id}>
+                <p className="response_p">الرد رقم :  {tender.id}</p>
+                <p className="response_p">الحالة : {tender.status}</p>
+                <p className="response_p">السعر المعروض : {tender.offered_price}</p>
+                <div className="gradient__text">
+                  <h4 className="response">منتجات العروض</h4>
+                </div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>معرف المنتج</th>
+                      <th>اسم المنتج</th>
+                      <th>الكمية المقدمة</th>
+                      <th>سعر المنتج</th>
+                      <th>مدة التوريد</th>
+                      <th>وصف المنتج</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tender.offer_products.map((product, innerIndex) => (
+                      <tr key={innerIndex}>
+                        <td>{product.id}</td>
+                        <td>{product.title}</td>
+                        <td>{product.provided_quantity}</td>
+                        <td>{product.product_price}</td>
+                        <td>{product.supplying_duration}</td>
+                        <td>{product.product_description}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {tender.offer_conditions.length > 0 && (
+                  <div>
+                    <div className="gradient__text">
+                      <h4 className="response">شروط العروض</h4>
+                    </div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>رقم الشرط</th>
+                          <th>الشرط</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tender.offer_conditions.map((condition, innerIndex) => (
+                          <tr key={innerIndex}>
+                            <td>{innerIndex + 1}</td>
+                            <td>{condition.condition}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                <button className="buton_resonpose" type="button" onClick={() => handleSendResponse(tender)}>إرسال الرد إلى المرشحين</button>
+                <hr data-v-7e013592 />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>جاري تحميل تفاصيل العطاء...</p>
+        )}
+      </div>
     </div>
   );
 }
