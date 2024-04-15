@@ -18,10 +18,16 @@ function SignIn() {
     setPassword(event.target.value);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     // Call loginUser function from the context
-    login(event); // Pass the event object to the loginUser function
+    const formData = {
+      email: '',
+      password: '',
+    };
+    formData.email = e.target.email.value;
+    formData.password = e.target.password.value;
+    login(formData); // Pass the event object to the loginUser function
   };
 
   return (

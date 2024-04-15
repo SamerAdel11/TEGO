@@ -13,15 +13,14 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const history = useHistory();
 
-  const loginUser = async (e) => {
-    e.preventDefault();
+  const loginUser = async (formData) => {
     console.log('form submitted');
     const response = await fetch('http://localhost:8000/login/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: e.target.email.value,
-        password: e.target.password.value,
+        email: formData.email,
+        password: formData.passWord,
       }),
     });
     const tokens = await response.json();
@@ -41,6 +40,8 @@ export const AuthProvider = ({ children }) => {
     } else if (response.status === 401) {
       alert(tokens.detail);
     } else {
+      console.log(formData);
+      console.log(response.json());
       alert('something went wrong');
     }
   };

@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 // import { Navbar } from '../../components';
 import './signUpPage.css';
 // import axios from 'axios';
-
 import { Link } from 'react-router-dom'; // Import Link
 import '../../components/navbar/navbar.css';
+import AuthContext from '../../context/Authcontext';
 import logo from '../../assets/Logo4.png';
 
 const SignUpPage = () => {
+  const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     companyName: '',
     address: '',
@@ -97,6 +98,7 @@ const SignUpPage = () => {
         console.log(JSON.stringify(postData));
         console.error(response.json());
       } else {
+        await login(formData);
         console.log(response.json());
       }
       // Optionally, you can handle the response here

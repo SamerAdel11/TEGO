@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 // import { Navbar } from '../../components';
 import './signUpPage2.css';
 // import axios from 'axios';
 
 import { Link } from 'react-router-dom'; // Import Link
+import AuthContext from '../../context/Authcontext';
 import '../../components/navbar/navbar.css';
 import logo from '../../assets/Logo4.png';
 
 const SignUpPage2 = () => {
+  const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     companyName: '',
     UserName: '',
@@ -15,7 +17,7 @@ const SignUpPage2 = () => {
     First_Name: '',
     // registrationAuthority: '',
     Second_Name: '',
-    Password: '',
+    passWord: '',
     Password2: '',
     email: '',
     // companyType: '',
@@ -58,7 +60,7 @@ const SignUpPage2 = () => {
           first_name: formData.First_Name,
           last_name: formData.Second_Name,
           email: formData.email,
-          password: formData.Password,
+          password: formData.passWord,
           password2: formData.Password2,
         },
         name: formData.companyName,
@@ -81,6 +83,7 @@ const SignUpPage2 = () => {
         console.log(JSON.stringify(postData));
         console.error(response.json());
       } else {
+        await login(formData);
         console.log(response.json());
       }
       // Optionally, you can handle the response here
@@ -132,8 +135,8 @@ const SignUpPage2 = () => {
             </label>
           </div>
           <div className="form-group">
-            <label htmlFor="Password">كلمة السر
-              <input type="text" name="Password" id="Password" value={formData.Password} onChange={handleChange} />
+            <label htmlFor="passWord">كلمة السر
+              <input type="text" name="passWord" id="passWord" value={formData.passWord} onChange={handleChange} />
             </label>
           </div>
           <div className="form-group">
