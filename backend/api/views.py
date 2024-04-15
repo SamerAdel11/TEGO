@@ -161,8 +161,14 @@ class ResponseDetailAPIView(generics.ListAPIView):
         user = self.request.user
         tender_id = self.kwargs.get('pk')
         tender_instance=Tender.objects.get(id=tender_id)
-        print(tender_instance)
-        return TenderResponse.objects.filter(user=user,tender=tender_instance)
+        queryset=TenderResponse.objects.filter(user=user,tender=tender_instance)
+        status = self.request.query_params.get('status', None)
+        print(status)
+        if status:
+            print("entered status")
+            queryset = queryset.filter(status=status)
+
+        return queryset
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
