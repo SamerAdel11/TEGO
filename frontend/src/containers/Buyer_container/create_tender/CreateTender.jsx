@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import './createtender.css';
 import AuthContext from '../../../context/Authcontext';
 
@@ -78,6 +78,12 @@ function CreateTender() {
     const updatedPrivateConditions = [...privateconditions];
     updatedPrivateConditions[idx].value = value;
     setPrivateConditions(updatedPrivateConditions);
+  };
+  const textareaRef = useRef(Array.from({ length: 4 }, () => React.createRef()));
+  const handleInput = (indexx) => {
+    const textarea = textareaRef.current[indexx].current;
+    textarea.style.height = 'auto'; // Reset height to auto to measure content
+    textarea.style.height = `${textarea.scrollHeight}px`; // Set height to fit content
   };
 
   const handleSubmit = async (e) => {
@@ -228,10 +234,11 @@ function CreateTender() {
             <table>
               <thead>
                 <tr>
-                  <th style={{ width: '3px' }}>الصف</th>
-                  <th className="col-4">عنوان المنتج</th>
-                  <th className="col-4">وحدة الكمية</th>
-                  <th className="col-4">الكمية</th>
+                  <th style={{ width: '1px' }}>الصف</th>
+                  <th className="col-2">عنوان المنتج</th>
+                  <th className="col-1">وحدة الكمية</th>
+                  <th className="col-1">الكمية</th>
+                  <th className="col-">وصف المنتج</th>
                 </tr>
               </thead>
               <tbody>
@@ -239,48 +246,66 @@ function CreateTender() {
                   <tr key={idx}>
                     <td>{product.id}</td>
                     <td>
-                      <label htmlFor={`title_${idx}`}>
-                        عنوان المنتج
-                        <input
-                          type="text"
-                          id={`title_${idx}`}
-                          value={product.title}
-                          onChange={(e) => {
-                            handleProductChange(idx, 'title', e.target.value);
-                            handleTitleChange(idx, e.target.value);
-                          }}
-                        />
-                      </label>
+                      <textarea
+                        type="text"
+                        ref={textareaRef.current[0]}
+                        onInput={() => handleInput(0)}
+                        id={`title_${idx}`}
+                        value={product.title}
+                        aria-label="title"
+                        onChange={(e) => {
+                          handleProductChange(idx, 'title', e.target.value);
+                          handleTitleChange(idx, e.target.value);
+                        }}
+                      />
                     </td>
                     <td>
-                      <label htmlFor={`unit_${idx}`}>
-                        وحدة الكمية
-                        <input
-                          type="text"
-                          id={`unit_${idx}`}
-                          value={product.unit}
-                          onChange={(e) => handleProductChange(idx, 'unit', e.target.value)}
-                        />
-                      </label>
+                      <textarea
+                        ref={textareaRef.current[1]}
+                        onInput={() => handleInput(1)}
+                        type="text"
+                        id={`unit_${idx}`}
+                        value={product.unit}
+                        aria-label="quantity_unit"
+                        onChange={(e) => handleProductChange(idx, 'unit', e.target.value)}
+                      />
                     </td>
                     <td>
-                      <label htmlFor={`quantity_${idx}`}>
-                        الكمية
-                        <input
-                          type="text"
-                          id={`quantity_${idx}`}
-                          value={product.quantity}
-                          onChange={(e) => handleProductChange(idx, 'quantity', e.target.value)}
-                        />
-                      </label>
+                      <textarea
+                        type="text"
+                        ref={textareaRef.current[2]}
+                        onInput={() => handleInput(2)}
+                        id={`quantity_${idx}`}
+                        value={product.quantity}
+                        aria-label="quantity"
+                        onChange={(e) => handleProductChange(idx, 'quantity', e.target.value)}
+                      />
+                    </td>
+                    <td>
+                      <textarea
+                        ref={textareaRef.current[3]}
+                        onInput={() => handleInput(3)}
+                        type="text"
+                        id={`description_${idx}`}
+                        value={descriptions[idx]}
+                        aria-label="description"
+                        onChange={(e) => handleDescriptionChange(idx, e.target.value)}
+                      />
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            <button
+              type="button"
+              className="button condition"
+              onClick={handleAddProduct}
+            >
+              إضافة منتج جديد
+            </button>
           </div>
 
-          <div className="table-container">
+          {/* <div className="table-container">
             <table>
               <thead>
                 <tr>
@@ -323,7 +348,7 @@ function CreateTender() {
             >
               إضافة منتج جديد
             </button>
-          </div>
+          </div> */}
           <hr data-v-7e013592 />
           <div className="gradient__text m-3">
             <h1>الشروط العامة</h1>
