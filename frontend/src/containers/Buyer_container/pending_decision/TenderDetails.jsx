@@ -29,10 +29,14 @@ function TenderDetails() {
 
       const data = await response.json();
       console.log('Response sent:', data); // Log the response from the backend
+
+      // Refresh the page after the response is successfully sent
+      window.location.reload();
     } catch (error) {
       console.error('Error sending response:', error);
     }
   };
+
   useEffect(() => {
     let isMounted = true; // علم لتتبع ما إذا كان المكون مركوبًا
 
