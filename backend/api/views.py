@@ -133,7 +133,6 @@ def home(request):
 
 
 class ResponseView(APIView):
-
     def post(self, request, *args, **kwargs):
         serializer = ResponseSerializer(
             data=request.data, context={'request': request})
@@ -167,7 +166,6 @@ class ResponseDetailAPIView(generics.ListAPIView):
         if status:
             print("entered status")
             queryset = queryset.filter(status=status)
-
         return queryset
 
     def get(self, request, *args, **kwargs):
@@ -175,12 +173,12 @@ class ResponseDetailAPIView(generics.ListAPIView):
 
 from .serializer import ResponseDetailSerializer
 class ResponseStatusUpdateAPIView(APIView):
+
     def put(self, request, response_id, format=None):
         try:
             response_instance = TenderResponse.objects.get(pk=response_id)
         except TenderResponse.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
         serializer = ResponseDetailSerializer(response_instance, data=request.data,partial=True)
         if serializer.is_valid():
             serializer.save(instance=response_instance)  # Passing instance argument
