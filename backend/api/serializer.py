@@ -258,10 +258,11 @@ class ResponseSerializer(serializers.ModelSerializer):
         return data
 class ProductResponseRetrieveSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='product.title', read_only=True)
+    quantity_unit= serializers.CharField(source='product.quantity_unit')
     product_id=serializers.CharField(source='product.id',read_only=True)
     class Meta:
         model = ResponseProductBid
-        fields = ['id', 'product_id','title' ,'provided_quantity', 'product_price',
+        fields = ['id', 'product_id','title' ,'quantity_unit','provided_quantity', 'product_price',
                 'supplying_duration', 'supplying_status', 'product_description']
 
 

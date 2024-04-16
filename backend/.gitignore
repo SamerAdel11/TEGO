@@ -5,3 +5,4 @@ test.rest
 vercel.json
 api/migrations
 tego/settings.py
+api/__pycache__

@@ -13,7 +13,7 @@ urlpatterns = [
     path('create_tender/',views.TenderCreateView.as_view(),name='create_tender'), 
     path('add_response/',views.ResponseView.as_view(),name='add_response'),
     path('get_responses/',views.ResponseListAPIView.as_view(),name='get_responses'),
-    path('get_responses/<int:pk>/<int:fk>',views.ResponseDetailAPIView.as_view(),name='get_responses'),
+    path('get_responses/<int:pk>/',views.ResponseDetailAPIView.as_view(),name='get_responses'),
     path('update_response/<int:response_id>/', views.ResponseStatusUpdateAPIView.as_view(), name='response-status-update'),
 
     path('',views.home,name='index')

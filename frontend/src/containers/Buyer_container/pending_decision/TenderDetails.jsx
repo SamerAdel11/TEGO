@@ -29,10 +29,14 @@ function TenderDetails() {
 
       const data = await response.json();
       console.log('Response sent:', data); // Log the response from the backend
+
+      // Refresh the page after the response is successfully sent
+      window.location.reload();
     } catch (error) {
       console.error('Error sending response:', error);
     }
   };
+
   useEffect(() => {
     let isMounted = true; // علم لتتبع ما إذا كان المكون مركوبًا
 
@@ -77,15 +81,11 @@ function TenderDetails() {
         </div>
         {responseDetails !== null ? (
           <div>
-            {responseDetails.filter((tender) => tender.status !== 'candidate_pool').map((tender) => (
+            {responseDetails.filter((tender) => tender.status !== 'candidate_pool').map((tender, index) => (
               <div key={tender.id}>
-                <p className="response_p">الرد رقم : {tender.id}</p>
-                <p className="response_p">الحالة : <span className="response_red">{tender.status}</span></p>
-                <p className="response_p">
-                  السعر المعروض : {tender.offered_price}
-                </p>
                 <div className="gradient__text">
-                  <h4 className="response">منتجات العروض</h4>
+                  <h3>العرض رقم {index + 1}</h3>
+                  <h4 className="response">منتجات العرض</h4>
                 </div>
                 <table>
                   <thead>
@@ -95,18 +95,23 @@ function TenderDetails() {
                       <th>الكمية المقدمة</th>
                       <th>سعر المنتج</th>
                       <th>مدة التوريد</th>
-                      <th>وصف المنتج</th>
+                      <th style={{ maxWidth: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordWrap: 'break-word' }}>وصف المنتج</th>
+                      <th>حالة التوريد</th>
                     </tr>
                   </thead>
                   <tbody>
                     {tender.offer_products.map((product, innerIndex) => (
                       <tr key={innerIndex}>
-                        <td>{product.id}</td>
+                        <td>{innerIndex + 1}</td>
                         <td>{product.title}</td>
-                        <td>{product.provided_quantity}</td>
-                        <td>{product.product_price}</td>
-                        <td>{product.supplying_duration}</td>
-                        <td>{product.product_description}</td>
+                        <td>
+                          {product.provided_quantity} {product.supplying_status ? product.quantity_unit : '-' }
+                        </td>
+                        <td>{product.supplying_status ? product.product_price : '-' }</td>
+                        <td>{product.supplying_status ? product.supplying_duration : '-' }</td>
+                        <td> {product.supplying_status ? product.product_description : '-' } </td>
+                        <td> {product.supplying_status ? 'متاح' : 'ناسف'} </td>
+
                       </tr>
                     ))}
                   </tbody>
@@ -115,7 +120,7 @@ function TenderDetails() {
                 {tender.offer_conditions.length > 0 && (
                   <div>
                     <div className="gradient__text">
-                      <h4 className="response">شروط العروض</h4>
+                      <h4 className="response">شروط العرض</h4>
                     </div>
                     <table>
                       <thead>
