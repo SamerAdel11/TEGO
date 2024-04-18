@@ -107,6 +107,16 @@ CHANNEL_LAYERS = {
     }
 }
 
+# Set the email backend to use SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Email configuration
+EMAIL_HOST = 'smtp.gmail.com'  # Your SMTP server host
+EMAIL_PORT = 587  # Port for SMTP (587 for TLS)
+EMAIL_HOST_USER = 'sameradel789@gmail.com'  # Your SMTP username
+EMAIL_HOST_PASSWORD = 'zknnwsmhlttuofsb'  # Your SMTP password
+EMAIL_USE_TLS = True  # Use TLS (True or False)
+
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
