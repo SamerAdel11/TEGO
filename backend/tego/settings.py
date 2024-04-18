@@ -97,7 +97,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'tego',
         'USER': 'postgres',
-        'PASSWORD': '12345',
+        'PASSWORD': '1234',
     }
 }
 

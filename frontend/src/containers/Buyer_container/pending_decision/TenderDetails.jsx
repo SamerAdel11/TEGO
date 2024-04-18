@@ -43,7 +43,7 @@ function TenderDetails() {
     const fetchTenderDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/get_responses/${id}`,
+          `http://localhost:8000/get_responses/?tender_id=${id}`,
           {
             method: 'GET',
             headers: {
