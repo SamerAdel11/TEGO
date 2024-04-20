@@ -6,4 +6,3 @@ vercel.json
 api/migrations
 tego/settings.py
 api/__pycache__
-api/forms.py
