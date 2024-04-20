@@ -37,39 +37,26 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class CompanyView(APIView):
 
     permission_classes = []
-
     def post(self, request, *args, **kwargs):
-
         serializer = CompanySerializer(data=request.data)
-
         if serializer.is_valid(raise_exception=True):
+            user = serializer.save()
+            print(user)
+            activateEmail(request, user)
 
-            response = serializer.save()
-
-            return Response(response)
-
+            return Response({"data":"data has been submitted succesfully"})
         else:
-
             return Response(serializer.errors)
 
     def put(self, request, *args, **kwargs):
-
         email = request.data.get('user').get('email', None)
-
         if email is None:
-
             return Response({'error': 'Email is required in the request data.'},
-
                             status=status.HTTP_400_BAD_REQUEST)
-
         instance = Company.objects.filter(user__email=email).first()
-
         serializer = CompanySerializer(instance=instance, data=request.data)
-
         print('serializer is valid')
-
         serializer.update(instance, request.data)
-
         return Response(CompanySerializer(instance).data)
 
 
@@ -188,8 +175,20 @@ class ResponseStatusUpdateAPIView(APIView):
         if serializer.is_valid():
             serializer.save(instance=response_instance)  # Passing instance argument
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)\
 
+from django.contrib.auth.decorators import login_required
+
+class CheckVerifiedView(APIView):
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_authenticated and hasattr(user, 'verified'):
+            if user.verified:
+                return JsonResponse({'verified': True})
+            else:
+                return JsonResponse({'verified': False})
+        else:
+            return JsonResponse({'error': 'User is not authenticated or does not have a verified attribute'})
 
 from django.shortcuts import render, redirect
 from .forms import CustomUserForm
@@ -200,41 +199,45 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMessage
 from django.contrib import messages
 from .tokens import account_activation_token
+from django.http import JsonResponse
+from rest_framework.decorators import authentication_classes
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def activate(request, uidb64, token):
+    print("Entered activate function")
     uid = force_str(urlsafe_base64_decode(uidb64))
-    user = CustomUser.objects.get(id=uid)
-    print(f"user if {user}")
-
+    try:
+        user = CustomUser.objects.get(id=uid)
+    except CustomUser.DoesNotExist:
+        user = None
     if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
+        user.verified = True
         user.save()
-
-        messages.success(request, "Thank you for your email confirmation. Now you can login your account.")
-        return redirect('email')
+        # Return a success JSON response
+        return JsonResponse({'message': 'Account activated successfully'}, status=200)
     else:
-        messages.error(request, "Activation link is invalid!")
+        # Return an error JSON response
+        return JsonResponse({'error': 'Activation link is invalid'}, status=400)
 
-    return redirect('email')
-
-def activateEmail(request, user, to_email):
-    mail_subject = "Activate your user account."
+def activateEmail(request, user):
+    mail_subject = "Activate your Tego Email."
     message = render_to_string("text.html", {
         'user': user.email,
-        'domain': get_current_site(request).domain,
-        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'domain': 'localhost:3000',
+        'uid': urlsafe_base64_encode(force_bytes(user.id)),
         'token': account_activation_token.make_token(user),
         "protocol": 'https' if request.is_secure() else 'http'
     })
     import socket
     socket.getaddrinfo('localhost', 8000)
     print(message)
-    email = EmailMessage(mail_subject, message, to=[to_email])
+    email = EmailMessage(mail_subject, message, to=[user.email])
     if email.send():
-        messages.success(request, f'Dear <b>{user}</b>, please go to you email <b>{to_email}</b> inbox and click on \
+        messages.success(request, f'Dear <b>{user}</b>, please go to you email <b>{user.email}</b> inbox and click on \
                 received activation link to confirm and complete the registration. <b>Note:</b> Check your spam folder.')
     else:
-        messages.error(request, f'Problem sending email to {to_email}, check if you typed it correctly.')
+        messages.error(request, f'Problem sending email to {user.email}, check if you typed it correctly.')
 
 
 def create_custom_user(request):
@@ -375,3 +378,35 @@ def email(request):
 
 #         }
 #         return response
+
+# from .serializer import MyTokenObtainPairSerializer
+# from rest_framework_simplejwt.views import TokenObtainPairView
+
+# class MyTokenObtainPairView(TokenObtainPairView):
+#     """
+#     Custom view to return the additional key-value pair with the token.
+#     """
+
+#     serializer_class = MyTokenObtainPairSerializer
+
+
+#     def post(self, request, *args, **kwargs):
+#         try:
+#             token_data = self.get_serializer(data=request.data).validate()
+#             token = super().get_token(token_data['user'])  # Get the default token
+
+#             # Add custom claim to the obtained token
+#             token['verified'] = token_data['user'].get_full_name()
+
+#             refresh = RefreshToken.for_user(token_data['user'])
+#             refresh['custom_key'] = token_data['user'].get_full_name()  # Synchronize custom claim (optional)
+
+#             data = {
+#                 'refresh': str(refresh),
+#                 'access': str(refresh.access_token),
+#                 'custom_key': token_data['user'].get_full_name()  # Include custom key-value pair
+#             }
+#             return Response(data, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+

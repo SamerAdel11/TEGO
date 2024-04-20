@@ -9,9 +9,6 @@ const Navbar = () => {
   const [toggleMenu, setToggleMenu] = useState(false);
   const { user, logout } = useContext(AuthContext);
 
-  if (user) {
-    console.log(user);
-  }
   return (
     <div className="gpt3__navbar">
       <div className="gpt3__navbar-links">

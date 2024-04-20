@@ -7,11 +7,35 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const storedAuthTokens = localStorage.getItem('authTokens');
   const initialUser = storedAuthTokens ? jwtDecode(storedAuthTokens) : null;
-  const [user, setUser] = useState(initialUser);
+  const [user, setUser] = useState(null);
   const initialAuthTokens = storedAuthTokens ? JSON.parse(storedAuthTokens) : null;
   const [authTokens, setAuthTokens] = useState(initialAuthTokens);
   const [loading, setLoading] = useState(true);
   const history = useHistory();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (initialUser && loading) {
+        try {
+          console.log('Fetching user...');
+          const response = await fetch('http://localhost:8000/verified/', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authTokens.access}` },
+          });
+          const data = await response.json();
+          console.log(`Data is ${JSON.stringify(data)}`);
+          setUser({ ...initialUser, verified: data.verified });
+        } catch (error) {
+          console.error('Error fetching user:', error);
+        } finally {
+          console.log('loading has been setted to false');
+          setLoading(false);
+        }
+      }
+    };
+    console.log('Fetch user called');
+    fetchUser(); // Call the function to fetch user when component mounts or dependencies change
+  }, [initialUser, authTokens]); // Dependencies for the useEffect hook
 
   const loginUser = async (formData) => {
     console.log('form submitted');
@@ -32,10 +56,10 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('authTokens', JSON.stringify(tokens));
       if (loggedUser.company_type === 'supplier') {
         console.log('SUPPLIER');
-        history.push('/supplier');
+        history.push('/host');
       } else {
         console.log('HOST');
-        history.push('/host');
+        // history.push('/host');
       }
     } else if (response.status === 401) {
       alert(tokens.detail);
@@ -87,6 +111,7 @@ export const AuthProvider = ({ children }) => {
     authTokens,
     login: loginUser,
     logout: logoutUser,
+    loading,
   };
   useEffect(() => {
     // if (loading) {

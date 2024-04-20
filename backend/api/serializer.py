@@ -8,8 +8,8 @@ class UserSerializer(serializers.ModelSerializer):
         style={'input_type': 'password'}, write_only=True)
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name',
-                  'email', 'password', 'password2']
+        fields = ['id','first_name', 'last_name',
+                'email', 'password', 'password2']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -72,6 +72,7 @@ class CompanySerializer(serializers.ModelSerializer):
         else:
             return data
     def create(self, validated_data):
+        original_data=validated_data.copy()
         print("enter create function")
         # create user instance
         user = validated_data.pop('user')
@@ -100,7 +101,7 @@ class CompanySerializer(serializers.ModelSerializer):
             CompanyField.objects.create(**field, company=company)
         UserNotification.objects.create(
             recipient=user, message='you have successfully created your account')
-        return validated_data
+        return user
     # def update(self, instace, validated_data):
     #     print('entered update method')
     #     instace.name = validated_data.get('name', instace.name)

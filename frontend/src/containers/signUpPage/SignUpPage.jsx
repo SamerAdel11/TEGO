@@ -2,13 +2,14 @@ import React, { useState, useContext } from 'react';
 // import { Navbar } from '../../components';
 import './signUpPage.css';
 // import axios from 'axios';
-import { Link } from 'react-router-dom'; // Import Link
+import { Link, useHistory } from 'react-router-dom'; // Import Link
 import '../../components/navbar/navbar.css';
 import AuthContext from '../../context/Authcontext';
 import logo from '../../assets/Logo4.png';
 
 const SignUpPage = () => {
   const { login } = useContext(AuthContext);
+  const history = useHistory();
   const [formData, setFormData] = useState({
     companyName: '',
     address: '',
@@ -99,6 +100,7 @@ const SignUpPage = () => {
         console.error(response.json());
       } else {
         await login(formData);
+        history.push('/waiting_for_verification');
         console.log(response.json());
       }
       // Optionally, you can handle the response here

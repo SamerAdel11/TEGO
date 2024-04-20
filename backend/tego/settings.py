@@ -69,7 +69,8 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 # ]
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
-
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000','https://*.127.0.0.1']
+CSRF_COOKIE_SECURE = False 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -97,7 +98,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'tego',
         'USER': 'postgres',
-        'PASSWORD': '1234',
+        'PASSWORD': '12345',
     }
 }
 
