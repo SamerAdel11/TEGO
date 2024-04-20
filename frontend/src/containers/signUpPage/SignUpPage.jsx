@@ -79,6 +79,7 @@ const SignUpPage = () => {
           email: formData.email,
           password: formData.passWord,
           password2: formData.passWord_2,
+          verified: true,
         },
         owners: [...Array(repeatBranchRows)].map((_, index) => ({
           name: formData[`owner_name_${index}`],
