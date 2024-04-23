@@ -1,0 +1,103 @@
+.center-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  table {
+    border-collapse: separate; /* or simply remove this line if you want to remove the property altogether */
+  }
+  .container {
+    font-family: var(--font-family);
+    /* background-color: var(--color-bg); */
+    color: var(--color-text);
+  }
+  
+  .tender-details {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  table {
+    width: 90%;
+    margin: 0 auto; /* Center the table horizontally */
+  }
+  
+  th, td {
+    padding: 8px;
+    border: 2px solid var(--color-footer); /* Using color-text for borders */
+    border-radius: 10px;
+    text-align: center;
+    font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 30px;
+    color: #ffffff;
+  }
+  
+  tr {
+    background-color: var(--color-blog); /* Background color for table rows */
+  }
+  
+  
+  p {
+    margin: 0;
+  }
+  
+  h1 {
+    color: var(--gradient-text);
+    font-size: 16px;
+    margin: 0;
+  }
+  
+  h3 {
+    color: var(--color-subtext);
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  .response{
+    font-size: 2rem;
+    text-align: right;
+    font-family: var(--font-family);
+    padding: 1rem;
+  }
+  .response_p{
+    font-family: var(--font-family);
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 38px;
+    color: var(--color-text);
+    margin-top: 1.5rem;
+  }
+.buton_resonpose{
+    width: 20%;
+    text-align: center;
+    margin: 1.5rem 2rem;
+}
+
+.response_red{
+    font-family: var(--font-family);
+    font-weight: 500;
+    /* font-size: 16px; */
+    line-height: 30px;
+    color: #ff7171;
+}
+.fixed-width-column {
+  width: 200px; /* Adjust the width as needed */
+  max-width: 200px; /* Ensure that the width doesn't exceed this value */
+  overflow: hidden; /* Hide any overflow content */
+  text-overflow: ellipsis; /* Display an ellipsis (...) for overflow text */
+  white-space: nowrap; /* Prevent wrapping of text within the cell */
+}
+.national{
+  font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 30px;
+    color: #71E5FF;
+    margin:1rem;
+}
+.national-id-field{
+  margin: 2rem;
+}

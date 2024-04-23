@@ -64,7 +64,7 @@ endpoint = "http://localhost:8000/add_response/"
 # }
 
 #tender_data
-data={
+tender_data={
   "ad": {
     "title": "توريد وتركيب أنظمة أمن متكاملة لمشروع مجمع النخبة السكني",
     "topic": "شروع مجمع النخبة السكني هو مشروع سكني راقي قيد الإنشاء، يتكون من 10 مبنى سكني فخم يحتوي على 500 شقة سكنية، بالإضافة إلى المرافق المشتركة مثل حمام سباحة، صالة ألعاب رياضية، وقاعات متعددة الاستخدامات. لضمان أعلى مستوى من الأمن والسلامة للسكان والممتلكات، تنوي شركة النخبة للمقاولات طرح مناقصة لتوريد وتركيب أنظمة أمن متكاملة تشمل أنظمة مراقبة بالكاميرات، إنذار الحريق، والتحكم بالدخول",
@@ -187,23 +187,23 @@ data={
 
 response_data={
     "offered_price": 90000, 
-    "tender_id": 19,
+    "tender_id": 1,
     'status':'open',
     "offer_products": [
         {
-            "productid": 39,
+            "productid": 5,
             "supplying_status": False,
         },
         {
-            "productid": 38,
+            "productid": 4,
             "supplying_status": False,
         },
         {
-            "productid": 37,
+            "productid": 3,
             "supplying_status": False,
         },
         {
-            "productid": 36,
+            "productid": 2,
             "provided_quantity": 20,
             "product_price": 50,
             "supplying_duration": "15 working days",
@@ -216,7 +216,7 @@ response_data={
             """
         },
         {
-            "productid": 35,
+            "productid": 1,
             "provided_quantity": 100,
             "product_price": 30,
             "supplying_duration": "10 working days",
@@ -249,10 +249,62 @@ endpoint = "http://localhost:8000/get_responses/19?status=candidate_pool"
 update={
   "status":"can"
 }
+user_data={
+  "name": "Fake Company Inc.",
+  "location": "123 Fake Street",
+  "city": "Fakeville",
+  "mobile": "1234567890",
+  "landline": "0987654321",
+  "fax_number": "5555555555",
+  "company_type_tego": "supplier",
+  "supplier": {
+    "tax_card_number": "1234567890",
+    "commercial_registration_number": "CR123456",
+    "company_type": "Fake LLC",
+    "company_capital": "900000"
+  },
+  "company_fields": [
+    {
+      "primary_field": "Fake Primary Activity 1",
+      "secondary_field": "Fake Sub Activity 1"
+    },
+    {
+      "primary_field": "Fake Primary Activity 2",
+      "secondary_field": "Fake Sub Activity 2"
+    }
+  ],
+  "user": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "sameradel789@gmail.com",
+    "password": "sameradel",
+    "password2": "sameradel",
+    "verified": True
+  },
+  "owners": [
+    {
+      "name": "Jane Doe",
+      "owner_id": "ID123",
+      "onwer_position": "CEO",
+      "address": "456 Fake Avenue"
+    },
+    {
+      "name": "Bob Smith",
+      "owner_id": "ID456",
+      "onwer_position": "CFO",
+      "address": "789 Fake Boulevard"
+    }
+  ]
+}
+
 samer_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNTg2ODExLCJpYXQiOjE3MTMxNTQ4MTEsImp0aSI6IjgyYTAzMTNjNjhiYjQ2NmJhNTMxNWU2Yjg5ODhhMjUzIiwidXNlcl9pZCI6OSwiZW1haWwiOiJzYW1lcmFkZWw3ODk5QGdtYWlsLmNvbSIsImNvbXBhbnlfdHlwZSI6InN1cHBsaWVyIn0.CsPComCiSST6Yi2d_q0mws16k6QEioWhhfULVl9cQQs'
-fady_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNDc4ODk4LCJpYXQiOjE3MTMwNDY4OTgsImp0aSI6IjQ4ZTZlYWU5MDdiNjQyZTg4NTRmMzZkNDhjNmQ5MjVmIiwidXNlcl9pZCI6MSwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoiYnV5ZXIifQ.MdMaj2GxsPCQT2o3MSDWHeHPmrSDjbVnxn1G7x7oG7M'
-headers = {'Authorization': f"Bearer {samer_token}"}
-response = requests.get(endpoint, headers=headers,json=update)
+fady_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0MDcwOTE5LCJpYXQiOjE3MTM2Mzg5MTksImp0aSI6IjFjOWNiMzNkODk3ZTQzODZhNWJmZGZlZTMxZTBjMjEyIiwidXNlcl9pZCI6MiwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoic3VwcGxpZXIifQ.2trfZkqZESPRlQAY-4r46HBMuBAWeojrGIxKYUwKq1M'
+headers = {'Authorization': f"Bearer {fady_token}"}
+
+user_endpoint='http://localhost:8000/companies/'
+tender_endpoint='http://localhost:8000/create_tender/'
+add_response_endpoint  ='http://localhost:8000/add_response/'
+response = requests.post(tender_endpoint, headers=headers,json=tender_data)
 
 pprint.pprint(response.json())
 

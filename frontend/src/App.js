@@ -16,6 +16,8 @@ import TenderDetails from './containers/Buyer_container/pending_decision/TenderD
 import ActivationPage from './containers/activation/Activation';
 import EmailVerificationMessage from './containers/activation/EmailVerificationMessage';
 import PrivateRoute from './containers/private_routes/private_routes.js';
+import CandidatePool from './containers/Buyer_container/Candidate_folder/CandidatePool.jsx';
+import CandidateDetails from './containers/Buyer_container/Candidate_folder/CandidateDetails.jsx';
 
 function HostComponent() {
   return (
@@ -73,6 +75,29 @@ function TenderResponsesComponent() {
   );
 }
 
+function CandidatePooll() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <CandidatePool />
+      </div>
+    </div>
+  );
+}
+function CandidateDetailsfunction() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <CandidateDetails />
+      </div>
+    </div>
+  );
+}
+
 const App = () => (
   <Router>
     <div className="App">
@@ -102,6 +127,8 @@ const App = () => (
           <PrivateRoute exact path="/mytender" component={MyTenderComponent} />
           <PrivateRoute exact path="/pendingdecision" component={PendingDecisionComponent} />
           <PrivateRoute exact path="/tender_responses/:id" component={TenderResponsesComponent} />
+          <PrivateRoute exact path="/candidate_responses/:id" component={CandidateDetailsfunction} />
+          <PrivateRoute exact path="/candidate" component={CandidatePooll} />
 
         </Switch>
       </AuthProvider>

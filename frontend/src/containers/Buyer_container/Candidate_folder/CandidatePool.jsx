@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom'; // Import Link from React Router
-import './pendingdecision.css';
+import './CandidatePool.css';
 import AuthContext from '../../../context/Authcontext';
 
-function PendingDecision() {
+function CandidatePool() {
   const [tendersData, setTendersData] = useState(null);
   const { authTokens } = useContext(AuthContext);
 
@@ -33,10 +33,10 @@ function PendingDecision() {
   return (
     <div className="pending-container">
       <div className="gradient__text pending_title">
-        <h1 className="first_title">العروض المقدمة</h1>
+        <h1 className="first_title">طلبات التاكيد</h1>
       </div>
       {tendersData && tendersData.map((tender, index) => (
-        <Link key={index} to={`/tender_responses/${tender.id}`}>
+        <Link key={index} to={`/candidate_responses/${tender.id}`}>
           <div className="tender-card">
             <h1 className="tender-title gradient__text">
               {tender.ad?.title}
@@ -48,4 +48,4 @@ function PendingDecision() {
   );
 }
 
-export default PendingDecision;
+export default CandidatePool;

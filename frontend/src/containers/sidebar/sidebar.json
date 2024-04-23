@@ -17,12 +17,12 @@
                         "path": "/mytender"
                     },
                     {
-                        "title": "في انتظار القرارات",
+                        "title": "العروض المقدمة",
                         "path": "/pendingdecision"
                     },
                     {
-                        "title": "بانتظار التأكيد",
-                        "path": "/mytender"
+                        "title": "طلبات التأكيد",
+                        "path": "/candidate"
                     },
                     {
                         "title": "المناقصات الملغاه",
