@@ -11,6 +11,53 @@ import pprint
 # if auth_response.status_code == 200:
 
 # token=auth_response.json()['token']
+user_data={
+  "name": "Fake Company Inc.",
+  "location": "123 Fake Street",
+  "city": "Fakeville",
+  "mobile": "1234567890",
+  "landline": "0987654321",
+  "fax_number": "5555555555",
+  "company_type_tego": "supplier",
+  "supplier": {
+    "tax_card_number": "1234567890",
+    "commercial_registration_number": "CR123456",
+    "company_type": "Fake LLC",
+    "company_capital": "900000"
+  },
+  "company_fields": [
+    {
+      "primary_field": "Fake Primary Activity 1",
+      "secondary_field": "Fake Sub Activity 1"
+    },
+    {
+      "primary_field": "Fake Primary Activity 2",
+      "secondary_field": "Fake Sub Activity 2"
+    }
+  ],
+  "user": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "nardinphilip5@gmail.com",
+    "password": "sameradel",
+    "password2": "sameradel",
+    "verified": True
+  },
+  "owners": [
+    {
+      "name": "Jane Doe",
+      "owner_id": "ID123",
+      "onwer_position": "CEO",
+      "address": "456 Fake Avenue"
+    },
+    {
+      "name": "Bob Smith",
+      "owner_id": "ID456",
+      "onwer_position": "CFO",
+      "address": "789 Fake Boulevard"
+    }
+  ]
+}
 endpoint = "http://localhost:8000/add_response/"
 # data = {
 #     "ad": {
@@ -187,23 +234,23 @@ data={
 
 response_data={
     "offered_price": 90000, 
-    "tender_id": 19,
+    "tender_id": 1,
     'status':'open',
     "offer_products": [
         {
-            "productid": 39,
+            "productid": 5,
             "supplying_status": False,
         },
         {
-            "productid": 38,
+            "productid": 4,
             "supplying_status": False,
         },
         {
-            "productid": 37,
+            "productid": 3,
             "supplying_status": False,
         },
         {
-            "productid": 36,
+            "productid": 2,
             "provided_quantity": 20,
             "product_price": 50,
             "supplying_duration": "15 working days",
@@ -216,7 +263,7 @@ response_data={
             """
         },
         {
-            "productid": 35,
+            "productid": 1,
             "provided_quantity": 100,
             "product_price": 30,
             "supplying_duration": "10 working days",
@@ -245,14 +292,16 @@ response_data={
 
 
 
-endpoint = "http://localhost:8000/get_responses/19?status=candidate_pool"
+endpoint = "http://localhost:8000/add_response/"
 update={
   "status":"can"
 }
 samer_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNTg2ODExLCJpYXQiOjE3MTMxNTQ4MTEsImp0aSI6IjgyYTAzMTNjNjhiYjQ2NmJhNTMxNWU2Yjg5ODhhMjUzIiwidXNlcl9pZCI6OSwiZW1haWwiOiJzYW1lcmFkZWw3ODk5QGdtYWlsLmNvbSIsImNvbXBhbnlfdHlwZSI6InN1cHBsaWVyIn0.CsPComCiSST6Yi2d_q0mws16k6QEioWhhfULVl9cQQs'
 fady_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNDc4ODk4LCJpYXQiOjE3MTMwNDY4OTgsImp0aSI6IjQ4ZTZlYWU5MDdiNjQyZTg4NTRmMzZkNDhjNmQ5MjVmIiwidXNlcl9pZCI6MSwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoiYnV5ZXIifQ.MdMaj2GxsPCQT2o3MSDWHeHPmrSDjbVnxn1G7x7oG7M'
-headers = {'Authorization': f"Bearer {samer_token}"}
-response = requests.get(endpoint, headers=headers,json=update)
+nardin_token= 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0NTA2MjE0LCJpYXQiOjE3MTQwNzQyMTQsImp0aSI6ImVhZDA2ZGU2MDQ4ZTQyZTU5YzI5NGNhZDcxZWQwNDFkIiwidXNlcl9pZCI6MSwiZW1haWwiOiJuYXJkaW5waGlsaXA1QGdtYWlsLmNvbSIsImNvbXBhbnlfdHlwZSI6InN1cHBsaWVyIn0.V4BMDnANqkYZrIFS3DN9lD0gbT_58McaCYhu1nU5xGU'
+
+headers = {'Authorization': f"Bearer {nardin_token}"}
+response = requests.post(endpoint, headers=headers ,json=response_data)
 
 pprint.pprint(response.json())
 
