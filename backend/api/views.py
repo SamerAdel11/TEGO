@@ -41,7 +41,6 @@ class CompanyView(APIView):
         serializer = CompanySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
-            print(user)
             activateEmail(request, user)
 
             return Response({"data":"data has been submitted succesfully"})
@@ -55,7 +54,6 @@ class CompanyView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
         instance = Company.objects.filter(user__email=email).first()
         serializer = CompanySerializer(instance=instance, data=request.data)
-        print('serializer is valid')
         serializer.update(instance, request.data)
         return Response(CompanySerializer(instance).data)
 
@@ -83,7 +81,6 @@ class TenderListView(generics.ListAPIView):
     def get_queryset(self):
 
         user = self.request.user
-        print(user)
 
         queryset = Tender.objects.filter(user=user)
 
@@ -93,7 +90,6 @@ class TenderListView(generics.ListAPIView):
 
         response = super().list(request, *args, **kwargs)
 
-        print(response.data)  # Print the response data
         return response
 
 
@@ -146,17 +142,12 @@ class ResponseDetailAPIView(generics.ListAPIView):
         # Filter the queryset based on the currently authenticated user
         user = self.request.user
         tender_id = self.request.query_params.get('tender_id', None)
-        print(f"tender id is {tender_id}")
         if tender_id is None:
-            print("tender_id is none")
             return Response({'message':"tender id must be passed as a url parameter"})
         tender_instance=Tender.objects.get(id=tender_id)
         queryset=TenderResponse.objects.filter(user=user,tender=tender_instance)
         status = self.request.query_params.get('status', None)
-        import pprint
-        print(self.request.META)
         if status:
-            print("entered status")
             queryset = queryset.filter(status=status)
         return queryset
 
@@ -220,24 +211,38 @@ def activate(request, uidb64, token):
         # Return an error JSON response
         return JsonResponse({'error': 'Activation link is invalid'}, status=400)
 
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.utils.html import strip_tags
 def activateEmail(request, user):
     mail_subject = "Activate your Tego Email."
-    message = render_to_string("text.html", {
+    html_message=render_to_string('email2.html',{
         'user': user.email,
         'domain': 'localhost:3000',
         'uid': urlsafe_base64_encode(force_bytes(user.id)),
         'token': account_activation_token.make_token(user),
         "protocol": 'https' if request.is_secure() else 'http'
     })
-    import socket
-    socket.getaddrinfo('localhost', 8000)
-    print(message)
-    email = EmailMessage(mail_subject, message, to=[user.email])
-    if email.send():
-        messages.success(request, f'Dear <b>{user}</b>, please go to you email <b>{user.email}</b> inbox and click on \
-                received activation link to confirm and complete the registration. <b>Note:</b> Check your spam folder.')
-    else:
-        messages.error(request, f'Problem sending email to {user.email}, check if you typed it correctly.')
+    plain_message= strip_tags(html_message)
+    message=EmailMultiAlternatives(
+        subject=mail_subject,
+        body=plain_message,
+        to=[user.email]
+    )
+    message.attach_alternative(html_message,'text/html')
+    message.send()
+    # message = render_to_string("text.html", {
+    #     'user': user.email,
+    #     'domain': 'localhost:3000',
+    #     'uid': urlsafe_base64_encode(force_bytes(user.id)),
+    #     'token': account_activation_token.make_token(user),
+    #     "protocol": 'https' if request.is_secure() else 'http'
+    # })
+    # email = EmailMessage(mail_subject, message, to=[user.email])
+    # if email.send():
+    #     messages.success(request, f'Dear <b>{user}</b>, please go to you email <b>{user.email}</b> inbox and click on \
+    #             received activation link to confirm and complete the registration. <b>Note:</b> Check your spam folder.')
+    # else:
+    #     messages.error(request, f'Problem sending email to {user.email}, check if you typed it correctly.')
 
 
 def create_custom_user(request):
@@ -254,7 +259,7 @@ def create_custom_user(request):
     return render(request, 'create_custom_user.html', {'form': form})
 
 def email(request):
-    return render(request,'email.html')
+    return render(request,'email2.html')
 # class UserView(APIView):
 
 #     def get(self, request):

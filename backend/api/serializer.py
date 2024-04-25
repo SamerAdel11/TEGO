@@ -73,7 +73,6 @@ class CompanySerializer(serializers.ModelSerializer):
             return data
     def create(self, validated_data):
         original_data=validated_data.copy()
-        print("enter create function")
         # create user instance
         user = validated_data.pop('user')
         user.pop('password2')
@@ -177,9 +176,7 @@ class TenderSerializer(serializers.ModelSerializer):
         private_conditions_data = validated_data.pop('private_conditions')
         products_data = validated_data.pop('products')
         ad_data = validated_data.pop('ad')
-        print(f"Advertisment Data is {ad_data}")
         ad_instance = TenderAd.objects.create(**ad_data)
-        print(f"Tender Data is {validated_data}")
         tender = Tender.objects.create(
             **validated_data, user=user, ad=ad_instance)
         for admin_data in admins_data:
@@ -193,7 +190,6 @@ class TenderSerializer(serializers.ModelSerializer):
         for product_data in products_data:
             TenderProduct.objects.create(tender=tender, **product_data)
         tender.save()
-        print(original_data)
         return original_data
 
 class TenderRetrieveSerializer(serializers.ModelSerializer):
@@ -243,15 +239,12 @@ class ResponseSerializer(serializers.ModelSerializer):
             **validated_data, tender=tender, user=user)
         respons_offer_products=[]
         for product_data in offer_products_data:
-            print(product_data)
             productid = product_data.pop('productid')
             product = TenderProduct.objects.get(id=productid)
             ResponseProductBid.objects.create(
                 product=product, response=response, **product_data)
             product_data['product_name']=product.title
             respons_offer_products.append(product_data)
-        print("REsponses passed")
-        print(respons_offer_products)
         for condition_data in offer_conditions_data:
             ResponsePrivateCondition.objects.create(
                 response=response, **condition_data)

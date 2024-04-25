@@ -9,6 +9,7 @@ import logo from '../../assets/Logo4.png';
 
 const SignUpPage = () => {
   const { login } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
   const history = useHistory();
   const [formData, setFormData] = useState({
     companyName: '',
@@ -54,6 +55,7 @@ const SignUpPage = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const postData = {
         name: formData.companyName,
@@ -106,6 +108,7 @@ const SignUpPage = () => {
       }
       // Optionally, you can handle the response here
       console.log('Form submitted successfully');
+      setIsLoading(false);
     } catch (error) {
       console.error('Error submitting form:', error);
       // Handle errors, e.g., display error messages to the user
@@ -320,7 +323,14 @@ const SignUpPage = () => {
           <button type="button" className="Add_button" onClick={handleAddActivityRow}>
             <i className="fa fa-plus" /> اضافة نشاط آخر
           </button>
-          <button type="submit" className="submit_button" onClick={handleSubmit}>Submit</button>
+          <button type="submit" className="submit_button" onClick={handleSubmit}>
+            {isLoading ? (
+              '...Loading'
+            ) : (
+              'Submit'
+            )}
+
+          </button>
         </form>
       </div>
     </>

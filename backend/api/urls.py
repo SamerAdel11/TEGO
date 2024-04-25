@@ -18,5 +18,5 @@ urlpatterns = [
     path('get_responses/',views.ResponseDetailAPIView.as_view(),name='get_responses'),
     path('update_response/<int:response_id>/', views.ResponseStatusUpdateAPIView.as_view(), name='response-status-update'),
     path('',views.create_custom_user,name='create_user'),
-    path('email',views.email,name='email')
+    path('email',views.email,name='email'),
 ]
