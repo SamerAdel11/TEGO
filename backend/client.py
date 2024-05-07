@@ -345,21 +345,11 @@ user_data={
 }
 
 samer_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNTg2ODExLCJpYXQiOjE3MTMxNTQ4MTEsImp0aSI6IjgyYTAzMTNjNjhiYjQ2NmJhNTMxNWU2Yjg5ODhhMjUzIiwidXNlcl9pZCI6OSwiZW1haWwiOiJzYW1lcmFkZWw3ODk5QGdtYWlsLmNvbSIsImNvbXBhbnlfdHlwZSI6InN1cHBsaWVyIn0.CsPComCiSST6Yi2d_q0mws16k6QEioWhhfULVl9cQQs'
-<<<<<<< HEAD
-fady_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0MDcwOTE5LCJpYXQiOjE3MTM2Mzg5MTksImp0aSI6IjFjOWNiMzNkODk3ZTQzODZhNWJmZGZlZTMxZTBjMjEyIiwidXNlcl9pZCI6MiwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoic3VwcGxpZXIifQ.2trfZkqZESPRlQAY-4r46HBMuBAWeojrGIxKYUwKq1M'
-headers = {'Authorization': f"Bearer {fady_token}"}
-
-user_endpoint='http://localhost:8000/companies/'
-tender_endpoint='http://localhost:8000/create_tender/'
-add_response_endpoint  ='http://localhost:8000/add_response/'
-response = requests.post(tender_endpoint, headers=headers,json=tender_data)
-=======
 fady_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNDc4ODk4LCJpYXQiOjE3MTMwNDY4OTgsImp0aSI6IjQ4ZTZlYWU5MDdiNjQyZTg4NTRmMzZkNDhjNmQ5MjVmIiwidXNlcl9pZCI6MSwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoiYnV5ZXIifQ.MdMaj2GxsPCQT2o3MSDWHeHPmrSDjbVnxn1G7x7oG7M'
 nardin_token= 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0NTA2MjE0LCJpYXQiOjE3MTQwNzQyMTQsImp0aSI6ImVhZDA2ZGU2MDQ4ZTQyZTU5YzI5NGNhZDcxZWQwNDFkIiwidXNlcl9pZCI6MSwiZW1haWwiOiJuYXJkaW5waGlsaXA1QGdtYWlsLmNvbSIsImNvbXBhbnlfdHlwZSI6InN1cHBsaWVyIn0.V4BMDnANqkYZrIFS3DN9lD0gbT_58McaCYhu1nU5xGU'
 
 headers = {'Authorization': f"Bearer {nardin_token}"}
 response = requests.post(endpoint, headers=headers ,json=response_data)
->>>>>>> 0e4f476092db53508317f1c8d8fed745eb505190
 
 pprint.pprint(response.json())
 

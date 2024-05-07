@@ -59,61 +59,46 @@ class CompanyView(APIView):
 
 
 class TenderCreateView(APIView):
-
     def post(self, request, *args, **kwargs):
-
         serializer = TenderSerializer(
             data=request.data, context={'request': request})
-
         if serializer.is_valid():
-
             response = serializer.save()
-
             return Response(response, status=status.HTTP_201_CREATED)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class RetrieveTender(generics.RetrieveAPIView):
+    queryset=Tender.objects.all()
+    serializer_class=TenderSerializer
+    lookup_field='pk'
+    def get(self,request,*args,**kwargs):
+        return self.retrieve(request)
+
 class TenderListView(generics.ListAPIView):
-
     serializer_class = TenderRetrieveSerializer
-
     def get_queryset(self):
-
         user = self.request.user
-
         queryset = Tender.objects.filter(user=user)
-
         return queryset
 
     def get(self, request, *args, **kwargs):
-
         response = super().list(request, *args, **kwargs)
-
         return response
 
 
 class NotificationView(generics.ListAPIView):
-
     serializer_class = NotificationnSerializer
-
     def get_queryset(self):
-
         # Filter the queryset based on the currently authenticated user
-
         user = self.request.user
-
         return UserNotification.objects.filter(recipient=user)
-
     def get(self, request, *args, **kwargs):
-
         return self.list(request, *args, **kwargs)
 
 
 def home(request):
-
     return render(request, 'index.html')
-
 
 class ResponseView(APIView):
     def post(self, request, *args, **kwargs):
@@ -121,7 +106,7 @@ class ResponseView(APIView):
             data=request.data, context={'request': request})
         if serializer.is_valid():
             response = serializer.save()
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(request.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -156,7 +141,6 @@ class ResponseDetailAPIView(generics.ListAPIView):
 
 from .serializer import ResponseDetailSerializer
 class ResponseStatusUpdateAPIView(APIView):
-
     def put(self, request, response_id, format=None):
         try:
             response_instance = TenderResponse.objects.get(pk=response_id)
@@ -260,158 +244,56 @@ def create_custom_user(request):
 
 def email(request):
     return render(request,'email2.html')
-# class UserView(APIView):
-
-#     def get(self, request):
-
-#         print(request)
-
-#         token = request.COOKIES.get('jwt')
-
-#         if not token:
-#             raise AuthenticationFailed('Unauthenticated!')
-#         try:
-#             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-#         except jwt.ExpiredSignatureError:
-#             raise AuthenticationFailed('Unauthenticated')
-#         user = CustomUser.objects.get(id=payload['id'])
-#         serializer = UserSerializer(user)
-#         return Response(serializer.data)
-
-# @api_view(['POST'])
-# def UserView(request):
-#     serializer = UserSerializer(data=request.data)
-#     if serializer.is_valid():
-#         response = serializer.save()
-#         print(type(response))
-#         print(response)
-#         return Response(response)
-#     else:
-#         return Response(serializer.errors)
-
-# class CompanyView(generics.ListAPIView, generics.CreateAPIView,
-#                 generics.RetrieveAPIView,generics.UpdateAPIView):
-#     queryset = Company.objects.all()
-#     serializer_class = CompanySerializer
-#     def perform_create(self,serializer):
-#         serializer=serializer.save()
-#         print(f"serializer is {serializer}")
-#         return serializer
 
 
-#     def get(self, request, *args, **kwargs):
-#         pk = kwargs.get("pk")
-#         if pk is None:
-#             return self.list(request, *args, **kwargs)
-#         else:
-#             return self.retrieve(request, *args, **kwargs)
-#     def post(self, request,*args,**kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         new_serializer_data=self.perform_create(serializer)
-#         headers = self.get_success_headers(serializer.data)
-#         return Response(new_serializer_data)
-
-
-
-
-
-# class LoginView(APIView):
-#     def create_access_token(email):
-#         return jwt.encode({
-#             'email': email,
-#             'exp': datetime.datetime.utcnow()+datetime.timedelta(minutes=60),
-#             'iat': datetime.datetime.utcnow()
-#         }, 'secret', algorithm='HS256')
-
-#     def create_refresh_token(email):
-#         return jwt.encode({
-#             'email': email,
-#             'exp': datetime.datetime.utcnow()+datetime.timedelta(days=7),
-#             'iat': datetime.datetime.utcnow()
-#         }, 'secret', algorithm='HS256')
-
-
-#     def post(self, request):
-#         # def create_access_token(email):
-#         #     return jwt.encode({
-#         #     'email': email,
-#         #     'exp': datetime.datetime.utcnow()+datetime.timedelta(minutes=60),
-#         #     'iat': datetime.datetime.utcnow()
-#         # }, 'secret', algorithm='HS256')
-
-#         # def create_refresh_token(email):
-#         #     return jwt.encode({
-#         #         'email': email,
-#         #         'exp': datetime.datetime.utcnow()+datetime.timedelta(days=7),
-#         #         'iat': datetime.datetime.utcnow()
-#         #     }, 'secret', algorithm='HS256')
-
-
-#         email = request.data['email']
-#         password = request.data['password']
-#         user = CustomUser.objects.filter(email=email).first()
-#         if user is None:
-#             raise AuthenticationFailed("user not exist")
-
-#         if not user.check_password(password):
-#             raise AuthenticationFailed("password isn't correct")
-
-
-#         access_token = jwt.encode({
-#             'email': email,
-#             'exp': datetime.datetime.utcnow()+datetime.timedelta(days=1),
-#             'iat': datetime.datetime.utcnow()
-
-#         }, 'secret', algorithm='HS256')
-
-
-#         refresh_token = jwt.encode({
-#             'email': email,
-#             'exp': datetime.datetime.utcnow()+datetime.timedelta(days=7),
-#             'iat': datetime.datetime.utcnow()
-#         }, 'secret', algorithm='HS256')
-
-
-#         print({access_token})
-#         response = Response()
-#         response.set_cookie(key='jwt', value=access_token, httponly=True)
-#         response.data = {
-#             'roles': [2001, 5150],
-#             'access': access_token,
-#             'refresh': refresh_token
-
-#         }
-#         return response
-
-# from .serializer import MyTokenObtainPairSerializer
-# from rest_framework_simplejwt.views import TokenObtainPairView
-
-# class MyTokenObtainPairView(TokenObtainPairView):
-#     """
-#     Custom view to return the additional key-value pair with the token.
-#     """
-
-#     serializer_class = MyTokenObtainPairSerializer
-
-
-#     def post(self, request, *args, **kwargs):
-#         try:
-#             token_data = self.get_serializer(data=request.data).validate()
-#             token = super().get_token(token_data['user'])  # Get the default token
-
-#             # Add custom claim to the obtained token
-#             token['verified'] = token_data['user'].get_full_name()
-
-#             refresh = RefreshToken.for_user(token_data['user'])
-#             refresh['custom_key'] = token_data['user'].get_full_name()  # Synchronize custom claim (optional)
-
-#             data = {
-#                 'refresh': str(refresh),
-#                 'access': str(refresh.access_token),
-#                 'custom_key': token_data['user'].get_full_name()  # Include custom key-value pair
-#             }
-#             return Response(data, status=status.HTTP_200_OK)
-#         except Exception as e:
-#             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+class test(APIView):
+    permission_classes=[]
+    def post(self,request):
+        from pprint import pprint
+        pprint(request.data)
+        return Response(request.data)
+# from transformers import AutoTokenizer, AutoModel
+# import pandas as pd
+# import numpy as np
+# from sklearn.metrics.pairwise import cosine_similarity
+# from joblib import dump, load
+# import torch
+# class Similarity(APIView):
+#     permission_classes=[]
+#     tokenizer = AutoTokenizer.from_pretrained("aubmindlab/bert-base-arabertv02")
+#     model = AutoModel.from_pretrained("aubmindlab/bert-base-arabertv02")
+#     def compute_similarity(self,tender,response):
+#         # Split the requirements from the row
+#         requirements_1 = tender.split('|')
+#         requirements_2 = response.split('|')
+        
+#         # List to store similarity scores for this row
+#         row_similarities = []
+        
+#         # Iterate over each pair of corresponding requirements
+#         for req1, req2 in zip(requirements_1, requirements_2):
+#             # Tokenize the requirements
+#             tokens1 = self.tokenizer(req1, return_tensors='pt', padding=True, truncation=True)
+#             tokens2 = self.tokenizer(req2, return_tensors='pt', padding=True, truncation=True)
+            
+#             # Get embeddings for the requirements
+#             with torch.no_grad():
+#                 output1 = self.model(**tokens1)
+#                 output2 = self.model(**tokens2)
+            
+#             # Compute the mean embeddings
+#             embedding1 = output1.last_hidden_state.mean(dim=1).squeeze().numpy()
+#             embedding2 = output2.last_hidden_state.mean(dim=1).squeeze().numpy()
+            
+#             # Compute cosine similarity between the embeddings
+#             similarity_score = cosine_similarity([embedding1], [embedding2])[0][0]
+#             row_similarities.append(similarity_score)
+        
+#         # Calculate mean similarity score for this row
+#         mean_similarity_score = np.mean(row_similarities)
+#         return mean_similarity_score
+#     def post(self,request):
+#         tender=request.data['tender']
+#         response=request.data['response']
+#         score=self.compute_similarity(tender,response)
+#         return Response({"message":score*100})

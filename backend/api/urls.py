@@ -11,6 +11,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('get_tenders/',views.TenderListView.as_view(), name='get_tenders'),
     path('create_tender/',views.TenderCreateView.as_view(),name='create_tender'),
+    path('get_tender/<int:pk>',views.RetrieveTender.as_view(),name='get_tender'),
     path('add_response/',views.ResponseView.as_view(),name='add_response'),
     path('activate/<str:uidb64>/<str:token>', views.activate, name='activate'),
     path('verified/',views.CheckVerifiedView.as_view(),name='verified'),
@@ -19,4 +20,6 @@ urlpatterns = [
     path('update_response/<int:response_id>/', views.ResponseStatusUpdateAPIView.as_view(), name='response-status-update'),
     path('',views.create_custom_user,name='create_user'),
     path('email',views.email,name='email'),
+    path('test/',views.test.as_view(),name='test'),
+    # path('score',views.Similarity.as_view()),
 ]

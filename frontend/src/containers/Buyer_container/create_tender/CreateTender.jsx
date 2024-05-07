@@ -1,8 +1,10 @@
 import React, { useState, useContext, useRef } from 'react';
 import './createtender.css';
+import { useHistory } from 'react-router-dom';
 import AuthContext from '../../../context/Authcontext';
 
 function CreateTender() {
+  const navigate = useHistory();
   const { authTokens } = useContext(AuthContext);
   const [officials, setOfficials] = useState([
     { id: 1, name: '', position: '' },
@@ -125,9 +127,10 @@ function CreateTender() {
       });
       if (response.ok) {
         console.log('Data sent successfully');
+        navigate.push('/mytender');
         // You can reset form state or take other actions if needed
       } else {
-        console.error(`Failed to send data to server ${response.json()}`);
+        console.error('Failed to send data to server', response.json());
       }
     } catch (error) {
       console.error('Error:', error);
@@ -148,7 +151,7 @@ function CreateTender() {
             </div>
             <div className="form-fields">
               <label htmlFor="tenderSubject">موضوع المناقصة
-                <input type="text" id="tenderSubject" />
+                <textarea type="text" id="tenderSubject" />
               </label>
             </div>
             <div className="form-fields">
@@ -251,8 +254,8 @@ function CreateTender() {
                         ref={textareaRef.current[0]}
                         onInput={() => handleInput(0)}
                         id={`title_${idx}`}
-                        value={product.title}
                         aria-label="title"
+                        value={product.title}
                         onChange={(e) => {
                           handleProductChange(idx, 'title', e.target.value);
                           handleTitleChange(idx, e.target.value);
@@ -356,7 +359,7 @@ function CreateTender() {
 
           <div className="condition-section">
             {conditions.map((condition, idx) => (
-              <div key={idx} className="condition-field">
+              <div key={idx} className="condition-field1">
                 <input
                   type="text"
                   value={condition.value}
@@ -380,7 +383,7 @@ function CreateTender() {
 
           <div className="condition-section">
             {privateconditions.map((privateCondition, idx) => (
-              <div key={idx} className="condition-field">
+              <div key={idx} className="condition-field1">
                 <input
                   type="text"
                   value={privateCondition.value}

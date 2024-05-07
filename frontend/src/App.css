@@ -31,6 +31,7 @@ a {
 }
 
 .gradient__text {
+  
   background: var(--gradient-text);
   background-clip: text;
   -webkit-background-clip: text;
@@ -95,6 +96,7 @@ a {
 
   }
 /* here i will add the syle of pages i added */
+.supplier_side,
 .host_side{
   display: flex;
   direction: rtl;

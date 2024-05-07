@@ -4,11 +4,11 @@
     font-family: var(--font-family);
     padding:1rem;
 }
-  
+
 .container_create_tender {
     display: flex;
     flex-direction: column;
-    justify-content: start;
+    justify-content: center;
     margin: 0; /* Removed auto margin */
     width: 100%; /* Adjust width as needed */
     margin: 0 4rem; /* Center horizontally */
@@ -99,7 +99,7 @@ button[type="submit"]:hover {
   width: 20%;
   margin: 1rem;
 }
-.condition-field1{
+.condition-field{
   margin: 1rem;
 }
 input[type="date"]::-webkit-calendar-picker-indicator {
@@ -114,16 +114,9 @@ textarea {
   background-color: var(--color-footer); /* Define background color */
   resize: none;  
   max-lines: 9;
-padding-top: 7px;
-  outline: none;
-
+  padding-top: 7px;
 }
-/* textarea{
-  overflow: hidden;
-    background-color:var(--color-bg);
-    border: 0;
-    outline: none;
-} */
+
 /* th, td { */
   /* padding: 8px; */
   /* border: 2px solid var(--color-footer);  */
@@ -135,3 +128,51 @@ padding-top: 7px;
   /* line-height: 30px; */
   /* color: #ffffff; */
 /* } */
+input[readonly],textarea[readonly]{
+  overflow: hidden;
+    background-color:var(--color-bg);
+    border: 0;
+    outline: none;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0; /* Optional: Remove default margin */
+}
+
+.admin {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+}
+.condition-section {
+  display: flex; /* Arrange conditions horizontally */
+  flex-direction: column; /* Stack conditions vertically */
+}
+
+.condition-field {
+  margin-bottom: -15px;
+  display: flex;
+  align-items: center; /* Align index and input vertically */
+  gap: 0.5rem; /* Add a small gap between index and input */
+}
+.private-condition-field {
+  padding: 0;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center; /* Align index and input vertically */
+  gap: 0.5rem; /* Add a small gap between index and input */
+}
+
+.condition-index {
+  font-size: large;
+  color: var(--color-text);
+  font-family: var(--font-family);
+  
+}
+
+.private-condition-input {
+  padding: 0.5rem; /* Add some padding for readability */
+}

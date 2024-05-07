@@ -93,7 +93,6 @@ function TenderDetails() {
                       <th>معرف المنتج</th>
                       <th>اسم المنتج</th>
                       <th>الكمية المقدمة</th>
-                      <th>سعر المنتج</th>
                       <th>مدة التوريد</th>
                       <th style={{ maxWidth: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordWrap: 'break-word' }}>وصف المنتج</th>
                       <th>حالة التوريد</th>
@@ -105,12 +104,11 @@ function TenderDetails() {
                         <td>{innerIndex + 1}</td>
                         <td>{product.title}</td>
                         <td>
-                          {product.provided_quantity} {product.supplying_status ? product.quantity_unit : '-' }
+                          {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity } {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit }
                         </td>
-                        <td>{product.supplying_status ? product.product_price : '-' }</td>
                         <td>{product.supplying_status ? product.supplying_duration : '-' }</td>
-                        <td> {product.supplying_status ? product.product_description : '-' } </td>
-                        <td> {product.supplying_status ? 'متاح' : 'ناسف'} </td>
+                        <td>{product.supplying_status !== 'متوفر' ? '-' : product.product_description } </td>
+                        <td>{product.supplying_status }</td>
 
                       </tr>
                     ))}
@@ -134,7 +132,7 @@ function TenderDetails() {
                           (condition, innerIndex) => (
                             <tr key={innerIndex}>
                               <td>{innerIndex + 1}</td>
-                              <td>{condition.condition}</td>
+                              <td>{condition.offered_condition}</td>
                             </tr>
                           ),
                         )}

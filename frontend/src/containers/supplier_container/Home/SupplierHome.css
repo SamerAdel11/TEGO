@@ -1,0 +1,55 @@
+.host-home-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    margin: 0; /* Removed auto margin */
+    width: 100%; /* Adjust width as needed */
+    margin: 0 auto; /* Center horizontally */
+  }
+  
+  .host_home {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    margin: 0 auto; /* Center horizontally */
+  }
+  
+  .gradient__text h1 {
+    font-size: 50px;
+    text-align: center;
+    font-family: var(--font-family);
+  }
+  
+  .search-filter {
+    margin-top: 20px; /* Adjust as needed */
+  }
+  
+  .search-input {
+    padding: 10px;
+    border: white;
+    border-radius: 5%;
+    outline: none;
+    min-width: 600px;
+    margin: 0 auto; /* Center horizontally */
+  }
+  
+  .search-button {
+    padding: 0.5rem 1rem;
+    margin-top: 1rem;
+    color: #fff;
+    background: #ff4820;
+    font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 25px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 30%;
+    display: block; /* Ensures the button is a block element */
+    margin: 1rem auto; /* Center horizontally */
+  }
+  .search-button i {
+    color: var(--color-text);
+  }

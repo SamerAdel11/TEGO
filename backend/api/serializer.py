@@ -150,7 +150,7 @@ class TenderPublicConditionsSerializer(serializers.ModelSerializer):
 class TenderPrivateConditionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TenderPrivateConditions
-        fields = ['condition']
+        fields = ['id','condition']
 
 class TenderProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -210,13 +210,13 @@ class ProductResponseSerializer(serializers.ModelSerializer):
     productid = serializers.CharField(write_only=True)
     class Meta:
         model = ResponseProductBid
-        fields = ['id', 'productid', 'provided_quantity', 'product_price',
-                  'supplying_duration', 'supplying_status', 'product_description']
+        fields = ['id', 'productid', 'provided_quantity','product_title','product_description',
+                  'supplying_status', 'product_description']
 
 class ResponsePrivateConditionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResponsePrivateCondition
-        fields = ['id', 'condition']
+        fields = ['id', 'condition','offered_condition']
 
 class ResponseSerializer(serializers.ModelSerializer):
     offer_products = ProductResponseSerializer(many=True)
@@ -236,19 +236,25 @@ class ResponseSerializer(serializers.ModelSerializer):
         # print(validated_data)
         tender = Tender.objects.get(id=validated_data['tender_id'])
         response = TenderResponse.objects.create(
-            **validated_data, tender=tender, user=user)
-        respons_offer_products=[]
+            offered_price=validated_data.get('offered_price'),
+            tender=tender,
+            user=user
+            )
         for product_data in offer_products_data:
+            print(product_data)
+            print("*"*10)
             productid = product_data.pop('productid')
             product = TenderProduct.objects.get(id=productid)
             ResponseProductBid.objects.create(
-                product=product, response=response, **product_data)
-            product_data['product_name']=product.title
-            respons_offer_products.append(product_data)
-        for condition_data in offer_conditions_data:
-            ResponsePrivateCondition.objects.create(
-                response=response, **condition_data)
+                product=product,
+                response=response,**product_data)
 
+        for condition_data in offer_conditions_data:
+            # condition_instance=TenderPrivateConditions.objects.get(id=condition_data.get('condition'))
+            ResponsePrivateCondition.objects.create(
+                condition=condition_data.get('condition'),
+                response=response,
+                offered_condition=condition_data.get('offered_condition'))
         return data
 class ProductResponseRetrieveSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='product.title', read_only=True)
@@ -256,8 +262,8 @@ class ProductResponseRetrieveSerializer(serializers.ModelSerializer):
     product_id=serializers.CharField(source='product.id',read_only=True)
     class Meta:
         model = ResponseProductBid
-        fields = ['id', 'product_id','title' ,'quantity_unit','provided_quantity', 'product_price',
-                'supplying_duration', 'supplying_status', 'product_description']
+        fields = ['id', 'product_id','title' ,'quantity_unit','provided_quantity',
+                'supplying_status', 'product_description']
 
 
 class ResponseDetailSerializer(serializers.ModelSerializer):

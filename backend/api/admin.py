@@ -34,3 +34,4 @@ admin.site.register(models.TenderResponse)
 admin.site.register(models.ResponseProductBid)
 
 admin.site.register(models.ResponsePrivateCondition)
+admin.site.register(models.TenderAd)

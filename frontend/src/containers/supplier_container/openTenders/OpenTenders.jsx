@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom'; // Import Link from React Router
-import './CandidatePool.css';
+import './OpenTenders.css';
 import AuthContext from '../../../context/Authcontext';
 
-function CandidatePool() {
+function OpenTenders() {
   const [tendersData, setTendersData] = useState(null);
   const { authTokens } = useContext(AuthContext);
 
@@ -33,14 +33,15 @@ function CandidatePool() {
   return (
     <div className="pending-container">
       <div className="gradient__text pending_title">
-        <h1 className="first_title">طلبات التاكيد</h1>
+        <h1 className="first_title">المناقصات المتاحه</h1>
       </div>
       {tendersData && tendersData.map((tender, index) => (
-        <Link style={{ 'text-decoration': 'none' }} key={index} to={`/candidate_responses/${tender.id}`}>
-          <div className="tender-card">
+        <Link style={{ 'text-decoration': 'none' }} key={index} to={`/add_response?tender_id=${tender.id}`}>
+          <div className="tender-cards">
             <h1 className="tender-title gradient__text">
               {tender.ad?.title}
             </h1>
+            <h2> اخر موعد لتقديم العروض {tender.ad?.deadline} </h2>
           </div>
         </Link>
       ))}
@@ -48,4 +49,4 @@ function CandidatePool() {
   );
 }
 
-export default CandidatePool;
+export default OpenTenders;

@@ -196,34 +196,26 @@ class TenderProduct(models.Model):
 class TenderResponse(models.Model):
 
     offered_price = models.IntegerField()
-
     status = models.CharField(max_length=255)
-
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
-
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-
     # class Meta:
     #     unique_together = ('user', 'tender')
-
     def __str__(self):
         return f"{self.id}- {self.user}->Tender {self.tender.id}"
     @property
     def offer_products(self):
         return self.responseproductbid_set.all()
-
     @property
     def offer_conditions(self):
         return self.responseprivatecondition_set.all()
 
 
 class ResponseProductBid(models.Model):
-
     product = models.ForeignKey(TenderProduct, on_delete=models.CASCADE)
     provided_quantity = models.IntegerField(null=True)
-    product_price = models.IntegerField(null=True)
-    supplying_duration = models.CharField(max_length=255,null=True)
-    supplying_status = models.BooleanField()
+    supplying_status = models.CharField()
+    product_title=models.CharField(max_length=255)
     product_description = models.TextField(null=True)
     response = models.ForeignKey(TenderResponse, on_delete=models.CASCADE)
 
@@ -235,7 +227,6 @@ class ResponseProductBid(models.Model):
         return f"{self.id}- {self.product.title} {self.product.id}-> Tender {self.response.tender.id}"
 
 class ResponsePrivateCondition(models.Model):
-
-    condition = models.TextField()
-
+    offered_condition=models.CharField(max_length=255)
+    condition = models.ForeignKey(TenderPrivateConditions,on_delete=models.CASCADE)
     response = models.ForeignKey(TenderResponse, on_delete=models.CASCADE)

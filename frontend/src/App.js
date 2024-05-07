@@ -18,6 +18,11 @@ import EmailVerificationMessage from './containers/activation/EmailVerificationM
 import PrivateRoute from './containers/private_routes/private_routes.js';
 import CandidatePool from './containers/Buyer_container/Candidate_folder/CandidatePool.jsx';
 import CandidateDetails from './containers/Buyer_container/Candidate_folder/CandidateDetails.jsx';
+import SidebarSupplier from './containers/sidebar_supplier/Sidebar.js';
+import SupplierHome from './containers/supplier_container/Home/SupplierHome.jsx';
+import OpenTenders from './containers/supplier_container/openTenders/OpenTenders.jsx';
+import AddResponse from './containers/supplier_container/add_Response/AddResponse.jsx';
+import YourComponent from './containers/supplier_container/test_response.jsx';
 
 function HostComponent() {
   return (
@@ -26,6 +31,17 @@ function HostComponent() {
       <div className="host_side">
         <Sidebar />
         <HostHome />
+      </div>
+    </div>
+  );
+}
+function SupplierComponent() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="supplier_side">
+        <SidebarSupplier />
+        <SupplierHome />
       </div>
     </div>
   );
@@ -48,6 +64,17 @@ function MyTenderComponent() {
       <div className="host_side">
         <Sidebar />
         <MyTenders />
+      </div>
+    </div>
+  );
+}
+function OpenTendersComponent() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <SidebarSupplier />
+        <OpenTenders />
       </div>
     </div>
   );
@@ -97,6 +124,17 @@ function CandidateDetailsfunction() {
     </div>
   );
 }
+function AddTenderResponse() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="supplier_side">
+        {/* <SidebarSupplier /> */}
+        <AddResponse />
+      </div>
+    </div>
+  );
+}
 
 const App = () => (
   <Router>
@@ -111,6 +149,7 @@ const App = () => (
           <Route path="/activate/:uidb64/:token" component={ActivationPage} />
           <Route path="/waiting_for_verification" component={EmailVerificationMessage} />
           <Route path="/notification" component={WebSocketExample} />
+          <Route path="/test" component={YourComponent} />
           <Route path="/" exact>
             <div className="gradient__bg">
               <Navbar />
@@ -123,12 +162,15 @@ const App = () => (
             <Footer />
           </Route>
           <PrivateRoute exact path="/host" component={HostComponent} />
+          <PrivateRoute exact path="/supplier" component={SupplierComponent} />
           <PrivateRoute exact path="/createtnder" component={CreateTenderComponent} />
           <PrivateRoute exact path="/mytender" component={MyTenderComponent} />
           <PrivateRoute exact path="/pendingdecision" component={PendingDecisionComponent} />
           <PrivateRoute exact path="/tender_responses/:id" component={TenderResponsesComponent} />
           <PrivateRoute exact path="/candidate_responses/:id" component={CandidateDetailsfunction} />
           <PrivateRoute exact path="/candidate" component={CandidatePooll} />
+          <PrivateRoute exact path="/open_tenders" component={OpenTendersComponent} />
+          <PrivateRoute exact path="/add_response" component={AddTenderResponse} />
 
         </Switch>
       </AuthProvider>

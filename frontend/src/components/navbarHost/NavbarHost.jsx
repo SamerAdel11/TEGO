@@ -15,7 +15,7 @@ function Navbar() {
           <img src={logo} alt="logo" />
         </div>
         <div className="gpt3__navbar-links_container">
-          <p><Link to="/">الرئيسية</Link></p>
+          <p><Link style={{ 'text-decoration': 'none' }} to="/">الرئيسية</Link></p>
           <p><a href="#wgpt3">الملف الشخصي</a></p>
           {/* <p><a href="#features">تسجيل الخروج</a></p> */}
         </div>
