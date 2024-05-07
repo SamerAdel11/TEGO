@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from .models import CustomUser, Company, Notes,UserNotification
+from .models import CustomUser, Company,UserNotification
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .serializer import UserSerializer, CompanySerializer, NoteSerializer, NotificationnSerializer
+from .serializer import UserSerializer, CompanySerializer, NotificationnSerializer,TenderSerializer
 from rest_framework import generics, status
 from rest_framework import serializers
 from rest_framework.views import APIView
@@ -44,6 +44,13 @@ class CompanyView(APIView):
         serializer.update(instance, request.data)
         return Response(CompanySerializer(instance).data)
 
+class TenderCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = TenderSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            response=serializer.save()
+            return Response(response, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class NotificationView(generics.ListAPIView):
     serializer_class = NotificationnSerializer
@@ -60,14 +67,6 @@ def home(request):
     return render(request,'index.html')
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def getNotes(request):
-    user = request.user
-    notes = Notes.objects.filter(user=user)
-    print(notes)
-    serializer = NoteSerializer(notes, many=True)
-    return Response(serializer.data)
 
 
 # class UserView(APIView):

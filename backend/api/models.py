@@ -44,6 +44,7 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     objects = CustomUserManager()
+
     def __str__(self):
         return self.email
 
@@ -64,10 +65,6 @@ class Company(models.Model):
     @property
     def owners(self):
         return self.owner_set.all()
-
-    @property
-    def branches(self):
-        return self.branch_set.all()
 
     @property
     def company_fields(self):
@@ -99,7 +96,6 @@ class Owner(models.Model):
     def __str__(self):
         return self.name
 
-
 class CompanyField(models.Model):
     primary_field = models.CharField(max_length=255)
     secondary_field = models.CharField(max_length=255)
@@ -107,15 +103,6 @@ class CompanyField(models.Model):
 
     def __str__(self):
         return self.primary_field
-
-
-class Notes(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    body = models.TextField()
-
-    def __str__(self):
-        return self.body
-
 
 class UserNotification(models.Model):
     recipient = models.ForeignKey(
@@ -125,3 +112,53 @@ class UserNotification(models.Model):
     seen = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.message}->{self.recipient}"
+
+class TenderAd(models.Model):
+    title=models.CharField(max_length=255)
+    topic=models.CharField(max_length=255)
+    field=models.CharField(max_length=255)
+    deadline=models.DateField()
+
+class Tender(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    initial_price=models.IntegerField()
+    status=models.CharField(max_length=50)
+    date_created=models.DateTimeField(auto_now_add=True)
+    ad=models.OneToOneField(TenderAd,on_delete=models.CASCADE)
+
+    @property
+    def admins(self):
+        return self.tenderadmin_set.all()
+
+    @property
+    def public_conditions(self):
+        return self.publicconditions_set.all()
+
+    @property
+    def private_conditions(self):
+        return self.privateconditions_set.all()
+    
+    @property
+    def products(self):
+        return self.tenderproduct_set.all()
+    
+
+class TenderAdmin(models.Model):
+    name=models.CharField(max_length=255)
+    job_title=models.CharField(max_length=255)
+    tender=models.ForeignKey(Tender,on_delete=models.CASCADE)
+
+class TenderPublicConditions(models.Model):
+    condition=models.TextField()
+    tender=models.ForeignKey(Tender,on_delete=models.CASCADE)
+
+class TenderPrivateConditions(models.Model):
+    condition=models.TextField()
+    tender=models.ForeignKey(Tender,on_delete=models.CASCADE)
+
+class TenderProduct(models.Model):
+    title=models.CharField(max_length=255)
+    quantity_unit=models.CharField(max_length=255)
+    quantity=models.CharField(max_length=255)
+    description=models.TextField()
+    tender=models.ForeignKey(Tender,on_delete=models.CASCADE)
