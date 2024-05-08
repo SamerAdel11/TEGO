@@ -215,6 +215,7 @@ class ResponseProductBid(models.Model):
     product = models.ForeignKey(TenderProduct, on_delete=models.CASCADE)
     provided_quantity = models.IntegerField(null=True)
     supplying_status = models.CharField()
+    supplying_duration = models.CharField(null=True,blank=True)
     product_title=models.CharField(max_length=255)
     product_description = models.TextField(null=True)
     response = models.ForeignKey(TenderResponse, on_delete=models.CASCADE)
@@ -227,6 +228,6 @@ class ResponseProductBid(models.Model):
         return f"{self.id}- {self.product.title} {self.product.id}-> Tender {self.response.tender.id}"
 
 class ResponsePrivateCondition(models.Model):
-    offered_condition=models.CharField(max_length=255)
+    offered_condition=models.CharField(max_length=255,blank=True,null=True)
     condition = models.ForeignKey(TenderPrivateConditions,on_delete=models.CASCADE)
     response = models.ForeignKey(TenderResponse, on_delete=models.CASCADE)

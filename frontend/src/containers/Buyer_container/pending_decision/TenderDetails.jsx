@@ -106,7 +106,7 @@ function TenderDetails() {
                         <td>
                           {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity } {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit }
                         </td>
-                        <td>{product.supplying_status ? product.supplying_duration : '-' }</td>
+                        <td>{product.supplying_status !== 'متوفر' ? '-' : product.supplying_duration }</td>
                         <td>{product.supplying_status !== 'متوفر' ? '-' : product.product_description } </td>
                         <td>{product.supplying_status }</td>
 

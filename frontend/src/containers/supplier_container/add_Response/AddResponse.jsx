@@ -43,6 +43,7 @@ function AddResponse() {
         const productswithsupplystatus = tender.products.map((product) => ({
           ...product,
           supplying_status: '',
+          supplying_duration: '',
         }));
         setProducts(productswithsupplystatus);
         setConditions(tender.public_conditions);
@@ -92,8 +93,9 @@ function AddResponse() {
   };
   const handlePrivateConditionChange = (idx, value) => {
     const updatedPrivateConditions = [...privateconditions];
-    updatedPrivateConditions[idx].value = value;
+    updatedPrivateConditions[idx].condition = value;
     setPrivateConditions(updatedPrivateConditions);
+    console.log(updatedPrivateConditions);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,6 +105,7 @@ function AddResponse() {
       provided_quantity: product.quantity,
       productid: product.id,
       supplying_status: product.supplying_status,
+      supplying_duration: product.supplying_duration,
     });
     const renameKeys2 = (prcondition) => ({
       condition: prcondition.id,
@@ -191,12 +194,15 @@ function AddResponse() {
             <table>
               <thead>
                 <tr>
-                  <th style={{ width: '1px' }}>رقم المنتج</th>
+                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                  <th style={{ width: '0.1px' }} />
                   <th className="col-2">عنوان المنتج</th>
-                  <th className="col-1">وحدة الكمية</th>
-                  <th className="col-1">الكمية</th>
+                  <th style={{ width: '0.8px' }}>وحدة الكمية</th>
+                  <th style={{ width: '0.8px' }}>الكمية</th>
                   <th className="col-">وصف المنتج</th>
                   <th className="col-2">حاله التوريد</th>
+                  <th className="col-1">مده التوريد</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -251,6 +257,14 @@ function AddResponse() {
                         <option value="متوفر">متوفر</option>
                         <option value="نأسف">نأسف</option>
                       </select>
+                    </td>
+                    <td>
+                      <textarea
+                        value={product.supplying_duration}
+                        onChange={(e) => handleProductChange(idx, 'supplying_duration', e.target.value)}
+                        id={`supplying_duration${idx}`}
+                        aria-label={`Description for Product ${product.id}`}
+                      />
                     </td>
                   </tr>
                 ))}

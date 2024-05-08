@@ -208,15 +208,21 @@ class TenderRetrieveSerializer(serializers.ModelSerializer):
 
 class ProductResponseSerializer(serializers.ModelSerializer):
     productid = serializers.CharField(write_only=True)
+    # supplying_duration = serializers.CharField(allow_null=True, required=False)
     class Meta:
         model = ResponseProductBid
         fields = ['id', 'productid', 'provided_quantity','product_title','product_description',
-                  'supplying_status', 'product_description']
+                  'supplying_status', 'product_description','supplying_duration']
+        extra_kwargs = {"supplying_duration": {"required": False, "allow_null": True},}
+
 
 class ResponsePrivateConditionSerializer(serializers.ModelSerializer):
+    # offered_condition = serializers.CharField(allow_null=True, required=False)
     class Meta:
         model = ResponsePrivateCondition
         fields = ['id', 'condition','offered_condition']
+        extra_kwargs = {"offered_condition": {"required": False, "allow_null": True},}
+
 
 class ResponseSerializer(serializers.ModelSerializer):
     offer_products = ProductResponseSerializer(many=True)
@@ -263,7 +269,7 @@ class ProductResponseRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResponseProductBid
         fields = ['id', 'product_id','title' ,'quantity_unit','provided_quantity',
-                'supplying_status', 'product_description']
+                'supplying_status','supplying_duration', 'product_description']
 
 
 class ResponseDetailSerializer(serializers.ModelSerializer):
