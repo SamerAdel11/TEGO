@@ -36,7 +36,7 @@ function PendingDecision() {
         <h1 className="first_title">العروض المقدمة</h1>
       </div>
       {tendersData && tendersData.map((tender, index) => (
-        <Link key={index} to={`/tender_responses/${tender.id}`}>
+        <Link style={{ 'text-decoration': 'none' }} key={index} to={`/tender_responses/${tender.id}`}>
           <div className="tender-card">
             <h1 className="tender-title gradient__text">
               {tender.ad?.title}

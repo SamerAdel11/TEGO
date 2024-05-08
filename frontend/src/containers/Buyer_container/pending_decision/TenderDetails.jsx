@@ -73,6 +73,21 @@ function TenderDetails() {
     };
   }, [id, authTokens.access]);
 
+  const closeCandidatePool = async () => {
+    const response = await fetch(
+      `http://localhost:8000/close_candidate_pool?tender_id=${id}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authTokens.access}`,
+        },
+      },
+    );
+
+    const data = await response.json();
+    console.log(data);
+  };
   return (
     <div className="tender-details-container">
       <div className="center-content">
@@ -109,7 +124,6 @@ function TenderDetails() {
                         <td>{product.supplying_status !== 'متوفر' ? '-' : product.supplying_duration }</td>
                         <td>{product.supplying_status !== 'متوفر' ? '-' : product.product_description } </td>
                         <td>{product.supplying_status }</td>
-
                       </tr>
                     ))}
                   </tbody>
@@ -151,7 +165,18 @@ function TenderDetails() {
                 <hr data-v-7e013592 />
               </div>
             ))}
+            <div className="center-content">
+              <button
+                style={{ alignItems: 'center' }}
+                className="buton_resonpose"
+                type="button"
+                onClick={closeCandidatePool}
+              >
+                إغلاق قائمه المرشحين
+              </button>
+            </div>
           </div>
+
         ) : (
           <p>جاري تحميل تفاصيل العطاء...</p>
         )}

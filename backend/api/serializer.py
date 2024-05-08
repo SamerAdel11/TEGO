@@ -244,11 +244,10 @@ class ResponseSerializer(serializers.ModelSerializer):
         response = TenderResponse.objects.create(
             offered_price=validated_data.get('offered_price'),
             tender=tender,
-            user=user
+            user=user,
+            status=validated_data.get('status')
             )
         for product_data in offer_products_data:
-            print(product_data)
-            print("*"*10)
             productid = product_data.pop('productid')
             product = TenderProduct.objects.get(id=productid)
             ResponseProductBid.objects.create(

@@ -139,6 +139,31 @@ class ResponseDetailAPIView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
+class CloseCandidatePool(APIView):
+    
+    def get(self, request, *args, **kwargs):
+        print("Entered get function")
+        tender_id = self.request.query_params.get('tender_id', None)
+        tender= Tender.objects.get(id=tender_id)
+        print(tender_id)
+        responses= TenderResponse.objects.filter(tender=tender)
+        print(responses)
+        for response in responses:
+            print(response.status)
+            if response.status=='open' or response.status=='offered' or response.status=='rejected':
+                print(f'status is {response.status}')
+                response.status='rejected'
+                response.save()
+                UserNotification.objects.create(
+                    recipient=response.user,
+                    message=f'unfortunately your offer has been rejected from the tender{response.tender.ad.title}'
+                )
+
+
+        return Response({"Message":"DONE"})
+
+
+
 from .serializer import ResponseDetailSerializer
 class ResponseStatusUpdateAPIView(APIView):
     def put(self, request, response_id, format=None):
@@ -149,6 +174,8 @@ class ResponseStatusUpdateAPIView(APIView):
         serializer = ResponseDetailSerializer(response_instance, data=request.data,partial=True)
         if serializer.is_valid():
             serializer.save(instance=response_instance)  # Passing instance argument
+            UserNotification.objects.create(recipient=response_instance.user,
+            message="Congratulations your offer has been awarded to the candidate pool stage")
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)\
 

@@ -61,6 +61,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .tender-card.expanded .tender-products {
   display: block;
   margin: 0 2rem;
+  overflow: hidden;
+
 }
 
 .tender-details,
