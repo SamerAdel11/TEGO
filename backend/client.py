@@ -299,15 +299,17 @@ response_data = {
                                             عن 30 متر، غلاف مقاوم للظروف 
                                             الجوية الخارجية """,
                         'product_title': 'كاميرات مراقبة عالية الدقة',
-                        'productid': 15,
+                        'productid': 1,
                         'provided_quantity': '100',
+                        'supplying_duration':"3 ايام عمل",
                         'supplying_status': 'متوفر'},
                        {'product_description': """أجهزة تسجيل رقمية متوافقة مع 
                                             كاميرات IP، سعة تخزين لا تقل عن 
                                             تيرابايت، تدعم خاصية التسجيل 
                                             المستمر بجودة عالية,""",
                         'product_title': 'أجهزة تسجيل ومراقبة رقمية',
-                        'productid': 16,
+                        'productid': 2,
+                        'supplying_duration':"3 ايام عمل",
                         'provided_quantity': '10',
                         'supplying_status': 'متوفر'},
                        {'product_description': """لوحات تحكم متطورة قابلة للبرمجة،
@@ -316,7 +318,8 @@ response_data = {
                                             مع جميع أنظمة إنذار الحريق وأجهز
                                             قراءة بطاقات الدخول,""",
                         'product_title': 'لوحات تحكم بالإنذار',
-                        'productid': 17,
+                        'productid': 3,
+                        'supplying_duration':"3 ايام عمل",
                         'provided_quantity': '200',
                         'supplying_status': 'متوفر'},
                        {'product_description': """حساس إنذار دخاني عالي الحساسية، 
@@ -324,7 +327,8 @@ response_data = {
                                             دخان\\nإنذار حراري يستجيب لارتفا
                                             مفاجئ في درجة الحرارة'""",
                         'product_title': 'حساسات إنذار الحريق',
-                        'productid': 18,
+                        'productid': 4,
+                        'supplying_duration':"3 ايام عمل",
                         'provided_quantity': '50',
                         'supplying_status': 'متوفر'},
                        {'product_description': """أجهزة قراءة بطاقات دخول متينة 
@@ -333,7 +337,8 @@ response_data = {
                                             بالإنذار لمنع الدخول غير المصرح 
                                             به',""",
                         'product_title': 'أجهزة قراءة بطاقات الدخول',
-                        'productid': 19,
+                        'productid': 5,
+                        'supplying_duration':"3 ايام عمل",
                         'provided_quantity': '10',
                         'supplying_status': 'متوفر'},
                        {'product_description': """أبواب دوارة مصنوعة من الفولاذ 
@@ -342,23 +347,27 @@ response_data = {
                                             تتكامل مع أجهزة قراءة بطاقات 
                                             الدخول,""",
                         'product_title': 'أبواب دوارة أمنية',
-                        'productid': 20,
+                        'productid': 6,
                         'provided_quantity': '10',
+                        'supplying_duration':"3 ايام عمل",
                         'supplying_status': 'متوفر'}],
-    'offered_price': '900', }
+                        'tender_id':1,
+                        'status':'offered',
+                        'offered_price': '900', }
 
 samer_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NTMzNjA4LCJpYXQiOjE3MTUxMDE2MDgsImp0aSI6ImI3ZTdiZDU4Y2U5ZTQ0ZDY5ZTA3NmVjYzAzYTI4MGI2IiwidXNlcl9pZCI6MSwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoic3VwcGxpZXIifQ.fkSgMV9NygHtIVKotddrJoWoeG2sbzbrEendE6WFnLw'
-fady_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNDc4ODk4LCJpYXQiOjE3MTMwNDY4OTgsImp0aSI6IjQ4ZTZlYWU5MDdiNjQyZTg4NTRmMzZkNDhjNmQ5MjVmIiwidXNlcl9pZCI6MSwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoiYnV5ZXIifQ.MdMaj2GxsPCQT2o3MSDWHeHPmrSDjbVnxn1G7x7oG7M'
+fady_token ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NjM2OTgyLCJpYXQiOjE3MTUyMDQ5ODIsImp0aSI6IjA1ODg2NWE4ZTAwODQ1MzI5MGJiZmIwNjZhMWRhNTQ3IiwidXNlcl9pZCI6MiwiZW1haWwiOiJzYW1lcmFkZWw3ODlAZ21haWwuY29tIiwiY29tcGFueV90eXBlIjoic3VwcGxpZXIifQ.RwKAuTKNnS9JmQtVpvJMifoCRTWOWu8ja3YZYw9QFXg'
+
 nardin_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0NTA2MjE0LCJpYXQiOjE3MTQwNzQyMTQsImp0aSI6ImVhZDA2ZGU2MDQ4ZTQyZTU5YzI5NGNhZDcxZWQwNDFkIiwidXNlcl9pZCI6MSwiZW1haWwiOiJuYXJkaW5waGlsaXA1QGdtYWlsLmNvbSIsImNvbXBhbnlfdHlwZSI6InN1cHBsaWVyIn0.V4BMDnANqkYZrIFS3DN9lD0gbT_58McaCYhu1nU5xGU'
 
-headers = {'Authorization': f"Bearer {samer_token}"}
-endpoint = 'localhost:8000/companies/'
-response = requests.post(endpoint, headers=headers, json=user_data)
+headers = {'Authorization': f"Bearer {fady_token}"}
+# endpoint = 'http://localhost:8000/companies/'
+# response = requests.post(endpoint, json=user_data)
 
-endpoint = 'localhost:8000/create_tender/'
-response = requests.post(endpoint, headers=headers, json=tender_data)
+# endpoint = 'http://localhost:8000/create_tender/'
+# response = requests.post(endpoint, headers=headers, json=tender_data)
 
-endpoint = 'localhost:8000/add_response/'
+endpoint = 'http://localhost:8000/add_response/'
 response = requests.post(endpoint, headers=headers, json=response_data)
 
 pprint.pprint(response.json())
