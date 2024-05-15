@@ -73,8 +73,9 @@
     font-size: 25px;
     text-align: center;
     font-family: var(--font-family);
+    text-align: right;
+    align-items: flex-start;
   }
-  
 
   .tender-cards {
     width: auto;
@@ -90,4 +91,9 @@
   }  
   .tender-cards:hover {
     transform: scale(1.04);
+  }
+  .topic{
+    color: var(--color-text);
+    font-family: var(--font-family);
+    
   }

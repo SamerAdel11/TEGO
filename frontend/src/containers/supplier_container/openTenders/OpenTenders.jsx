@@ -41,6 +41,8 @@ function OpenTenders() {
             <h1 className="tender-title gradient__text">
               {tender.ad?.title}
             </h1>
+            <p className="topic">{tender.ad.topic}</p>
+
             <h2> اخر موعد لتقديم العروض {tender.ad?.deadline} </h2>
           </div>
         </Link>
