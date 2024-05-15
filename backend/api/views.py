@@ -1,39 +1,13 @@
 from django.shortcuts import render
-
 from .models import CustomUser, Company, UserNotification, Tender, TenderResponse
-
 from rest_framework.decorators import api_view, permission_classes
-
 from rest_framework.response import Response
-
 from .serializer import UserSerializer, CompanySerializer, NotificationnSerializer, TenderSerializer, ResponseSerializer, TenderRetrieveSerializer
-
 from rest_framework import generics, status, serializers
-
 from rest_framework.views import APIView
-
 from rest_framework.exceptions import AuthenticationFailed
-
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
-
-# @api_view(['POST'])
-
-# def CompanyView(request):
-
-#     serializer = CompanySerializer(data=request.data)
-
-#     if serializer.is_valid(raise_exception=True):
-
-#         response=serializer.save()
-
-#         return Response(response.data)
-
-#     else:
-
-#         return Response(serializer.errors)
-
-
+from tasks.tasks import activate_account
 class CompanyView(APIView):
 
     permission_classes = []
@@ -41,7 +15,7 @@ class CompanyView(APIView):
         serializer = CompanySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
-            activateEmail(request, user)
+            activate_account.delay(user.id)
 
             return Response({"data":"data has been submitted succesfully"})
         else:
@@ -255,7 +229,7 @@ def activateEmail(request, user):
     # else:
     #     messages.error(request, f'Problem sending email to {user.email}, check if you typed it correctly.')
 
-
+from tasks.tasks import activate_account
 def create_custom_user(request):
     if request.method == 'POST':
         form = CustomUserForm(request.POST)
@@ -263,7 +237,8 @@ def create_custom_user(request):
             user=form.save(commit=False)
             user.is_active=False
             user.save()
-            activateEmail(request, user, form.cleaned_data.get('email'))
+            activateEmail.delay(request, user, form.cleaned_data.get('email'))
+            print("")
             return redirect('email')  # Redirect to a success page
     else:
         form = CustomUserForm()
@@ -279,48 +254,49 @@ class test(APIView):
         from pprint import pprint
         pprint(request.data)
         return Response(request.data)
-# from transformers import AutoTokenizer, AutoModel
-# import pandas as pd
-# import numpy as np
-# from sklearn.metrics.pairwise import cosine_similarity
-# from joblib import dump, load
-# import torch
-# class Similarity(APIView):
-#     permission_classes=[]
-#     tokenizer = AutoTokenizer.from_pretrained("aubmindlab/bert-base-arabertv02")
-#     model = AutoModel.from_pretrained("aubmindlab/bert-base-arabertv02")
-#     def compute_similarity(self,tender,response):
-#         # Split the requirements from the row
-#         requirements_1 = tender.split('|')
-#         requirements_2 = response.split('|')
+
+from transformers import AutoTokenizer, AutoModel
+import pandas as pd
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+from joblib import dump, load
+import torch
+class Similarity(APIView):
+    permission_classes=[]
+    tokenizer = AutoTokenizer.from_pretrained("aubmindlab/bert-base-arabertv02")
+    model = AutoModel.from_pretrained("aubmindlab/bert-base-arabertv02")
+    def compute_similarity(self,tender,response):
+        # Split the requirements from the row
+        requirements_1 = tender.split('|')
+        requirements_2 = response.split('|')
         
-#         # List to store similarity scores for this row
-#         row_similarities = []
+        # List to store similarity scores for this row
+        row_similarities = []
         
-#         # Iterate over each pair of corresponding requirements
-#         for req1, req2 in zip(requirements_1, requirements_2):
-#             # Tokenize the requirements
-#             tokens1 = self.tokenizer(req1, return_tensors='pt', padding=True, truncation=True)
-#             tokens2 = self.tokenizer(req2, return_tensors='pt', padding=True, truncation=True)
+        # Iterate over each pair of corresponding requirements
+        for req1, req2 in zip(requirements_1, requirements_2):
+            # Tokenize the requirements
+            tokens1 = self.tokenizer(req1, return_tensors='pt', padding=True, truncation=True)
+            tokens2 = self.tokenizer(req2, return_tensors='pt', padding=True, truncation=True)
             
-#             # Get embeddings for the requirements
-#             with torch.no_grad():
-#                 output1 = self.model(**tokens1)
-#                 output2 = self.model(**tokens2)
+            # Get embeddings for the requirements
+            with torch.no_grad():
+                output1 = self.model(**tokens1)
+                output2 = self.model(**tokens2)
             
-#             # Compute the mean embeddings
-#             embedding1 = output1.last_hidden_state.mean(dim=1).squeeze().numpy()
-#             embedding2 = output2.last_hidden_state.mean(dim=1).squeeze().numpy()
+            # Compute the mean embeddings
+            embedding1 = output1.last_hidden_state.mean(dim=1).squeeze().numpy()
+            embedding2 = output2.last_hidden_state.mean(dim=1).squeeze().numpy()
             
-#             # Compute cosine similarity between the embeddings
-#             similarity_score = cosine_similarity([embedding1], [embedding2])[0][0]
-#             row_similarities.append(similarity_score)
+            # Compute cosine similarity between the embeddings
+            similarity_score = cosine_similarity([embedding1], [embedding2])[0][0]
+            row_similarities.append(similarity_score)
         
-#         # Calculate mean similarity score for this row
-#         mean_similarity_score = np.mean(row_similarities)
-#         return mean_similarity_score
-#     def post(self,request):
-#         tender=request.data['tender']
-#         response=request.data['response']
-#         score=self.compute_similarity(tender,response)
-#         return Response({"message":score*100})
+        # Calculate mean similarity score for this row
+        mean_similarity_score = np.mean(row_similarities)
+        return mean_similarity_score
+    def post(self,request):
+        tender=request.data['tender']
+        response=request.data['response']
+        score=self.compute_similarity(tender,response)
+        return Response({"message":score*100})

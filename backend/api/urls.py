@@ -21,6 +21,6 @@ urlpatterns = [
     path('',views.create_custom_user,name='create_user'),
     path('email',views.email,name='email'),
     path('test/',views.test.as_view(),name='test'),
-    path('close_candidate_pool',views.CloseCandidatePool.as_view())
-    # path('score',views.Similarity.as_view()),
+    path('close_candidate_pool',views.CloseCandidatePool.as_view()),
+    path('score',views.Similarity.as_view()),
 ]
