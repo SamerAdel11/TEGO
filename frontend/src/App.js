@@ -23,6 +23,8 @@ import SupplierHome from './containers/supplier_container/Home/SupplierHome.jsx'
 import OpenTenders from './containers/supplier_container/openTenders/OpenTenders.jsx';
 import AddResponse from './containers/supplier_container/add_Response/AddResponse.jsx';
 import YourComponent from './containers/supplier_container/test_response.jsx';
+import Awating from './containers/Buyer_container/Awating_Confirmation/Awating.jsx';
+import AwatingDetails from './containers/Buyer_container/Awating_Confirmation/AwatingDetails.jsx';
 
 function HostComponent() {
   return (
@@ -136,6 +138,40 @@ function AddTenderResponse() {
   );
 }
 
+function Awatingg() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <Awating />
+      </div>
+    </div>
+  );
+}
+function AwatingDetailss() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <AwatingDetails />
+      </div>
+    </div>
+  );
+}
+function AwatingContact() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <AwatingContact />
+      </div>
+    </div>
+  );
+}
+
 const App = () => (
   <Router>
     <div className="App">
@@ -171,6 +207,9 @@ const App = () => (
           <PrivateRoute exact path="/candidate" component={CandidatePooll} />
           <PrivateRoute exact path="/open_tenders" component={OpenTendersComponent} />
           <PrivateRoute exact path="/add_response" component={AddTenderResponse} />
+          <PrivateRoute exact path="/awating" component={Awatingg} />
+          <PrivateRoute exact path="/awating_responses/:id" component={AwatingDetailss} />
+          <PrivateRoute exact path="/awating_contact/:id" component={AwatingContact} />
 
         </Switch>
       </AuthProvider>
