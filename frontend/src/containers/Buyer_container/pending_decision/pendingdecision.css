@@ -77,8 +77,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   margin: 5px 0;
 }
 
-.gradient__text h3{
-  font-size: 25px;
+.gradient1__text1 h1{
+  font-size: 40px;
   text-align: center;
   font-family: var(--font-family);
+  color: var(--gradient-text)
 }

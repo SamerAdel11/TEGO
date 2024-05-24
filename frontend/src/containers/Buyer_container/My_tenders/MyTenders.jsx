@@ -9,7 +9,7 @@ const MyTenders = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders', {
+        const response = await fetch('http://localhost:8000/get_tenders?status=open', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

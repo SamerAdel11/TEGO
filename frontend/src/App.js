@@ -22,9 +22,13 @@ import SidebarSupplier from './containers/sidebar_supplier/Sidebar.js';
 import SupplierHome from './containers/supplier_container/Home/SupplierHome.jsx';
 import OpenTenders from './containers/supplier_container/openTenders/OpenTenders.jsx';
 import AddResponse from './containers/supplier_container/add_Response/AddResponse.jsx';
-import YourComponent from './containers/supplier_container/test_response.jsx';
 import Awating from './containers/Buyer_container/Awating_Confirmation/Awating.jsx';
 import AwatingDetails from './containers/Buyer_container/Awating_Confirmation/AwatingDetails.jsx';
+import AwardedTenders from './containers/supplier_container/participated_tenders/AwardedOffers/AwardedTenders.jsx';
+import CandidatePoolOffers from './containers/supplier_container/participated_tenders/candidatePoolOffers/candidatePoolOffers.jsx';
+import RejectedOffers from './containers/supplier_container/participated_tenders/RejectedOffers/RejectedOffers.jsx';
+import OfferedOffers from './containers/supplier_container/participated_tenders/OfferedOffers/OfferedOffers.jsx';
+import Response from './containers/supplier_container/participated_tenders/ResponseView/tenderWithOffer.jsx';
 
 function HostComponent() {
   return (
@@ -171,7 +175,61 @@ function AwatingContact() {
     </div>
   );
 }
-
+function AwardedTendersFunc() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="supplier_side">
+        <SidebarSupplier />
+        <AwardedTenders />
+      </div>
+    </div>
+  );
+}
+function CandidatePoolOffersFunc() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="supplier_side">
+        <SidebarSupplier />
+        <CandidatePoolOffers />
+      </div>
+    </div>
+  );
+}
+function RejectedOffersFunc() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="supplier_side">
+        <SidebarSupplier />
+        <RejectedOffers />
+      </div>
+    </div>
+  );
+}
+function OfferedOffersFunc() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="supplier_side">
+        <SidebarSupplier />
+        <OfferedOffers />
+      </div>
+    </div>
+  );
+}
+function TestFunc() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="supplier_side">
+        <SidebarSupplier />
+        <Response />
+      </div>
+    </div>
+  );
+}
 const App = () => (
   <Router>
     <div className="App">
@@ -185,7 +243,7 @@ const App = () => (
           <Route path="/activate/:uidb64/:token" component={ActivationPage} />
           <Route path="/waiting_for_verification" component={EmailVerificationMessage} />
           <Route path="/notification" component={WebSocketExample} />
-          <Route path="/test" component={YourComponent} />
+          <Route path="/tender_offer" component={TestFunc} />
           <Route path="/" exact>
             <div className="gradient__bg">
               <Navbar />
@@ -210,7 +268,11 @@ const App = () => (
           <PrivateRoute exact path="/awating" component={Awatingg} />
           <PrivateRoute exact path="/awating_responses/:id" component={AwatingDetailss} />
           <PrivateRoute exact path="/awating_contact/:id" component={AwatingContact} />
-
+          <PrivateRoute exact path="/awarded_tenders" component={AwardedTendersFunc} />
+          <PrivateRoute exact path="/candidate_pool_offers" component={CandidatePoolOffersFunc} />
+          <PrivateRoute exact path="/rejected_offers" component={RejectedOffersFunc} />
+          <PrivateRoute exact path="/offered_offers" component={OfferedOffersFunc} />
+          OfferedOffersFunc
         </Switch>
       </AuthProvider>
     </div>

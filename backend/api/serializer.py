@@ -1,8 +1,14 @@
 from rest_framework import serializers
-from .models import CustomUser, Company, Owner, CompanyField, ResponsePrivateCondition, Supplier, UserNotification, TenderAd, Tender, TenderAdmin, TenderPublicConditions, TenderPrivateConditions, TenderProduct, ResponseProductBid, TenderResponse
+from .models import ResponsePreviousWork,CustomUser, Company, Owner, CompanyField, ResponsePrivateCondition, Supplier, UserNotification, TenderAd, Tender, TenderAdmin, TenderPublicConditions, TenderPrivateConditions, TenderProduct, ResponseProductBid, TenderResponse
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from tasks.tasks import compute_similarity
+from django.utils.formats import date_format
+from django.utils import translation
+from django.utils.formats import date_format
+from django.conf import settings
+
 class UserSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(
         style={'input_type': 'password'}, write_only=True)
@@ -53,9 +59,6 @@ class NotificationnSerializer(serializers.ModelSerializer):
         fields = ['recipient', 'actor', 'event',
                   'verb', 'message', 'timestamp']
 
-    # def get_time_since(self, obj):
-    #     # Calculate the time difference between the current datetime and obj.datetime_field
-    #     return timesince(obj.datetime_field)
 class CompanySerializer(serializers.ModelSerializer):
     owners = OwnerSerializer(many=True, required=False)
     company_fields = CompanyFieldSerializer(many=True)
@@ -133,9 +136,19 @@ class CompanySerializer(serializers.ModelSerializer):
     #             owner_instance.save()
     #     return instace
 class TenderAdSerializer(serializers.ModelSerializer):
+    deadline_arabic = serializers.SerializerMethodField()
+    def get_deadline_arabic(self, obj):
+        # Convert deadline date to Arabic format
+        return self.format_date(obj.deadline)
+    def format_date(self, date):
+        with translation.override('ar'):
+            return date_format(date, format='j F Y')
+
     class Meta:
         model = TenderAd
-        fields = ['title', 'topic', 'deadline', 'field']
+        fields = ['title', 'topic', 'deadline', 'field','deadline_arabic']
+        read_only_fields = ['deadline_arabic']
+
 
 class TenderAdminSerializer(serializers.ModelSerializer):
     class Meta:
@@ -157,6 +170,10 @@ class TenderProductSerializer(serializers.ModelSerializer):
         model = TenderProduct
         fields = ['id', 'title', 'quantity_unit', 'quantity', 'description']
 
+class ResponsePreviousWorkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=ResponsePreviousWork
+        fields=['title','description']
 
 class TenderSerializer(serializers.ModelSerializer):
     admins = TenderAdminSerializer(many=True)
@@ -212,8 +229,8 @@ class ProductResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResponseProductBid
         fields = ['id', 'productid', 'provided_quantity','product_title','product_description',
-                  'supplying_status', 'product_description','supplying_duration']
-        extra_kwargs = {"supplying_duration": {"required": False, "allow_null": True},}
+                  'supplying_status', 'product_description','price']
+        # extra_kwargs = {"supplying_duration": {"required": False, "allow_null": True},}
 
 
 class ResponsePrivateConditionSerializer(serializers.ModelSerializer):
@@ -229,9 +246,10 @@ class ResponseSerializer(serializers.ModelSerializer):
     # Assuming you just want the string representation of conditions
     offer_conditions = ResponsePrivateConditionSerializer(many=True)
     tender_id = serializers.CharField()
+    previous_work=ResponsePreviousWorkSerializer(many=True)
     class Meta:
         model = TenderResponse
-        fields = ['id', 'offered_price', 'tender_id',
+        fields = ['id', 'offered_price', 'tender_id','previous_work',
                 'status', 'offer_products', 'offer_conditions']
 
     def create(self, validated_data):
@@ -239,6 +257,8 @@ class ResponseSerializer(serializers.ModelSerializer):
         data = validated_data.copy()
         offer_products_data = validated_data.pop('offer_products')
         offer_conditions_data = validated_data.pop('offer_conditions')
+        previous_work_data=validated_data.pop('previous_work')
+
         # print(validated_data)
         tender = Tender.objects.get(id=validated_data['tender_id'])
         response = TenderResponse.objects.create(
@@ -247,19 +267,38 @@ class ResponseSerializer(serializers.ModelSerializer):
             user=user,
             status=validated_data.get('status')
             )
+
+        tender_data=''
+        response_data=''
         for product_data in offer_products_data:
             productid = product_data.pop('productid')
             product = TenderProduct.objects.get(id=productid)
+            tender_data=tender_data+product.title+"|"+product.description+"|"+product.quantity+"|"
+            if product_data.get('supplying_status')!="متوفر":
+                response_data=response_data+' '+"|"+' '+"|"+' '+"|"
+            else:
+                response_data=response_data+product_data.get('product_title')+"|"+product_data.get('product_description')+"|"+str(product_data.get('provided_quantity'))+"|"
             ResponseProductBid.objects.create(
                 product=product,
                 response=response,**product_data)
 
+        offer_previous_work=[]
+        for work in previous_work_data:
+            offer_previous_work.append(work.get('title')+"|"+work.get('description')+"|")
+            ResponsePreviousWork.objects.create(response=response,**work)
+        ad=TenderAd.objects.get(tender=tender)
+        tender_ad=ad.title+"|"+ad.topic+"|"
+        print("offer previous work is",offer_previous_work)
         for condition_data in offer_conditions_data:
-            # condition_instance=TenderPrivateConditions.objects.get(id=condition_data.get('condition'))
+            condition_instance=condition_data.get('condition')
+            tender_data= tender_data +condition_instance.condition+"|"
+            response_data = response_data+ condition_data.get('offered_condition') + "|"
             ResponsePrivateCondition.objects.create(
                 condition=condition_data.get('condition'),
                 response=response,
                 offered_condition=condition_data.get('offered_condition'))
+
+        compute_similarity.delay(tender_data,response_data,response.id,offer_previous_work,tender_ad)
         return data
 class ProductResponseRetrieveSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='product.title', read_only=True)
@@ -268,16 +307,18 @@ class ProductResponseRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResponseProductBid
         fields = ['id', 'product_id','title' ,'quantity_unit','provided_quantity',
-                'supplying_status','supplying_duration', 'product_description']
+                'supplying_status','price', 'product_description']
 
 
 class ResponseDetailSerializer(serializers.ModelSerializer):
     offer_products = ProductResponseRetrieveSerializer(many=True)
     # Assuming you just want the string representation of conditions
     offer_conditions = ResponsePrivateConditionSerializer(many=True)
+    previous_work=ResponsePreviousWorkSerializer(many=True)
+
     class Meta:
         model = TenderResponse
-        fields = ['id', 'offered_price',
+        fields = ['id', 'offered_price','previous_work','score',
                 'status', 'offer_products', 'offer_conditions']
     def update(self, instance, validated_data):
         # Check if 'status' is present in validated_data

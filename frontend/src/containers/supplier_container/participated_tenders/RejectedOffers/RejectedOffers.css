@@ -1,0 +1,99 @@
+.pending-container{
+    flex-wrap: wrap;
+    margin: 0 auto; /* Center the container */
+    justify-content: center; /* Center the content horizontally */
+  }
+  .pending_title {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .first_title {
+    text-align: center;
+  }
+  
+  .tender-response {
+    margin-top: 20px;
+    display: flex;
+    text-align: center;
+    justify-content: center; /* Center content horizontally */
+  }
+  
+  .tender-response table {
+    width: 100%; /* Set table width to 70% */
+    border-collapse: collapse; /* Collapse table borders */
+  }
+  
+  .tender-response h2 {
+    color: var(--color-text2); /* Text color */
+    font-size: 2rem;
+  }
+  
+  .tender-response ul {
+    list-style-type: none;
+    padding: 0;
+    display: inline-block;
+    color: var(--color-footer);
+  }
+  
+  .tender-response tr {
+    background-color: var(--color-blog); /* Background color for table header */
+  }
+  
+  .tender-response td, .tender-response th {
+    padding: 8px;
+    padding: 8px 2.5rem;
+    border: 2px solid var(--color-footer); /* Using color-text for borders */
+    border-radius: 10px;
+    text-align: center;
+    font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 30px;
+    color: #ffffff;
+  } 
+  
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(100%);
+  }
+
+  .tender-details,
+  .tender-response,
+  .tender-products {
+    display: none;
+  }
+  
+  .tender-details p,
+  .tender-response p,
+  .tender-products p {
+    margin: 5px 0;
+  }
+  
+  .gradient__text h3{
+    font-size: 25px;
+    text-align: center;
+    font-family: var(--font-family);
+    text-align: right;
+    align-items: flex-start;
+  }
+
+  .tender-cards {
+    width: auto;
+    background-color: var(--color-footer);
+    color: var(--color-text);
+    padding: 20px;
+    border-radius: 10px;
+    margin:  40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    max-height: 400px; /* Adjust the value as needed */
+    overflow: hidden;
+  }  
+  .tender-cards:hover {
+    transform: scale(1.04);
+  }
+  .topic{
+    color: var(--color-text);
+    font-family: var(--font-family);
+    
+  }

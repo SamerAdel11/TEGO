@@ -9,18 +9,18 @@ function CandidateDetails() {
   const [responseDetails, setResponseDetails] = useState(null);
   const { authTokens } = useContext(AuthContext);
 
-  const handleSendResponse = async (tender, nationalID) => { // Modified handleSendResponse to accept nationalID parameter
+  const handleSendResponse = async (tender) => {
     try {
-      const status = 'candidate_pool';
+      const status = 'awarded';
       const response = await fetch(
-        `http://localhost:8000/update_response/${tender.id}/`,
+        `http://localhost:8000/award_tender?tender=${id}&response=${tender.id}`,
         {
-          method: 'PUT',
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
           },
-          body: JSON.stringify({ status, nationalID }), // Include national ID in the request body
+          body: JSON.stringify({ status }), // Include national ID in the request body
         },
       );
 
@@ -66,35 +66,60 @@ function CandidateDetails() {
     };
   }, [id, authTokens.access]);
 
-  const [nationalID, setNationalID] = useState(''); // Moved nationalID declaration here
+  // const [nationalID, setNationalID] = useState(''); // Moved nationalID declaration here
 
-  const handleNationalIDChange = (event) => { // Added function to handle changes in the national ID input field
-    setNationalID(event.target.value);
-  };
+  // const handleNationalIDChange = (event) => { // Added function to handle changes in the national ID input field
+  //   setNationalID(event.target.value);
+  // };
 
   return (
     <div className="tender-details-container">
       <div className="center-content">
-        <div className="gradient__text mytender">
-          <h1 className="first_title">جميع الردود</h1>
-        </div>
         {responseDetails !== null ? (
           <div>
             {responseDetails.map((tender, index) => (
               <div key={tender.id}>
-                <div className="gradient__text">
-                  <h3>العرض رقم {index + 1}</h3>
-                  <h3> السعر المعروض : {tender.offered_price}</h3>
-                  <h4 className="response">منتجات العرض</h4>
+                <div className="gradient__text mytender">
+                  <h1>العرض رقم {index + 1}</h1>
                 </div>
+                <h3> السعر المعروض : {tender.offered_price}</h3>
+                <h3> هذا العرض ملائم لهذه المناقصة بنسبه {tender.score}%</h3>
+                { tender.previous_work.length > 0 && (
+                <div>
+                  <h4 className="response">الاعمال السابقة</h4>
+                </div>
+                )}
+                {tender.previous_work.map((work, indexx) => (
+                  <div key={indexx}>
+                    <div className="center-content">
+                      {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                      <label>المشروع رقم {indexx + 1}</label>
+                    </div>
+                    {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                    <label htmlFor="prevtenderTitle">عنوان المناقصة
+                      <input type="text" id="prevtenderTitle" value={work.title} readOnly="readonly" />
+                    </label>
+                    <label htmlFor="prevtenderSubject">موضوع المشروع
+                      <textarea
+                        readOnly="readonly"
+                        type="text"
+                        id={`prevtenderSubject${index}`}
+                        value={work.description}
+                      />
+                    </label>
+                    <hr style={{ marginRight: '15%', marginLeft: '15%' }} />
+                  </div>
+                ))}
+                <h4 className="response">منتجات العرض</h4>
+
                 <table>
                   <thead>
                     <tr>
                       <th>معرف المنتج</th>
                       <th>اسم المنتج</th>
                       <th>الكمية المقدمة</th>
-                      {/* <th>سعر المنتج</th> */}
-                      <th>مدة التوريد</th>
+                      <th>سعر الوحدة</th>
+                      <th>سعر الكمية</th>
                       <th style={{ maxWidth: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordWrap: 'break-word' }}>وصف المنتج</th>
                       <th>حالة التوريد</th>
                     </tr>
@@ -105,9 +130,10 @@ function CandidateDetails() {
                         <td>{innerIndex + 1}</td>
                         <td>{product.title}</td>
                         <td>
-                          {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity } {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit }
+                          {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit } {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity }
                         </td>
-                        <td>{product.supplying_status ? product.supplying_duration : '-' }</td>
+                        <td>{product.supplying_status !== 'متوفر' ? '-' : product.price }</td>
+                        <td>{product.supplying_status !== 'متوفر' ? '-' : product.price * product.provided_quantity }</td>
                         <td>{product.supplying_status !== 'متوفر' ? '-' : product.product_description } </td>
                         <td>{product.supplying_status }</td>
                       </tr>
@@ -117,9 +143,7 @@ function CandidateDetails() {
 
                 {tender.offer_conditions.length > 0 && (
                   <div>
-                    <div className="gradient__text">
-                      <h4 className="response">شروط العرض</h4>
-                    </div>
+                    <h4 className="response">شروط العرض</h4>
                     <table>
                       <thead>
                         <tr>
@@ -140,7 +164,7 @@ function CandidateDetails() {
                     </table>
                   </div>
                 )}
-                <p className="national">في حالة اختيار المرشح الرجاء ادخال الهوية الوطنية الخاصة بك</p>
+                {/* <p className="national">في حالة اختيار المرشح الرجاء ادخال الهوية الوطنية الخاصة بك</p>
                 <div className="national-id-field">
                   <input
                     type="text"
@@ -149,11 +173,11 @@ function CandidateDetails() {
                     value={nationalID}
                     onChange={handleNationalIDChange} // Added onChange handler for the national ID input field
                   />
-                </div>
+                </div> */}
                 <button
                   className="buton_resonpose"
                   type="button"
-                  onClick={() => handleSendResponse(tender, nationalID)}
+                  onClick={() => handleSendResponse(tender)}
                 >
                   اختيار المرشح
                 </button>

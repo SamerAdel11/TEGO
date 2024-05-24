@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useEffect, useContext } from 'react';
 import './TenderDetails.css';
 import { useParams } from 'react-router-dom';
@@ -43,7 +44,7 @@ function TenderDetails() {
     const fetchTenderDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/get_responses/?tender_id=${id}`,
+          `http://localhost:8000/get_responses/?tender_id=${id}&status=offered`,
           {
             method: 'GET',
             headers: {
@@ -91,24 +92,48 @@ function TenderDetails() {
   return (
     <div className="tender-details-container">
       <div className="center-content">
-        <div className="gradient__text mytender">
-          <h1 className="first_title">جميع الردود</h1>
-        </div>
         {responseDetails !== null ? (
           <div>
             {responseDetails.filter((tender) => tender.status !== 'candidate_pool').map((tender, index) => (
               <div key={tender.id}>
                 <div className="gradient__text">
-                  <h3>العرض رقم {index + 1}</h3>
-                  <h4 className="response">منتجات العرض</h4>
+                  <h1>العرض رقم {index + 1}</h1>
                 </div>
+                <h3> هذا العرض ملائم لهذه المناقصة بنسبه {tender.score}%</h3>
+                { tender.previous_work.length > 0 && (
+                  <div>
+                    <h4 className="response">الاعمال السابقة</h4>
+                  </div>
+                )}
+                {tender.previous_work.map((work, indexx) => (
+                  <div key={indexx}>
+                    <div className="center-content">
+                      <label>المشروع رقم {indexx + 1}</label>
+                    </div>
+                    {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                    <label htmlFor="prevtenderTitle">عنوان المناقصة
+                      <input type="text" id="prevtenderTitle" value={work.title} readOnly="readonly" />
+                    </label>
+                    <label htmlFor="prevtenderSubject">موضوع المشروع
+                      <textarea
+                        readOnly="readonly"
+                        type="text"
+                        id={`prevtenderSubject${index}`}
+                        value={work.description}
+                      />
+                    </label>
+                    <hr style={{ marginRight: '15%', marginLeft: '15%' }} />
+                  </div>
+                ))}
+                <h4 className="response">منتجات العرض</h4>
                 <table>
                   <thead>
                     <tr>
                       <th>معرف المنتج</th>
                       <th>اسم المنتج</th>
                       <th>الكمية المقدمة</th>
-                      <th>مدة التوريد</th>
+                      <th>سعر الوحدة</th>
+                      <th>سعر الكمية</th>
                       <th style={{ maxWidth: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordWrap: 'break-word' }}>وصف المنتج</th>
                       <th>حالة التوريد</th>
                     </tr>
@@ -119,9 +144,10 @@ function TenderDetails() {
                         <td>{innerIndex + 1}</td>
                         <td>{product.title}</td>
                         <td>
-                          {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity } {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit }
+                          {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit } {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity }
                         </td>
-                        <td>{product.supplying_status !== 'متوفر' ? '-' : product.supplying_duration }</td>
+                        <td>{product.supplying_status !== 'متوفر' ? '-' : product.price }</td>
+                        <td>{product.supplying_status !== 'متوفر' ? '-' : product.price * product.provided_quantity }</td>
                         <td>{product.supplying_status !== 'متوفر' ? '-' : product.product_description } </td>
                         <td>{product.supplying_status }</td>
                       </tr>
@@ -131,9 +157,7 @@ function TenderDetails() {
 
                 {tender.offer_conditions.length > 0 && (
                   <div>
-                    <div className="gradient__text">
-                      <h4 className="response">شروط العرض</h4>
-                    </div>
+                    <h4 className="response">الشروط الخاصة</h4>
                     <table>
                       <thead>
                         <tr>
@@ -160,11 +184,18 @@ function TenderDetails() {
                   type="button"
                   onClick={() => handleSendResponse(tender)}
                 >
-                  إرسال الرد إلى المرشحين
+                  إرسال الرد إلى قائمة المرشح
                 </button>
                 <hr data-v-7e013592 />
               </div>
             ))}
+            {
+              responseDetails.length === 0 && (
+                <div>
+                  <h3>لا يوجد عروض</h3>
+                </div>
+              )
+            }
             <div className="center-content">
               <button
                 style={{ alignItems: 'center' }}
@@ -176,7 +207,6 @@ function TenderDetails() {
               </button>
             </div>
           </div>
-
         ) : (
           <p>جاري تحميل تفاصيل العطاء...</p>
         )}

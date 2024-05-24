@@ -35,3 +35,4 @@ admin.site.register(models.ResponseProductBid)
 
 admin.site.register(models.ResponsePrivateCondition)
 admin.site.register(models.TenderAd)
+admin.site.register(models.ResponsePreviousWork)

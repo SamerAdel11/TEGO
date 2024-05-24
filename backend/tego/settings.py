@@ -88,7 +88,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'tego',
         'USER': 'postgres',
-        'PASSWORD': '12345',
+        'PASSWORD': '1234',
     }
 }
 
@@ -202,4 +202,5 @@ CELERY_BEAT_SCHEDULE={
         "task":"tasks.tasks.activate_account",
         "schedule":crontab(hour=2, minute=29)
     }
-} 
+}
+ML_VENV_PATH = 'D:\django\\tego\\tego_app\ml_venv'

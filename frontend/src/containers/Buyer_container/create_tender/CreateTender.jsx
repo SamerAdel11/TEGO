@@ -115,7 +115,7 @@ function CreateTender() {
           description: e.target.querySelector(`#description_${idx}`).value,
         })),
         initial_price: e.target.querySelector('#create_tender').value,
-        status: 'Open',
+        status: 'open',
       };
       const response = await fetch('http://localhost:8000/create_tender/', {
         method: 'POST',

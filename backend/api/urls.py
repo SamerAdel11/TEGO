@@ -9,7 +9,8 @@ urlpatterns = [
     path('companies/', views.CompanyView.as_view()),
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('get_tenders/',views.TenderListView.as_view(), name='get_tenders'),
+    path('get_tenders/',views.TenderHostView.as_view(), name='get_tenders'),
+    path('get_tenders_supplier/',views.TenderSupplierView.as_view()),
     path('create_tender/',views.TenderCreateView.as_view(),name='create_tender'),
     path('get_tender/<int:pk>',views.RetrieveTender.as_view(),name='get_tender'),
     path('add_response/',views.ResponseView.as_view(),name='add_response'),
@@ -17,10 +18,13 @@ urlpatterns = [
     path('verified/',views.CheckVerifiedView.as_view(),name='verified'),
     # path('get_responses/',views.ResponseListAPIView.as_view(),name='get_responses'),
     path('get_responses/',views.ResponseDetailAPIView.as_view(),name='get_responses'),
+    path("get_my_response/",views.MyResponseDetailAPIView.as_view(),name='get_my_response'),
     path('update_response/<int:response_id>/', views.ResponseStatusUpdateAPIView.as_view(), name='response-status-update'),
     path('',views.create_custom_user,name='create_user'),
     path('email',views.email,name='email'),
     path('test/',views.test.as_view(),name='test'),
     path('close_candidate_pool',views.CloseCandidatePool.as_view()),
+    path('award_tender',views.AwardResponse.as_view()),
     path('score',views.Similarity.as_view()),
+    path('supplier_confirmation',views.SupplierConfirmation.as_view())
 ]

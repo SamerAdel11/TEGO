@@ -10,7 +10,7 @@ function PendingDecision() {
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders', {
+        const response = await fetch('http://localhost:8000/get_tenders?status=pending_decision', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

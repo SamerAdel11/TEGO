@@ -8,15 +8,24 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from tasks.tasks import activate_account
+from joblib import dump, load
+import torch
+from tasks.tasks import compute_similarity
 class CompanyView(APIView):
 
     permission_classes = []
+    def get(self,request,*args,**kwargs):
+        response_id= request.query_params.get("response_id")
+        user=TenderResponse.objects.get(id=response_id).user
+        company=Company.objects.get(user=user)
+        serialized_data= CompanySerializer(company).data
+        return Response(serialized_data)
+
     def post(self, request, *args, **kwargs):
         serializer = CompanySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
             activate_account.delay(user.id)
-
             return Response({"data":"data has been submitted succesfully"})
         else:
             return Response(serializer.errors)
@@ -49,17 +58,32 @@ class RetrieveTender(generics.RetrieveAPIView):
     def get(self,request,*args,**kwargs):
         return self.retrieve(request)
 
-class TenderListView(generics.ListAPIView):
+class TenderHostView(generics.ListAPIView):
     serializer_class = TenderRetrieveSerializer
     def get_queryset(self):
         user = self.request.user
+        status = self.request.query_params.get('status', None)
         queryset = Tender.objects.filter(user=user)
+        if status:
+            status_list = status.split(',')
+            return queryset.filter(status__in=status_list)
         return queryset
+
+class TenderSupplierView(generics.ListAPIView):
+    serializer_class = TenderRetrieveSerializer
+    def get_queryset(self):
+        user = self.request.user
+        responsestatus = self.request.query_params.get('responsestatus', None)
+        print(responsestatus)
+        queryset = Tender.objects.filter(user=user)
+        if responsestatus:
+            # queryset=queryset.exclude(tenderresponse__user=request.user)
+            return queryset.filter(tenderresponse__status=responsestatus)
+        return queryset.exclude(tenderresponse__user=self.request.user)
 
     def get(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
         return response
-
 
 class NotificationView(generics.ListAPIView):
     serializer_class = NotificationnSerializer
@@ -84,14 +108,14 @@ class ResponseView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ResponseListAPIView(generics.ListAPIView):
-    serializer_class = ResponseSerializer
-    def get_queryset(self):
-        # Filter the queryset based on the currently authenticated user
-        user = self.request.user
-        return TenderResponse.objects.filter(user=user)
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+# class ResponseListAPIView(generics.ListAPIView):
+#     serializer_class = ResponseSerializer
+#     def get_queryset(self):
+#         # Filter the queryset based on the currently authenticated user
+#         user = self.request.user
+#         return TenderResponse.objects.filter(user=user)
+#     def get(self, request, *args, **kwargs):
+#         return self.list(request, *args, **kwargs)
 
 from . import serializer
 
@@ -102,29 +126,40 @@ class ResponseDetailAPIView(generics.ListAPIView):
         user = self.request.user
         tender_id = self.request.query_params.get('tender_id', None)
         if tender_id is None:
-            return Response({'message':"tender id must be passed as a url parameter"})
+            return Response({'message':"tender id must be passed as a url parameter"},)
         tender_instance=Tender.objects.get(id=tender_id)
         queryset=TenderResponse.objects.filter(user=user,tender=tender_instance)
         status = self.request.query_params.get('status', None)
         if status:
-            queryset = queryset.filter(status=status)
+            status_list = status.split(',')
+            return queryset.filter(status__in=status_list)
         return queryset
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
+class MyResponseDetailAPIView(APIView):
+    def get(self,request,*args,**kwargs):
+        user=self.request.user
+        tender_id = self.request.query_params.get('tender_id', None)
+        response= TenderResponse.objects.get(user=user,tender=Tender.objects.get(id=tender_id))
+        serialized_version= ResponseDetailSerializer(response)
+        print(serialized_version)
+        return Response(serialized_version.data)
+
 class CloseCandidatePool(APIView):
-    
     def get(self, request, *args, **kwargs):
         print("Entered get function")
         tender_id = self.request.query_params.get('tender_id', None)
         tender= Tender.objects.get(id=tender_id)
+        tender.status='candidate_pool'
+        tender.save()
         print(tender_id)
         responses= TenderResponse.objects.filter(tender=tender)
         print(responses)
         for response in responses:
             print(response.status)
-            if response.status=='open' or response.status=='offered' or response.status=='rejected':
+            if response.status=='open' or response.status=='offered':
                 print(f'status is {response.status}')
                 response.status='rejected'
                 response.save()
@@ -132,11 +167,36 @@ class CloseCandidatePool(APIView):
                     recipient=response.user,
                     message=f'unfortunately your offer has been rejected from the tender{response.tender.ad.title}'
                 )
+        return Response({"Message":"Done"})
 
+class AwardResponse(APIView):
+    def post(self,request):
+        tender_id=request.query_params.get("tender")
+        response_id=request.query_params.get("response")
+        tender=Tender.objects.get(id=tender_id)
+        response=TenderResponse.objects.get(id=response_id)
+        tender.status="awaiting_confirmation"
+        tender.save()
+        response.status="awarded"
+        response.save()
+        return Response({"Message":"Done"})
 
-        return Response({"Message":"DONE"})
-
-
+class SupplierConfirmation(APIView):
+    def post(self,request):
+        tender= Tender.objects.get(id=self.request.query_params.get('tender_id'))
+        response= TenderResponse.objects.get(id=self.request.query_params.get('response_id'))
+        confirm_status = self.request.query_params.get('confirm_status')
+        if confirm_status=='confirmed':
+            tender.status='awarded'
+            response.status='winner'
+            tender.save()
+            response.save()
+        elif confirm_status=='rejected':
+            tender.status=='candidate_pool'
+            response.status=='rejected'
+            tender.save()
+            response.save()
+        return Response({"Message":"Done"})
 
 from .serializer import ResponseDetailSerializer
 class ResponseStatusUpdateAPIView(APIView):
@@ -151,7 +211,7 @@ class ResponseStatusUpdateAPIView(APIView):
             UserNotification.objects.create(recipient=response_instance.user,
             message="Congratulations your offer has been awarded to the candidate pool stage")
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)\
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 from django.contrib.auth.decorators import login_required
 
@@ -215,19 +275,6 @@ def activateEmail(request, user):
     )
     message.attach_alternative(html_message,'text/html')
     message.send()
-    # message = render_to_string("text.html", {
-    #     'user': user.email,
-    #     'domain': 'localhost:3000',
-    #     'uid': urlsafe_base64_encode(force_bytes(user.id)),
-    #     'token': account_activation_token.make_token(user),
-    #     "protocol": 'https' if request.is_secure() else 'http'
-    # })
-    # email = EmailMessage(mail_subject, message, to=[user.email])
-    # if email.send():
-    #     messages.success(request, f'Dear <b>{user}</b>, please go to you email <b>{user.email}</b> inbox and click on \
-    #             received activation link to confirm and complete the registration. <b>Note:</b> Check your spam folder.')
-    # else:
-    #     messages.error(request, f'Problem sending email to {user.email}, check if you typed it correctly.')
 
 from tasks.tasks import activate_account
 def create_custom_user(request):
@@ -255,48 +302,11 @@ class test(APIView):
         pprint(request.data)
         return Response(request.data)
 
-from transformers import AutoTokenizer, AutoModel
-import pandas as pd
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
-from joblib import dump, load
-import torch
+
 class Similarity(APIView):
     permission_classes=[]
-    tokenizer = AutoTokenizer.from_pretrained("aubmindlab/bert-base-arabertv02")
-    model = AutoModel.from_pretrained("aubmindlab/bert-base-arabertv02")
-    def compute_similarity(self,tender,response):
-        # Split the requirements from the row
-        requirements_1 = tender.split('|')
-        requirements_2 = response.split('|')
-        
-        # List to store similarity scores for this row
-        row_similarities = []
-        
-        # Iterate over each pair of corresponding requirements
-        for req1, req2 in zip(requirements_1, requirements_2):
-            # Tokenize the requirements
-            tokens1 = self.tokenizer(req1, return_tensors='pt', padding=True, truncation=True)
-            tokens2 = self.tokenizer(req2, return_tensors='pt', padding=True, truncation=True)
-            
-            # Get embeddings for the requirements
-            with torch.no_grad():
-                output1 = self.model(**tokens1)
-                output2 = self.model(**tokens2)
-            
-            # Compute the mean embeddings
-            embedding1 = output1.last_hidden_state.mean(dim=1).squeeze().numpy()
-            embedding2 = output2.last_hidden_state.mean(dim=1).squeeze().numpy()
-            
-            # Compute cosine similarity between the embeddings
-            similarity_score = cosine_similarity([embedding1], [embedding2])[0][0]
-            row_similarities.append(similarity_score)
-        
-        # Calculate mean similarity score for this row
-        mean_similarity_score = np.mean(row_similarities)
-        return mean_similarity_score
     def post(self,request):
         tender=request.data['tender']
         response=request.data['response']
-        score=self.compute_similarity(tender,response)
-        return Response({"message":score*100})
+        score=compute_similarity.delay(tender,response)
+        return Response({"message":"Score will be calculated"})

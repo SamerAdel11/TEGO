@@ -1,12 +1,13 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import './AddResponse.css';
-import AuthContext from '../../../context/Authcontext';
+import AuthContext from '../../../../context/Authcontext';
+// import './AddResponse.css';
 
-function AddResponse() {
+function Response() {
   const { authTokens } = useContext(AuthContext);
   const [data, setData] = useState(null);
   const [products, setProducts] = useState(data && data.products);
+  const [offer, setOffer] = useState(null);
   const textareaRefs = useRef([]);
   const [conditions, setConditions] = useState(data && data.public_conditions);
   const [privateconditions, setPrivateConditions] = useState(data && data.private_conditions);
@@ -16,7 +17,7 @@ function AddResponse() {
   const navigate = useHistory();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const [totalPrice, setTotalPrice] = useState(0);
+  // const [totalPrice, setTotalPrice] = useState(0);
   const tenderId = searchParams.get('tender_id');
   const handleAddProject = () => {
     const newPreviousWork = { id: previousWorkIndex + 1, title: '', description: '' };
@@ -47,20 +48,6 @@ function AddResponse() {
       [textarea.name]: textarea.value,
     };
     setProducts(updatedProducts);
-  };
-  const calculateTotalPrice = () => {
-    let ttotalPrice = 0;
-    products.forEach((product) => {
-      if (product.supplying_status === 'متوفر') {
-        console.log('entered if condition');
-        ttotalPrice += product.quantity * product.price;
-      }
-    });
-    setTotalPrice((prevTotalPrice) => {
-      console.log('Previous total price:', prevTotalPrice);
-      console.log('New total price:', ttotalPrice);
-      return ttotalPrice;
-    });
   };
   useEffect(() => {
     const fetchTenders = async () => {
@@ -110,6 +97,44 @@ function AddResponse() {
         console.error('Error fetching tenders:', error);
       }
     };
+    const getResponse = async () => {
+      try {
+        const myresponse = await fetch(`http://localhost:8000/get_my_response?tender_id=${tenderId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+        });
+        const myresponseData = await myresponse.json();
+        setOffer(myresponseData);
+        const adjustTextareaHeight = () => {
+          const textarea = document.getElementById('tenderSubject');
+          if (textarea) {
+            textarea.style.height = 'auto'; // Reset height to auto to measure content
+            textarea.style.height = `${textarea.scrollHeight}px`; // Set height to fit content
+          }
+          // eslint-disable-next-line no-plusplus
+          for (let i = 0; i < myresponseData.offer_products.length; i += 1) {
+            const textareatitle = document.getElementById(`title${i}`);
+            const textareadescription = document.getElementById(`description${i}`);
+            if (textareatitle) {
+              textareatitle.style.height = 'auto'; // Reset height to auto to measure content
+              textareatitle.style.height = `${textareatitle.scrollHeight}px`;
+            }
+            if (textareadescription) {
+              textareadescription.style.height = 'auto'; // Reset height to auto to measure content
+              textareadescription.style.height = `${textareadescription.scrollHeight}px`;
+            }
+          }
+        };
+        console.log(myresponseData);
+        adjustTextareaHeight();
+      } catch (err) {
+        console.log('Error in fetching response');
+      }
+    };
+    getResponse();
     fetchTenders();
   }, [authTokens]);
   const handleProductChange = (idx, field, value) => {
@@ -182,13 +207,53 @@ function AddResponse() {
       console.error('Error:', error);
     }
   };
-  if (!data) {
+  const confirmNotification = async (decision) => {
+    // e.preventDefault();
+    const confirmationApi = await fetch(`http://localhost:8000/supplier_confirmation?tender_id=${tenderId}&response_id=${offer.id}&confirm_status=${decision}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authTokens.access}`,
+      },
+    });
+    if (confirmationApi.ok) {
+      console.log('Done');
+    } else {
+      console.error('Error in submitting the data');
+    }
+  };
+  if (!data || !offer) {
     return <div>Loading...</div>;
   }
   return (
     <>
       <div className="container_create_tender">
         <form onSubmit={handleSubmit}>
+          {offer.status === 'awarded' && (
+            <div className="buttons_awating">
+              <button
+                type="submit"
+                className="button_awating"
+                onClick={(e) => {
+                  e.preventDefault();
+                  confirmNotification('confirmed');
+                }}
+              >
+                موافق
+              </button>
+              <button
+                type="button"
+                style={{ background: 'red' }}
+                className="button_awating"
+                onClick={(e) => {
+                  e.preventDefault();
+                  confirmNotification('rejected');
+                }}
+              >
+                رفض
+              </button>
+            </div>
+          )}
           <div className="tender_announcement">
             <div className="gradient__text">
               <h1>إعلان  المناقصة</h1>
@@ -235,7 +300,7 @@ function AddResponse() {
                 </tr>
               </thead>
               <tbody>
-                { products && products.map((product, idx) => (
+                { offer && offer.offer_products.map((product, idx) => (
                   <tr key={idx}>
                     <td>{idx + 1}</td>
                     <td>
@@ -264,10 +329,9 @@ function AddResponse() {
                       <textarea
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id="quantity"
-                        value={product.quantity}
+                        value={product.provided_quantity}
                         onChange={(e) => {
                           handleProductChange(idx, 'quantity', e.target.value);
-                          calculateTotalPrice();
                         }}
                         onInput={(e) => {
                           handleTextareaInput(e, idx);
@@ -280,7 +344,7 @@ function AddResponse() {
                       <textarea
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id={`description${idx}`}
-                        value={product.description}
+                        value={product.product_description}
                         onChange={(e) => handleProductChange(idx, 'description', e.target.value)}
                         onInput={(e) => handleTextareaInput(e, idx)}
                         aria-label={`Description for Product ${product.id}`}
@@ -291,7 +355,6 @@ function AddResponse() {
                         value={product.price}
                         onChange={(e) => {
                           handleProductChange(idx, 'price', e.target.value);
-                          calculateTotalPrice();
                         }}
                         onInput={(e) => {
                           handleTextareaInput(e, idx);
@@ -302,17 +365,10 @@ function AddResponse() {
                       />
                     </td>
                     <td>
-                      <select
+                      <textarea
                         value={product.supplying_status}
-                        onChange={(e) => {
-                          handleProductChange(idx, 'supplying_status', e.target.value);
-                          calculateTotalPrice();
-                        }}
-                      >
-                        <option value="">اختر حاله التوريد</option>
-                        <option value="متوفر">متوفر</option>
-                        <option value="نأسف">نأسف</option>
-                      </select>
+                        aria-label={`supplying status for product ${product.id}`}
+                      />
                     </td>
                   </tr>
                 ))}
@@ -321,7 +377,7 @@ function AddResponse() {
           </div>
           <div className="form-fields col-md-3" style={{ marginTop: '20px', marginBottom: '10px' }}>
             <label htmlFor="create_tender">السعر المعروض للمناقصة بالكامل
-              <input style={{ marginTop: '20px', marginBottom: '10px' }} value={totalPrice} type="number" id="offeredprice" />
+              <input style={{ marginTop: '20px', marginBottom: '10px' }} value={offer.offered_price} type="number" id="offeredprice" />
             </label>
           </div>
           <hr data-v-7e013592 />
@@ -351,12 +407,12 @@ function AddResponse() {
           </div>
 
           <div className="condition-section">
-            { privateconditions && privateconditions.map((privateCondition, idx) => (
+            { offer && offer.offer_conditions.map((privateCondition, idx) => (
               <div key={idx} className="private-condition-field">
                 <span className="condition-index">{idx + 1}.</span>
                 <input
                   type="text"
-                  defaultValue={`${privateCondition.condition}`}
+                  defaultValue={`${privateCondition.offered_condition}`}
                   onChange={(e) => handlePrivateConditionChange(idx, e.target.value)}
                   placeholder={` الشرط الخاص رقم ${idx + 1}`}
                   className="private-condition-input"
@@ -364,27 +420,17 @@ function AddResponse() {
               </div>
             ))}
           </div>
-          { showAddProjectButton ? (
-            <div style={{ textAlign: 'center' }}>
-              <button
-                type="button"
-                style={{ alignItems: 'center' }}
-                className="button condition"
-                onClick={handleAddProject}
-              >
-                إضافة سابقة أعمال
-              </button>
-            </div>
-          ) : (
-            <div>
-              <hr data-v-7e013592 />
-              <div className="gradient__text">
+          <div>
+            {offer.previous_work ? (
+              <div className="gradient__text m-3">
                 <h1>الأعمال السابقة</h1>
               </div>
-            </div>
-          )}
-          <div>
-            {previousWork.map((work, index) => (
+            ) : (
+              <div className="gradient__text m-3">
+                <h1>لا يوجدالأعمال السابقة </h1>
+              </div>
+            ) }
+            {offer.previous_work.map((work, index) => (
               <div key={index}>
                 <h3>المشروع رقم {index + 1}</h3>
                 <label htmlFor="prevtenderTitle">عنوان المناقصة
@@ -427,4 +473,4 @@ function AddResponse() {
   );
 }
 
-export default AddResponse;
+export default Response;

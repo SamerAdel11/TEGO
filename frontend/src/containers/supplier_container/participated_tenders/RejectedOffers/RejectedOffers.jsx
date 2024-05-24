@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom'; // Import Link from React Router
-import './CandidatePool.css';
-import AuthContext from '../../../context/Authcontext';
+import './RejectedOffers.css';
+import AuthContext from '../../../../context/Authcontext';
 
-function CandidatePool() {
+function RejectedOffers() {
   const [tendersData, setTendersData] = useState(null);
   const { authTokens } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders?status=candidate_pool', {
+        const response = await fetch('http://localhost:8000/get_tenders_supplier?responsestatus=rejected', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -33,14 +33,17 @@ function CandidatePool() {
   return (
     <div className="pending-container">
       <div className="gradient__text pending_title">
-        <h1 className="first_title">طلبات التاكيد</h1>
+        <h1 className="first_title">المناقصات الخاسره</h1>
       </div>
       {tendersData && tendersData.map((tender, index) => (
-        <Link style={{ 'text-decoration': 'none' }} key={index} to={`/candidate_responses/${tender.id}`}>
-          <div className="tender-card">
+        <Link style={{ 'text-decoration': 'none' }} key={index} to={`/tender_offer?tender_id=${tender.id}`}>
+          <div className="tender-cards">
             <h1 className="tender-title gradient__text">
               {tender.ad?.title}
             </h1>
+            <p className="topic">{tender.ad.topic}</p>
+
+            <h2> اخر موعد لتقديم العروض {tender.ad?.deadline} </h2>
           </div>
         </Link>
       ))}
@@ -48,4 +51,4 @@ function CandidatePool() {
   );
 }
 
-export default CandidatePool;
+export default RejectedOffers;
