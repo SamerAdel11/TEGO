@@ -8,7 +8,7 @@ function AwatingDetails() {
   console.log('معرف العطاء:', id);
   const [responseDetails, setResponseDetails] = useState(null);
   const [supplierDetails, setSupplierDetails] = useState(null);
-
+  const [activeButton, setActiveButton] = useState('details');
   const { authTokens } = useContext(AuthContext);
   const [activeContent, setActiveContent] = useState('details');
 
@@ -74,22 +74,24 @@ function AwatingDetails() {
 
   const showContent = (contentId) => {
     setActiveContent(contentId);
+    setActiveButton(contentId);
   };
 
   return (
-    <div className="tender-details-container">
+    <div className="tender-details-container" style={{ marginBottom: '50px' }}>
       <div className="center-content">
         <div className="gradient__text mytender">
           {/* <h1 className="first_title">جميع الردود</h1> */}
         </div>
         {responseDetails !== null ? (
           <div>
+            {/* tender below means the response not tender */}
             {responseDetails.map((tender) => (
               <div key={tender.id}>
                 <div className="gradient__text">
                   {/* <h3>العرض رقم {index + 1}</h3> */}
                 </div>
-                {responseDetails.status === 'awarded' ? (
+                {tender.status === 'awarded' ? (
                   <div>
                     <div className="center-content">
                       <p className="national">في إنتظار التاكيد من المورد</p>
@@ -100,6 +102,7 @@ function AwatingDetails() {
                     <p className="national">المورد أكد التعاقد علي المناقصة</p>
                     <div className="buttons_awating">
                       <button
+                        style={{ border: 'none', outline: 'none', backgroundColor: activeButton === 'details' && '#AA1910' }}
                         className="button_awating"
                         type="button"
                         onClick={() => showContent('details')}
@@ -107,6 +110,7 @@ function AwatingDetails() {
                         تفاصيل العطاء
                       </button>
                       <button
+                        style={{ border: 'none', outline: 'none', backgroundColor: activeButton === 'contanct_info' && '#AA1910' }}
                         className="button_awating"
                         type="button"
                         onClick={() => showContent('contanct_info')}
@@ -118,7 +122,29 @@ function AwatingDetails() {
                 )}
                 {activeContent === 'details' ? (
                   <div>
-                    <h3> السعر المعروض : {tender.offered_price}</h3>
+                    { tender.previous_work.length > 0 && (
+                    <div className="gradient__text">
+                      <h4 className="response">الاعمال السابقة</h4>
+                    </div>
+                    )}
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>رقم المشروع</th>
+                          <th>عنوان المشروع</th>
+                          <th>وصف المشروع</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tender.previous_work.map((work, indexx) => (
+                          <tr key={indexx}>
+                            <td>{indexx + 1}</td>
+                            <td>{work.title}</td>
+                            <td>{work.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                     <div className="gradient__text">
                       <h4 className="response">منتجات العرض</h4>
                     </div>
@@ -128,8 +154,8 @@ function AwatingDetails() {
                           <th>معرف المنتج</th>
                           <th>اسم المنتج</th>
                           <th>الكمية المقدمة</th>
-                          {/* <th>سعر المنتج</th> */}
-                          <th>مدة التوريد</th>
+                          <th>سعر الوحدة</th>
+                          <th>سعر الكمية</th>
                           <th style={{ maxWidth: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordWrap: 'break-word' }}>وصف المنتج</th>
                           <th>حالة التوريد</th>
                         </tr>
@@ -140,13 +166,20 @@ function AwatingDetails() {
                             <td>{innerIndex + 1}</td>
                             <td>{product.title}</td>
                             <td>
-                              {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity } {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit }
+                              {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit } {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity }
                             </td>
-                            <td>{product.supplying_status ? product.price : '-' }</td>
+                            <td>{product.supplying_status !== 'متوفر' ? '-' : product.price }</td>
+                            <td>{product.supplying_status !== 'متوفر' ? '-' : product.price * product.provided_quantity }</td>
                             <td>{product.supplying_status !== 'متوفر' ? '-' : product.product_description } </td>
                             <td>{product.supplying_status }</td>
                           </tr>
                         ))}
+                        <tr>
+                          <td colSpan="3">السعر الإجمالي</td>
+                          <td colSpan="2">{tender.offered_price}</td>
+                          {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                          {/* <td colSpan="2" /> */}
+                        </tr>
                       </tbody>
                     </table>
                     {tender.offer_conditions.length > 0 && (

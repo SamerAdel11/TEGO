@@ -254,6 +254,11 @@ function Response() {
               </button>
             </div>
           )}
+          {offer.status === 'winner' && (
+          <div className="center-content">
+            <p className="national">تهانينا لقد فزت بهذه المناقصة</p>
+          </div>
+          )}
           <div className="tender_announcement">
             <div className="gradient__text">
               <h1>إعلان  المناقصة</h1>

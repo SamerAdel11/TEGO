@@ -21,7 +21,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         # Fetch all existing notifications and send them to the client
         notifications = await self.get_all_notifications()
         for notification in notifications:
-            await self.send_notification(notification.message)
+            await self.send_notification(notification)
     
     async def get_all_notifications(self):
         self.user = await self.authenticate_user(self.scope)
@@ -29,11 +29,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             print('that use is anonymous or not found')
             await self.close()
         # Fetch all notifications from the database
-        return UserNotification.objects.filter(recipient=self.user)
+        return UserNotification.objects.filter(recipient=self.user).order_by('timestamp')
     
     async def send_notification(self, message):
-        print("message from notification is",message)
-        await self.send(text_data=json.dumps({'message': message}))
+        # print("message from notification is",message)
+        await self.send(text_data=json.dumps({'message': message.message,
+        'seen':message.seen}))
 
     async def send_notification2(self,message):
         print("message from notification22 is",message)
@@ -47,13 +48,13 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         # Extract the token from the query parameters
         query_params = parse_qs(scope['query_string'].decode('utf-8'))
         token = query_params.get('token', [None])[0]
-        print("token is ",token)
+        # print("token is ",token)
         # Authenticate the user using the token
         if token:
             try:
                 # Decode the token
                 payload = jwt.decode(token, options={"verify_signature": False})
-                print("payload is ",payload )
+                # print("payload is ",payload )
                 # Return the user associated with the token
                 return CustomUser.objects.get(id=payload["user_id"])
             except Exception as e:

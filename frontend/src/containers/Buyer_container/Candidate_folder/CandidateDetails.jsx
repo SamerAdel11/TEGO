@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import './CandidateDetails.css';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import AuthContext from '../../../context/Authcontext';
 
 function CandidateDetails() {
@@ -8,7 +8,7 @@ function CandidateDetails() {
   console.log('معرف العطاء:', id);
   const [responseDetails, setResponseDetails] = useState(null);
   const { authTokens } = useContext(AuthContext);
-
+  const history = useHistory();
   const handleSendResponse = async (tender) => {
     try {
       const status = 'awarded';
@@ -26,7 +26,7 @@ function CandidateDetails() {
 
       const data = await response.json();
       console.log('Response sent:', data);
-      window.location.reload();
+      history.push(`/awating_responses${id}`);
     } catch (error) {
       console.error('Error sending response:', error);
     }
@@ -75,6 +75,7 @@ function CandidateDetails() {
   return (
     <div className="tender-details-container">
       <div className="center-content">
+        {/* eslint-disable-next-line no-nested-ternary */}
         {responseDetails !== null ? (
           <div>
             {responseDetails.map((tender, index) => (
@@ -82,36 +83,36 @@ function CandidateDetails() {
                 <div className="gradient__text mytender">
                   <h1>العرض رقم {index + 1}</h1>
                 </div>
-                <h3> السعر المعروض : {tender.offered_price}</h3>
-                <h3> هذا العرض ملائم لهذه المناقصة بنسبه {tender.score}%</h3>
+                <div className="center-content">
+                  <p className="national"> هذا العرض ملائم لهذه المناقصة بنسبه {tender.score} %</p>
+                </div>
                 { tender.previous_work.length > 0 && (
-                <div>
+                <div className="gradient__text">
                   <h4 className="response">الاعمال السابقة</h4>
                 </div>
                 )}
-                {tender.previous_work.map((work, indexx) => (
-                  <div key={indexx}>
-                    <div className="center-content">
-                      {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-                      <label>المشروع رقم {indexx + 1}</label>
-                    </div>
-                    {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-                    <label htmlFor="prevtenderTitle">عنوان المناقصة
-                      <input type="text" id="prevtenderTitle" value={work.title} readOnly="readonly" />
-                    </label>
-                    <label htmlFor="prevtenderSubject">موضوع المشروع
-                      <textarea
-                        readOnly="readonly"
-                        type="text"
-                        id={`prevtenderSubject${index}`}
-                        value={work.description}
-                      />
-                    </label>
-                    <hr style={{ marginRight: '15%', marginLeft: '15%' }} />
-                  </div>
-                ))}
-                <h4 className="response">منتجات العرض</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>رقم المشروع</th>
+                      <th>عنوان المشروع</th>
+                      <th>وصف المشروع</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tender.previous_work.map((work, indexx) => (
+                      <tr key={indexx}>
+                        <td>{indexx + 1}</td>
+                        <td>{work.title}</td>
+                        <td>{work.description}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
 
+                <div className="gradient__text">
+                  <h4 className="response">منتجات العرض</h4>
+                </div>
                 <table>
                   <thead>
                     <tr>
@@ -138,12 +139,20 @@ function CandidateDetails() {
                         <td>{product.supplying_status }</td>
                       </tr>
                     ))}
+                    <tr>
+                      <td colSpan="3">السعر الإجمالي</td>
+                      <td colSpan="2">{tender.offered_price}</td>
+                      {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                      {/* <td colSpan="2" /> */}
+                    </tr>
                   </tbody>
                 </table>
 
                 {tender.offer_conditions.length > 0 && (
                   <div>
-                    <h4 className="response">شروط العرض</h4>
+                    <div className="gradient__text">
+                      <h4 className="response">شروط العرض</h4>
+                    </div>
                     <table>
                       <thead>
                         <tr>
@@ -186,7 +195,13 @@ function CandidateDetails() {
             ))}
           </div>
         ) : (
-          <p>جاري تحميل تفاصيل العطاء...</p>
+          responseDetails && responseDetails.length > 0 ? (
+            <p>جاري تحميل تفاصيل العطاء...</p>
+          ) : (
+            <div>
+              <h3>لا يوجد عروض</h3>
+            </div>
+          )
         )}
       </div>
     </div>

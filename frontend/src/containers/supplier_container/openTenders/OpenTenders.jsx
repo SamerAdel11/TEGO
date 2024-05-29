@@ -36,7 +36,7 @@ function OpenTenders() {
         <h1 className="first_title">المناقصات المتاحه</h1>
       </div>
       {tendersData && tendersData.map((tender, index) => (
-        <Link style={{ 'text-decoration': 'none' }} key={index} to={`/tender_offer?tender_id=${tender.id}`}>
+        <Link style={{ 'text-decoration': 'none' }} key={index} to={`/add_response?tender_id=${tender.id}`}>
           <div className="tender-cards">
             <h1 className="tender-title gradient__text">
               {tender.ad?.title}

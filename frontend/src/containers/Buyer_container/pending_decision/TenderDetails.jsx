@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useEffect, useContext } from 'react';
 import './TenderDetails.css';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import AuthContext from '../../../context/Authcontext';
 
 function TenderDetails() {
@@ -9,34 +9,7 @@ function TenderDetails() {
   console.log('معرف العطاء:', id); // تسجيل معرف العطاء
   const [responseDetails, setResponseDetails] = useState(null);
   const { authTokens } = useContext(AuthContext);
-
-  const handleSendResponse = async (tender) => {
-    try {
-      // Assign 'candidate_pool' to the status variable
-      const status = 'candidate_pool';
-
-      // Send only the status in the request body
-      const response = await fetch(
-        `http://localhost:8000/update_response/${tender.id}/`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authTokens.access}`,
-          },
-          body: JSON.stringify({ status }), // Send only the status
-        },
-      );
-
-      const data = await response.json();
-      console.log('Response sent:', data); // Log the response from the backend
-
-      // Refresh the page after the response is successfully sent
-      window.location.reload();
-    } catch (error) {
-      console.error('Error sending response:', error);
-    }
-  };
+  const histoyty = useHistory();
 
   useEffect(() => {
     let isMounted = true; // علم لتتبع ما إذا كان المكون مركوبًا
@@ -88,6 +61,36 @@ function TenderDetails() {
 
     const data = await response.json();
     console.log(data);
+    histoyty.push(`/awating_responses/${id}`);
+  };
+  const handleSendResponse = async (tender) => {
+    try {
+      // Assign 'candidate_pool' to the status variable
+      const status = 'candidate_pool';
+
+      // Send only the status in the request body
+      const response = await fetch(
+        `http://localhost:8000/update_response/${tender.id}/`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+          body: JSON.stringify({ status }), // Send only the status
+        },
+      );
+
+      const data = await response.json();
+      console.log('Response sent:', data); // Log the response from the backend
+      // Refresh the page after the response is successfully sent
+      window.location.reload();
+      if (responseDetails.length === 1) {
+        closeCandidatePool();
+      }
+    } catch (error) {
+      console.error('Error sending response:', error);
+    }
   };
   return (
     <div className="tender-details-container">
@@ -96,44 +99,44 @@ function TenderDetails() {
           <div>
             {responseDetails.filter((tender) => tender.status !== 'candidate_pool').map((tender, index) => (
               <div key={tender.id}>
-                <div className="gradient__text">
+                <div className="gradient__text mytender">
                   <h1>العرض رقم {index + 1}</h1>
                 </div>
-                <h3> هذا العرض ملائم لهذه المناقصة بنسبه {tender.score}%</h3>
+                <div className="center-content">
+                  <p className="national"> هذا العرض ملائم لهذه المناقصة بنسبه {tender.score} %</p>
+                </div>
                 { tender.previous_work.length > 0 && (
-                  <div>
-                    <h4 className="response">الاعمال السابقة</h4>
-                  </div>
+                <div className="gradient__text">
+                  <h4 className="response">الاعمال السابقة</h4>
+                </div>
                 )}
-                {tender.previous_work.map((work, indexx) => (
-                  <div key={indexx}>
-                    <div className="center-content">
-                      <label>المشروع رقم {indexx + 1}</label>
-                    </div>
-                    {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-                    <label htmlFor="prevtenderTitle">عنوان المناقصة
-                      <input type="text" id="prevtenderTitle" value={work.title} readOnly="readonly" />
-                    </label>
-                    <label htmlFor="prevtenderSubject">موضوع المشروع
-                      <textarea
-                        readOnly="readonly"
-                        type="text"
-                        id={`prevtenderSubject${index}`}
-                        value={work.description}
-                      />
-                    </label>
-                    <hr style={{ marginRight: '15%', marginLeft: '15%' }} />
-                  </div>
-                ))}
-                <h4 className="response">منتجات العرض</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>رقم المشروع</th>
+                      <th>عنوان المشروع</th>
+                      <th>وصف المشروع</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tender.previous_work.map((work, indexx) => (
+                      <tr key={indexx}>
+                        <td>{indexx + 1}</td>
+                        <td>{work.title}</td>
+                        <td>{work.description}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="gradient__text">
+                  <h4 className="response">منتجات العرض</h4>
+                </div>
                 <table>
                   <thead>
                     <tr>
                       <th>معرف المنتج</th>
                       <th>اسم المنتج</th>
                       <th>الكمية المقدمة</th>
-                      <th>سعر الوحدة</th>
-                      <th>سعر الكمية</th>
                       <th style={{ maxWidth: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordWrap: 'break-word' }}>وصف المنتج</th>
                       <th>حالة التوريد</th>
                     </tr>
@@ -146,8 +149,6 @@ function TenderDetails() {
                         <td>
                           {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit } {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity }
                         </td>
-                        <td>{product.supplying_status !== 'متوفر' ? '-' : product.price }</td>
-                        <td>{product.supplying_status !== 'متوفر' ? '-' : product.price * product.provided_quantity }</td>
                         <td>{product.supplying_status !== 'متوفر' ? '-' : product.product_description } </td>
                         <td>{product.supplying_status }</td>
                       </tr>
@@ -157,7 +158,9 @@ function TenderDetails() {
 
                 {tender.offer_conditions.length > 0 && (
                   <div>
-                    <h4 className="response">الشروط الخاصة</h4>
+                    <div className="gradient__text">
+                      <h4 className="response">الشروط الخاصة</h4>
+                    </div>
                     <table>
                       <thead>
                         <tr>
@@ -196,16 +199,18 @@ function TenderDetails() {
                 </div>
               )
             }
-            <div className="center-content">
-              <button
-                style={{ alignItems: 'center' }}
-                className="buton_resonpose"
-                type="button"
-                onClick={closeCandidatePool}
-              >
-                إغلاق قائمه المرشحين
-              </button>
-            </div>
+            {responseDetails.length > 0 && (
+              <div className="center-content">
+                <button
+                  style={{ alignItems: 'center' }}
+                  className="buton_resonpose"
+                  type="button"
+                  onClick={closeCandidatePool}
+                >
+                  إغلاق قائمه المرشحين
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <p>جاري تحميل تفاصيل العطاء...</p>

@@ -310,3 +310,12 @@ class Similarity(APIView):
         response=request.data['response']
         score=compute_similarity.delay(tender,response)
         return Response({"message":"Score will be calculated"})
+import time
+class MakeNotificationsSeen(APIView):
+    def post(self, request):
+        count=request.query_params.get('count')
+        queryset=UserNotification.objects.filter(recipient=request.user).order_by('-timestamp')
+        queryset.update(seen=True)
+        time.sleep(5)
+        return Response({"message":"Done"})
+        
