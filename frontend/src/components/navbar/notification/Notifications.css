@@ -1,0 +1,65 @@
+/* src/components/Notifications.css */
+
+.notifications-container {
+    position: relative;
+    display: inline-block;
+}
+
+.notification-icon {
+    position: relative;
+    cursor: pointer;
+    font-size: 24px;
+    color: #4CAF50; /* Default color */
+}
+
+.unseen-count {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.notification-dropdown {
+    position: absolute;
+    top: 40px; /* Adjusted for better spacing from the icon */
+    right: 0;
+    background: #2c3e50;
+    color: #ecf0f1;
+    width: 350px; /* Fixed width */
+    max-height: 400px; /* Fixed height */
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    border-radius: 8px; /* Slightly more rounded corners */
+    overflow-y: auto; /* Enable vertical scrolling */
+    z-index: 1000;
+}
+
+.notification-dropdown::-webkit-scrollbar {
+    width: 0; /* Remove scrollbar space */
+    height: 0; /* Remove horizontal scrollbar space */
+}
+
+.notification-drop {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.notification-item {
+    padding: 15px;
+    margin: 0; /* No margin needed since the separator is the border */
+    border-bottom: 1px solid #34495e; /* Separator */
+    transition: background 0.3s; /* Smooth hover effect */
+}
+
+.notification-item:last-child {
+    border-bottom: none; /* Remove border for the last item */
+}
+
+.notification-item:hover {
+    background: #3a5068; /* Color change on hover */
+    cursor: pointer;
+}
