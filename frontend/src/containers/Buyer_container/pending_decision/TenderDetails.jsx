@@ -28,10 +28,9 @@ function TenderDetails() {
         );
 
         const data = await response.json();
-        console.log('تفاصيل العطاء:', data); // تسجيل بيانات الاستجابة
+        console.log('تفاصيل العطاء:', data);
 
         if (isMounted) {
-          // التحقق مما إذا كان المكون مركوبًا قبل تحديث الحالة
           setResponseDetails(data);
         }
       } catch (error) {
@@ -46,7 +45,15 @@ function TenderDetails() {
       isMounted = false; // تحديث العلم المركوب إلى خطأ عند فك التركيب
     };
   }, [id, authTokens.access]);
-
+  useEffect(() => {
+    // This effect will run every time the location changes
+    const unlisten = histoyty.listen(() => {
+      window.scrollTo(0, 0);
+    });
+    return () => {
+      unlisten();
+    };
+  }, [histoyty]);
   const closeCandidatePool = async () => {
     const response = await fetch(
       `http://localhost:8000/close_candidate_pool?tender_id=${id}`,
@@ -61,7 +68,8 @@ function TenderDetails() {
 
     const data = await response.json();
     console.log(data);
-    histoyty.push(`/awating_responses/${id}`);
+    histoyty.push(`/candidate_responses/${id}`);
+    // histoyty.push(`/awating_responses/${id}`);
   };
   const handleSendResponse = async (tender) => {
     try {
@@ -84,9 +92,10 @@ function TenderDetails() {
       const data = await response.json();
       console.log('Response sent:', data); // Log the response from the backend
       // Refresh the page after the response is successfully sent
-      window.location.reload();
       if (responseDetails.length === 1) {
         closeCandidatePool();
+      } else {
+        window.location.reload();
       }
     } catch (error) {
       console.error('Error sending response:', error);
@@ -95,39 +104,44 @@ function TenderDetails() {
   return (
     <div className="tender-details-container">
       <div className="center-content">
+        <div style={{ marginBottom: '20px' }} className="gradient__text mytender">
+          <h1>العروض المقدمة</h1>
+        </div>
         {responseDetails !== null ? (
           <div>
             {responseDetails.filter((tender) => tender.status !== 'candidate_pool').map((tender, index) => (
               <div key={tender.id}>
                 <div className="gradient__text mytender">
-                  <h1>العرض رقم {index + 1}</h1>
+                  <h1 style={{ fontSize: '40px' }}>العرض رقم {index + 1}</h1>
                 </div>
                 <div className="center-content">
                   <p className="national"> هذا العرض ملائم لهذه المناقصة بنسبه {tender.score} %</p>
                 </div>
                 { tender.previous_work.length > 0 && (
-                <div className="gradient__text">
-                  <h4 className="response">الاعمال السابقة</h4>
-                </div>
+                  <div>
+                    <div className="gradient__text">
+                      <h4 className="response">الاعمال السابقة</h4>
+                    </div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>رقم المشروع</th>
+                          <th>عنوان المشروع</th>
+                          <th>وصف المشروع</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tender.previous_work.map((work, indexx) => (
+                          <tr key={indexx}>
+                            <td>{indexx + 1}</td>
+                            <td>{work.title}</td>
+                            <td>{work.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
-                <table>
-                  <thead>
-                    <tr>
-                      <th>رقم المشروع</th>
-                      <th>عنوان المشروع</th>
-                      <th>وصف المشروع</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tender.previous_work.map((work, indexx) => (
-                      <tr key={indexx}>
-                        <td>{indexx + 1}</td>
-                        <td>{work.title}</td>
-                        <td>{work.description}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
                 <div className="gradient__text">
                   <h4 className="response">منتجات العرض</h4>
                 </div>

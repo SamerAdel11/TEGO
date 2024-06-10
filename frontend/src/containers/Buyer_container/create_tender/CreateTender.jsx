@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import './createtender.css';
 import { useHistory } from 'react-router-dom';
 import AuthContext from '../../../context/Authcontext';
@@ -6,6 +6,45 @@ import AuthContext from '../../../context/Authcontext';
 function CreateTender() {
   const navigate = useHistory();
   const { authTokens } = useContext(AuthContext);
+  const [minDate, setMinDate] = useState('');
+  const [maxDate, setMaxDate] = useState('');
+  const [error, setError] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
+
+  useEffect(() => {
+    // Get the current date
+    const today = new Date();
+    // Format the date as yyyy-mm-dd
+    const formattedMinDate = today.toISOString().split('T')[0];
+    console.log(formattedMinDate);
+    const nextYear = new Date(today);
+    nextYear.setFullYear(today.getFullYear() + 1);
+    const formattedMaxDate = nextYear.toISOString().split('T')[0];
+
+    setMinDate(formattedMinDate);
+    setMaxDate(formattedMaxDate);
+    // Set the minDate state
+  }, []);
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  };
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    setSelectedDate(date);
+
+    // Check if the selected date is before the min date
+    console.log(date);
+    console.log(minDate);
+    if (date < minDate) {
+      setError('يرجي اختيار موعد قادم صحيح');
+    } else if (date > maxDate) {
+      setError(`يرجي اختيار موعد قبل ${formatDate(maxDate)}`);
+    } else {
+      setError('');
+    }
+  };
   const [officials, setOfficials] = useState([
     { id: 1, name: '', position: '' },
   ]);
@@ -30,9 +69,14 @@ function CreateTender() {
   const [conditions, setConditions] = useState([{ id: 1, value: '' }]);
   const [privateconditions, setPrivateConditions] = useState([{ id: 1, value: '' }]);
   const [selectedTender, setSelectedTender] = useState('');
+  const [selectedFinalPercentage, setSelectedPercentage] = useState('');
+  const [submitType, setSubmitType] = useState('');
 
   const handleSelectChange = (event) => {
     setSelectedTender(event.target.value);
+  };
+  const handleSelectPercentageChange = (event) => {
+    setSelectedPercentage(event.target.value);
   };
 
   const handleAddProduct = () => {
@@ -97,6 +141,7 @@ function CreateTender() {
           topic: e.target.querySelector('#tenderSubject').value,
           deadline: e.target.querySelector('#tenderOpeningDate').value,
           field: selectedTender,
+          finalInsurance: selectedFinalPercentage,
         },
         admins: officials.map((official) => ({
           name: official.name,
@@ -115,7 +160,7 @@ function CreateTender() {
           description: e.target.querySelector(`#description_${idx}`).value,
         })),
         initial_price: e.target.querySelector('#create_tender').value,
-        status: 'open',
+        status: submitType,
       };
       const response = await fetch('http://localhost:8000/create_tender/', {
         method: 'POST',
@@ -132,8 +177,8 @@ function CreateTender() {
       } else {
         console.error('Failed to send data to server', response.json());
       }
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (errorr) {
+      console.error('Error:', errorr);
     }
   };
   return (
@@ -152,6 +197,30 @@ function CreateTender() {
             <div className="form-fields">
               <label htmlFor="tenderSubject">موضوع المناقصة
                 <textarea type="text" id="tenderSubject" />
+              </label>
+            </div>
+            {/* <div className="form-fields col-8">
+              <label htmlFor="preInsurance">نسبه التأمين الابتدائي
+                <select value={selectedTender} onChange={handleSelectChange}>
+                  <option value="">اختر نسبة التأمين الإبتدائي </option>
+                  <option value="0.5">0.5%</option>
+                  <option value="1.0">1%</option>
+                  <option value="1.5">1%</option>
+                </select>
+              </label>
+            </div> */}
+            <div className="form-fields">
+              <label htmlFor="preInsurance"> نسبه التأمين النهائي <span style={{ fontSize: 'small' }}> **نسبه التأمين النهائي تحتسب من سعر العرض الفائز **</span>
+                <select value={selectedFinalPercentage} onChange={handleSelectPercentageChange}>
+                  <option value="">اختر نسبة التأمين النهائي </option>
+                  <option value="2">2%</option>
+                  <option value="2.5">2.5%</option>
+                  <option value="3">3%</option>
+                  <option value="3.5">3.5%</option>
+                  <option value="4">4%</option>
+                  <option value="4.5">4.5%</option>
+                  <option value="5">5%</option>
+                </select>
               </label>
             </div>
             <div className="form-fields">
@@ -181,9 +250,20 @@ function CreateTender() {
               </label>
             </div>
             <div className="form-fields">
-              <label htmlFor="tenderOpeningDate">معاد فتح المظاريف
-                <input type="date" id="tenderOpeningDate" />
-              </label>
+              <div>
+                <label htmlFor="tenderOpeningDate">
+                  معاد فتح المظاريف
+                  <input
+                    type="date"
+                    id="tenderOpeningDate"
+                    min={minDate}
+                    value={selectedDate}
+                    onChange={handleDateChange}
+                    max={maxDate}
+                  />
+                </label>
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+              </div>
             </div>
           </div>
           <div className="bidding_officials">
@@ -402,13 +482,13 @@ function CreateTender() {
           </div>
 
           <div className="button-container">
-            <button type="button" className="button">
+            <button type="submit" className="button" onClick={() => setSubmitType('draft')} onSubmit={handleSubmit}>
               حفظ كمسودة
             </button>
-            <button type="button" className="button">
+            {/* <button type="button" className="button">
               حفظ كقالب
-            </button>
-            <button type="submit" className="button" onSubmit={handleSubmit}>
+            </button> */}
+            <button type="submit" className="button" onClick={() => setSubmitType('open')} onSubmit={handleSubmit}>
               نشر
             </button>
             <button type="button" className="button cancel">

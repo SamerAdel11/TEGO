@@ -5,47 +5,30 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
 from django.contrib.auth.models import AbstractUser, User
-
+import datetime
 # Create your views here.
 
-
 class CustomUserManager(BaseUserManager):
-
     """
-
     Custom user model manager where email is the unique identifiers
-
     for authentication instead of usernames.
-
     """
-
     def create_user(self, email, password, **extra_fields):
         """
-
         Create and save a user with the given email and password.
-
         """
-
         if not email:
-
             raise ValueError(_("The Email must be set"))
-
         email = self.normalize_email(email)
-
         user = self.model(email=email, **extra_fields)
-
         user.set_password(password)
-
         user.save()
         return user
 
     def create_superuser(self, email, password, **extra_fields):
         """
-
         Create and save a SuperUser with the given email and password.
-
         """
-
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
@@ -59,7 +42,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
-    verified=models.BooleanField(default=False)
+    verified=models.BooleanField(default=True)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     objects = CustomUserManager()
@@ -76,6 +59,7 @@ class Company(models.Model):
     landline = models.CharField(max_length=255,null=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     company_type_tego = models.CharField(max_length=30,null=True)
+    company_field= models.CharField(max_length=255)
 
     def __str__(self):
         return f"company {self.name}"
@@ -83,10 +67,6 @@ class Company(models.Model):
     @property
     def owners(self):
         return self.owner_set.all()
-
-    @property
-    def company_fields(self):
-        return self.companyfield_set.all()
 
     @property
     def supplier(self):
@@ -113,14 +93,6 @@ class Owner(models.Model):
         return self.name
 
 
-class CompanyField(models.Model):
-    primary_field = models.CharField(max_length=255,null=True)
-    secondary_field = models.CharField(max_length=255,null=True)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE,null=True)
-    def _str_(self):
-        return self.primary_field
-
-
 class UserNotification(models.Model):
     recipient = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name='recipient')
@@ -136,6 +108,7 @@ class TenderAd(models.Model):
     topic=models.TextField()
     field=models.CharField(max_length=255)
     deadline=models.DateField()
+    finalInsurance=models.FloatField()
 
 class Tender(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -195,7 +168,7 @@ class TenderProduct(models.Model):
 
 class TenderResponse(models.Model):
 
-    offered_price = models.IntegerField()
+    offered_price = models.FloatField()
     status = models.CharField(max_length=255)
     score=models.FloatField(null=True)
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
@@ -224,17 +197,26 @@ class ResponseProductBid(models.Model):
     product = models.ForeignKey(TenderProduct, on_delete=models.CASCADE)
     provided_quantity = models.IntegerField(null=True)
     supplying_status = models.CharField()
-    price = models.CharField(null=True,blank=True)
+    price = models.FloatField(null=True,blank=True)
     product_title=models.CharField(max_length=255)
     product_description = models.TextField(null=True)
     response = models.ForeignKey(TenderResponse, on_delete=models.CASCADE)
 
+class Transaction(models.Model):
+    response=models.ForeignKey(TenderResponse, on_delete=models.CASCADE)
+    tender=models.ForeignKey(Tender, on_delete=models.CASCADE)
+    product_review_date= models.DateField(null=True)
+    product_review_date_status=models.CharField(null=True)
+    product_review_status =models.CharField(null=True)
+    transaction_date= models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('tender', 'response')
     # @property
     # def original_product(self):
     #     return self.product.
 
-    def __str__(self):
-        return f"{self.id}- {self.product.title} {self.product.id}-> Tender {self.response.tender.id}"
+    # def __str__(self):
+    #     return f"{self.id}- {self.product.title} {self.product.id}-> Tender {self.response.tender.id}"
 
 class ResponsePrivateCondition(models.Model):
     offered_condition=models.CharField(max_length=255,blank=True,null=True)

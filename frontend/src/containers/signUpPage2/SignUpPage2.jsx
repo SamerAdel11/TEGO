@@ -29,7 +29,6 @@ const SignUpPage2 = () => {
     // Company_branches_address: '',
     // Company_branches_governorate: '',
     Main_activity: '',
-    Sub_activity: '',
     address: '',
     registrationAuthority: '',
     fax: '',
@@ -44,18 +43,17 @@ const SignUpPage2 = () => {
       [name]: value,
     }));
   };
-  const [repeatActivityRows, setRepeatActivityRows] = useState(1); // State for repeated activity rows
-  const handleAddActivityRow = () => {
-    setRepeatActivityRows((prevRepeatRows) => prevRepeatRows + 1);
+
+  const [repeatBranchRows, setRepeatBranchRows] = useState(1);
+  const handleAddBranchRow = () => {
+    if (repeatBranchRows < 3) {
+      setRepeatBranchRows((prevRepeatRows) => prevRepeatRows + 1);
+    }
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const postData = {
-        company_fields: [...Array(repeatActivityRows)].map((_, index) => ({
-          primary_field: formData[`Main_activity_${index}`],
-          secondary_field: formData[`Sub_activity_${index}`],
-        })),
         user: {
           first_name: formData.First_Name,
           last_name: formData.Second_Name,
@@ -63,6 +61,12 @@ const SignUpPage2 = () => {
           password: formData.passWord,
           password2: formData.Password2,
         },
+        owners: [...Array(repeatBranchRows)].map((_, index) => ({
+          name: formData[`owner_name_${index}`],
+          owner_id: formData[`The_owner_id_${index}`],
+          onwer_position: formData[`Position_of_owner_${index}`],
+          address: formData[`Owner_address_${index}`],
+        })),
         name: formData.companyName,
         location: formData.address,
         fax_number: formData.fax,
@@ -70,6 +74,8 @@ const SignUpPage2 = () => {
         landline: formData.phone,
         city: formData.registrationAuthority,
         company_type_tego: 'buyer',
+        company_field: formData.Main_activity,
+
       };
       // Make POST request
       const response = await fetch('http://localhost:8000/companies/', {
@@ -136,12 +142,12 @@ const SignUpPage2 = () => {
           </div>
           <div className="form-group">
             <label htmlFor="passWord">كلمة السر
-              <input type="text" name="passWord" id="passWord" value={formData.passWord} onChange={handleChange} />
+              <input type="password" name="passWord" id="passWord" value={formData.passWord} onChange={handleChange} />
             </label>
           </div>
           <div className="form-group">
             <label htmlFor="Password2">تاكيد كلمة السر
-              <input type="text" name="Password2" id="Password2" value={formData.Password2} onChange={handleChange} />
+              <input type="password" name="Password2" id="Password2" value={formData.Password2} onChange={handleChange} />
             </label>
           </div>
           <hr data-v-7e013592 />
@@ -151,6 +157,11 @@ const SignUpPage2 = () => {
           <div className="form-group">
             <label htmlFor="address">اسم الشركه
               <input type="text" name="companyName" id="companyName" value={formData.companyName} onChange={handleChange} />
+            </label>
+          </div>
+          <div className="form-group ">
+            <label htmlFor="Main_activity">مجال الشركة
+              <input type="text" name="Main_activity" id="Main_activity" value={formData.Main_activity} onChange={handleChange} />
             </label>
           </div>
           <div className="form-group">
@@ -206,23 +217,51 @@ const SignUpPage2 = () => {
             </label>
           </div>
           <hr data-v-7e013592 />
-          <h2>انشطة الشركة</h2>
-          {[...Array(repeatActivityRows)].map((_, index) => (
-            <div key={index} className="row">
-              <div className="form-group col-md-6">
-                <label htmlFor={`Main_activity_${index}`}>نشاط رئيسي
-                  <input type="text" name={`Main_activity_${index}`} id={`Main_activity_${index}`} value={formData[`Main_activity_${index}`]} onChange={handleChange} />
-                </label>
+          <h2>ملاك الشركة المسئولين بالتضامن/ أعضاء مجلس الإدارة / المندوبين بحد أقصي(3)مندوب</h2>
+          <div>
+            {[...Array(repeatBranchRows)].map((_, index) => (
+              <div>
+                {index === 0 && <h2>المالك الأول</h2>}
+                {index === 1 && <h2>المالك الثاني</h2>}
+                {index === 2 && <h2>المالك الثالث</h2>}
+
+                <div key={index} className="row">
+                  <div className="form-group col-md-6">
+                    <label htmlFor={`owner_name_${index}`}>الاسم
+                      <input type="text" name={`owner_name_${index}`} id={`owner_name_${index}`} value={formData[`owner_name_${index}`]} onChange={(e) => handleChange(e, index)} />
+                    </label>
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor={`Position_of_owner_${index}`}>المنصب
+                      <select name={`Position_of_owner_${index}`} id={`Position_of_owner_${index}`} value={formData[`Position_of_owner_${index}`]} onChange={(e) => handleChange(e, index)}>
+                        <option value="">اختر المنصب</option>
+                        <option value="مالك">مالك</option>
+                        <option value="رئيس مجلس ادارة">رئيس مجلس ادارة</option>
+                        <option value="عضو مجلس ادارة">عضو مجلس ادارة</option>
+                        <option value="مدير">مدير</option>
+                        <option value="شريك">شريك</option>
+                        <option value="زوج / زوجة المالك">زوج / زوجة المالك</option>
+                        <option value="زوج / زوجة رئيس مجلس الادارة">زوج / زوجة رئيس مجلس الادارة</option>
+                        <option value="مندوب">مندوب</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div className="form-group col-md-12">
+                    <label htmlFor={`The_owner_id_${index}`}>الرقم القومي
+                      <input type="text" name={`The_owner_id_${index}`} id={`The_owner_id_${index}`} value={formData[`The_owner_id_${index}`]} onChange={(e) => handleChange(e, index)} />
+                    </label>
+                  </div>
+                  <div className="form-group col-md-12">
+                    <label htmlFor={`Owner_address_${index}`}>العنوان
+                      <input type="text" name={`Owner_address_${index}`} id={`Owner_address_${index}`} value={formData[`Owner_address_${index}`]} onChange={(e) => handleChange(e, index)} />
+                    </label>
+                  </div>
+                </div>
               </div>
-              <div className="form-group col-md-6">
-                <label htmlFor={`Sub_activity_${index}`}>نشاط فرعي
-                  <input type="text" name={`Sub_activity_${index}`} id={`Sub_activity_${index}`} value={formData[`Sub_activity_${index}`]} onChange={handleChange} />
-                </label>
-              </div>
-            </div>
-          ))}
-          <button type="button" className="Add_button" onClick={handleAddActivityRow}>
-            <i className="fa fa-plus" /> اضافة نشاط آخر
+            ))}
+          </div>
+          <button data-v-7e013592="" type="button" className="Add_button" onClick={handleAddBranchRow}>
+            <i data-v-7e013592="" className="fa fa-plus" />اضافة مالك اخر
           </button>
           <button type="submit" className="submit_button" onClick={handleSubmit}>Submit</button>
         </form>

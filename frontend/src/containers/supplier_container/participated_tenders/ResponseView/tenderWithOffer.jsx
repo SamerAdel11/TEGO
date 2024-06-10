@@ -1,6 +1,11 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 import AuthContext from '../../../../context/Authcontext';
+
 // import './AddResponse.css';
 
 function Response() {
@@ -14,11 +19,52 @@ function Response() {
   const [previousWork, setPreviousWork] = useState([]);
   const [previousWorkIndex, setPreviousWorkIndedx] = useState(0);
   const [showAddProjectButton, setShowAddProjectButton] = useState(true);
-  const navigate = useHistory();
+  const [transaction, setTransaction] = useState(null);
   const location = useLocation();
+  const [open, setOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
   const searchParams = new URLSearchParams(location.search);
   // const [totalPrice, setTotalPrice] = useState(0);
   const tenderId = searchParams.get('tender_id');
+  const [minDate, setMinDate] = useState('');
+  const [maxDate, setMaxDate] = useState('');
+  const [dateerror, setError] = useState('');
+
+  useEffect(() => {
+    // Get the current date
+    const today = new Date();
+    // Format the date as yyyy-mm-dd
+    const formattedMinDate = today.toISOString().split('T')[0];
+    const nextYear = new Date(today);
+    nextYear.setFullYear(today.getFullYear() + 1);
+    const formattedMaxDate = nextYear.toISOString().split('T')[0];
+
+    setMinDate(formattedMinDate);
+    setMaxDate(formattedMaxDate);
+    // Set the minDate state
+  }, []);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  };
+  const handleDateChange = (event) => {
+    const date = event.target.value;
+    setSelectedDate(date);
+    if (date < minDate) {
+      setError('يرجي اختيار موعد قادم صحيح');
+    } else if (date > maxDate) {
+      setError(`يرجي اختيار موعد قبل ${formatDate(maxDate)}`);
+    } else {
+      setError('');
+    }
+    // console.log('Tender opening date selected:', date);
+    // Additional actions can be added here
+  };
   const handleAddProject = () => {
     const newPreviousWork = { id: previousWorkIndex + 1, title: '', description: '' };
     setPreviousWork([...previousWork, newPreviousWork]);
@@ -108,6 +154,25 @@ function Response() {
         });
         const myresponseData = await myresponse.json();
         setOffer(myresponseData);
+        if (myresponseData.status === 'winner') {
+          try {
+            const response2 = await fetch(
+              `http://localhost:8000/transactions/${myresponseData.id}/${tenderId}/`,
+              {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${authTokens.access}`,
+                },
+              },
+            );
+            const transactionData = await response2.json();
+            console.log('Transaction:', transactionData);
+            setTransaction(transactionData);
+          } catch (error) {
+            console.error('خطأ في جلب تفاصيل العطاء:', error);
+          }
+        }
         const adjustTextareaHeight = () => {
           const textarea = document.getElementById('tenderSubject');
           if (textarea) {
@@ -134,9 +199,12 @@ function Response() {
         console.log('Error in fetching response');
       }
     };
-    getResponse();
     fetchTenders();
+    getResponse();
   }, [authTokens]);
+  useEffect(() => {
+    console.log('Transaction is here', transaction);
+  });
   const handleProductChange = (idx, field, value) => {
     const updatedProducts = [...products];
     updatedProducts[idx][field] = value;
@@ -147,65 +215,11 @@ function Response() {
     updatedConditions[idx].value = value;
     setConditions(updatedConditions);
   };
-  const handleClick = () => {
-    navigate.push('/open_tenders');
-  };
   const handlePrivateConditionChange = (idx, value) => {
     const updatedPrivateConditions = [...privateconditions];
     updatedPrivateConditions[idx].condition = value;
     setPrivateConditions(updatedPrivateConditions);
     console.log(updatedPrivateConditions);
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const renameKeys = (product) => ({
-      product_title: product.title,
-      product_description: product.description,
-      provided_quantity: product.quantity,
-      productid: product.id,
-      supplying_status: product.supplying_status,
-      price: product.price,
-    });
-    const renameKeys2 = (prcondition) => ({
-      condition: prcondition.id,
-      offered_condition: prcondition.condition,
-    });
-    const renamepreviouswork = (work) => ({
-      title: work.title,
-      description: work.description,
-    });
-    const renamedProducts = products.map(renameKeys);
-    const renamedPrcondition = privateconditions.map(renameKeys2);
-    const renamedWork = previousWork.map(renamepreviouswork);
-    try {
-      const formData = {
-        offer_products: renamedProducts,
-        offer_conditions: renamedPrcondition,
-        tender_id: tenderId,
-        status: 'offered',
-        previous_work: renamedWork,
-        offered_price: document.getElementById('offeredprice').value,
-      };
-
-      const response2 = await fetch('http://localhost:8000/add_response/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authTokens.access}`,
-        },
-        body: JSON.stringify(formData),
-      });
-      if (response2.ok) {
-        console.log(formData);
-        console.log('response2');
-        console.log(response2);
-        navigate.push('/open_tenders');
-      } else {
-        console.log('ERROR', response2.json());
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
   };
   const confirmNotification = async (decision) => {
     // e.preventDefault();
@@ -222,41 +236,213 @@ function Response() {
       console.error('Error in submitting the data');
     }
   };
+  const ConfirmDate = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/transactions/${transaction.response}/${tenderId}/`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+          body: JSON.stringify({
+            response: transaction.response,
+            product_review_date_status: 'accepted',
+            tender: tenderId,
+          }),
+        },
+      );
+
+      // const data = await response.json();
+      if (response.ok) {
+        // window.location.reload();
+      }
+    } catch (error) {
+      // alert(error);
+      console.error('خطأ في جلب تفاصيل العطاء:', error);
+    }
+  };
+  const ReviewDateSubmit = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/transactions/${transaction.response}/${tenderId}/`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+          body: JSON.stringify({
+            response: transaction.response,
+            tender: tenderId,
+            product_review_date: selectedDate,
+            product_review_date_status: 'waiting_for_host',
+          }),
+        },
+      );
+
+      // const data = await response.json();
+      if (response.ok) {
+        window.location.reload();
+      }
+    } catch (error) {
+      alert(error);
+      console.error('خطأ في جلب تفاصيل العطاء:', error);
+    }
+  };
   if (!data || !offer) {
     return <div>Loading...</div>;
   }
   return (
     <>
-      <div className="container_create_tender">
-        <form onSubmit={handleSubmit}>
+      <div className="container_create_tender" style={{ marginRight: '-20px' }}>
+        <form>
           {offer.status === 'awarded' && (
-            <div className="buttons_awating">
-              <button
-                type="submit"
-                className="button_awating"
-                onClick={(e) => {
-                  e.preventDefault();
-                  confirmNotification('confirmed');
-                }}
-              >
-                موافق
-              </button>
-              <button
-                type="button"
-                style={{ background: 'red' }}
-                className="button_awating"
-                onClick={(e) => {
-                  e.preventDefault();
-                  confirmNotification('rejected');
-                }}
-              >
-                رفض
-              </button>
+            <div>
+              <div className="center-content">
+                <p style={{ fontSize: '20px' }} className="national">تهانينا لقد فزت بهذه المناقصه يرجي التاكيد لاستمرار باقي اجرائات المناقصة</p>
+              </div>
+              <div className="buttons_awating">
+                <button
+                  style={{ padding: '12px', marginLeft: '150px', marginRight: '100px' }}
+                  type="submit"
+                  className="button_awating"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    confirmNotification('confirmed');
+                    window.location.reload();
+                  }}
+                >
+                  موافق
+                </button>
+                <button
+                  type="button"
+                  style={{ background: 'red', padding: '0px', marginLeft: '90px' }}
+                  className="button_awating"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    confirmNotification('rejected');
+                  }}
+                >
+                  رفض
+                </button>
+                <Dialog
+                  style={{ backgroundColor: '#073057' }}
+                  open={open}
+                  aria-labelledby="alert-dialog-title"
+                  aria-describedby="alert-dialog-description"
+                >
+                  <DialogTitle style={{ color: 'white', backgroundColor: '#073057', fontFamily: 'Alexandria', fontSize: 'x-large', marginBottom: '1px', padding: '15px' }} id="alert-dialog-title">
+                    موعد مراجعة المنتجات
+                  </DialogTitle>
+                  <DialogContent style={{ backgroundColor: '#073057', color: 'white' }}>
+                    {/* <DialogContentText style={{ backgroundColor: '#073057', color: 'white', fontSize: 'x-large', textAlign: 'center', paddingLeft: '50px', paddingRight: '50px' }} id="alert-dialog-description">
+                      يرجي اختيار موعد لتحديد مراجعة المنتجات
+                    </DialogContentText> */}
+                    <div className="form-fields">
+                      {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                      <label style={{ paddingBottom: '10px', marginTop: '20px' }} htmlFor="tenderOpeningDate">يرجي اختيار الموعد المناسب لك لمراجعة المنتجات </label>
+                      <input
+                        type="date"
+                        id="tenderOpeningDate"
+                        min={minDate}
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        max={maxDate}
+
+                      />
+                      {dateerror && <p style={{ color: 'red' }}>{dateerror}</p>}
+                    </div>
+                  </DialogContent>
+                  <DialogActions style={{ backgroundColor: '#073057' }}>
+                    <button type="button" style={{ backgroundColor: '#FC432E', color: 'white', fontFamily: 'Alexandria' }} onClick={ReviewDateSubmit}>اختيار</button>
+                  </DialogActions>
+                </Dialog>
+              </div>
             </div>
           )}
-          {offer.status === 'winner' && (
+          {transaction && transaction.product_review_date_status === 'waiting_for_supplier' && (
+            <div>
+              <div className="center-content">
+                <p style={{ fontSize: '20px' }} className="national">مالك المناقصة حدد موعد  {transaction.review_date_arabic} لمراجعة المنتجات لديكم يرجي التأكيد علي الموعد او اختيار موعد اخر</p>
+              </div>
+              <div className="buttons_awating">
+                <button
+                  style={{ padding: '12px', marginLeft: '150px', marginRight: '100px' }}
+                  type="submit"
+                  className="button_awating"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    ConfirmDate();
+                    window.location.reload();
+                  }}
+                >
+                  موافق
+                </button>
+                <button
+                  type="button"
+                  style={{ background: 'red', padding: '0px', marginLeft: '90px' }}
+                  className="button_awating"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleClickOpen();
+                  }}
+                >
+                  اختيار موعد اخر
+                </button>
+                <Dialog
+                  style={{ backgroundColor: '#073057' }}
+                  open={open}
+                  aria-labelledby="alert-dialog-title"
+                  aria-describedby="alert-dialog-description"
+                >
+                  <DialogTitle style={{ color: 'white', backgroundColor: '#073057', fontFamily: 'Alexandria', fontSize: 'x-large', marginBottom: '1px', padding: '15px' }} id="alert-dialog-title">
+                    موعد مراجعة المنتجات
+                  </DialogTitle>
+                  <DialogContent style={{ backgroundColor: '#073057', color: 'white' }}>
+                    {/* <DialogContentText style={{ backgroundColor: '#073057', color: 'white', fontSize: 'x-large', textAlign: 'center', paddingLeft: '50px', paddingRight: '50px' }} id="alert-dialog-description">
+                      يرجي اختيار موعد لتحديد مراجعة المنتجات
+                    </DialogContentText> */}
+                    <div className="form-fields">
+                      {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                      <label style={{ paddingBottom: '10px', marginTop: '20px' }} htmlFor="tenderOpeningDate">يرجي اختيار الموعد المناسب لك لمراجعة المنتجات </label>
+                      <input
+                        type="date"
+                        id="tenderOpeningDate"
+                        min={minDate}
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        max={maxDate}
+                      />
+                      {dateerror && <p style={{ color: 'red' }}>{dateerror}</p>}
+                    </div>
+                  </DialogContent>
+                  <DialogActions style={{ backgroundColor: '#073057' }}>
+                    <button type="button" style={{ backgroundColor: '#FC432E', color: 'white', fontFamily: 'Alexandria' }} onClick={ReviewDateSubmit}>اختيار</button>
+                  </DialogActions>
+                </Dialog>
+              </div>
+            </div>
+          )}
+          {transaction && transaction.product_review_status === 'accepted' && (
+            <div className="center-content">
+              <p className="national">لقد وافق مالك المناقصة علي منتجات هذه المناقصة بعد المراجعة</p>
+            </div>
+          )}
+          {transaction && transaction.product_review_status === 'rejected' && (
+            <div className="center-content">
+              <p className="national">لقد رفض مالك المناقصة علي منتجات هذه المناقصة بعد المراجعة</p>
+            </div>
+          )}
+          {offer.status === 'winner' && transaction && !transaction.product_review_date_status && !transaction.product_review_status && (
           <div className="center-content">
             <p className="national">تهانينا لقد فزت بهذه المناقصة</p>
+          </div>
+          )}
+          {offer.status === 'candidate_pool' && (
+          <div className="center-content">
+            <p style={{ fontSize: '23px' }} className="national">تمت إضافه هذا العرض لقائمه المرشحين</p>
           </div>
           )}
           <div className="tender_announcement">
@@ -417,7 +603,7 @@ function Response() {
                 <span className="condition-index">{idx + 1}.</span>
                 <input
                   type="text"
-                  defaultValue={`${privateCondition.offered_condition}`}
+                  value={`${privateCondition.offered_condition}`}
                   onChange={(e) => handlePrivateConditionChange(idx, e.target.value)}
                   placeholder={` الشرط الخاص رقم ${idx + 1}`}
                   className="private-condition-input"
@@ -425,16 +611,12 @@ function Response() {
               </div>
             ))}
           </div>
-          <div>
-            {offer.previous_work ? (
+          <div style={{ marginBottom: '70px' }}>
+            {offer.previous_work.length > 0 && (
               <div className="gradient__text m-3">
                 <h1>الأعمال السابقة</h1>
               </div>
-            ) : (
-              <div className="gradient__text m-3">
-                <h1>لا يوجدالأعمال السابقة </h1>
-              </div>
-            ) }
+            )}
             {offer.previous_work.map((work, index) => (
               <div key={index}>
                 <h3>المشروع رقم {index + 1}</h3>
@@ -462,15 +644,6 @@ function Response() {
                 اضافه مشروع
               </button>
             )}
-          </div>
-
-          <div className="button-container">
-            <button type="submit" className="button" onSubmit={handleSubmit}>
-              إرسال العرض
-            </button>
-            <button type="button" className="button cancel" onClick={handleClick}>
-              الغاء
-            </button>
           </div>
         </form>
       </div>

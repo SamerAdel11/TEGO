@@ -9,6 +9,15 @@ function CandidateDetails() {
   const [responseDetails, setResponseDetails] = useState(null);
   const { authTokens } = useContext(AuthContext);
   const history = useHistory();
+  useEffect(() => {
+    // This effect will run every time the location changes
+    const unlisten = history.listen(() => {
+      window.scrollTo(0, 0);
+    });
+    return () => {
+      unlisten();
+    };
+  }, [history]);
   const handleSendResponse = async (tender) => {
     try {
       const status = 'awarded';
@@ -26,7 +35,7 @@ function CandidateDetails() {
 
       const data = await response.json();
       console.log('Response sent:', data);
-      history.push(`/awating_responses${id}`);
+      history.push(`/awating_responses/${id}`);
     } catch (error) {
       console.error('Error sending response:', error);
     }
@@ -75,40 +84,45 @@ function CandidateDetails() {
   return (
     <div className="tender-details-container">
       <div className="center-content">
+        <div className="gradient__text mytender">
+          <h1 style={{ marginBottom: '20px' }}>قائمه المرشحين</h1>
+        </div>
         {/* eslint-disable-next-line no-nested-ternary */}
         {responseDetails !== null ? (
           <div>
             {responseDetails.map((tender, index) => (
               <div key={tender.id}>
                 <div className="gradient__text mytender">
-                  <h1>العرض رقم {index + 1}</h1>
+                  <h1 style={{ fontSize: '40px' }}>العرض رقم {index + 1}</h1>
                 </div>
                 <div className="center-content">
                   <p className="national"> هذا العرض ملائم لهذه المناقصة بنسبه {tender.score} %</p>
                 </div>
                 { tender.previous_work.length > 0 && (
-                <div className="gradient__text">
-                  <h4 className="response">الاعمال السابقة</h4>
-                </div>
+                  <div>
+                    <div className="gradient__text">
+                      <h4 className="response">الاعمال السابقة</h4>
+                    </div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>رقم المشروع</th>
+                          <th>عنوان المشروع</th>
+                          <th>وصف المشروع</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tender.previous_work.map((work, indexx) => (
+                          <tr key={indexx}>
+                            <td>{indexx + 1}</td>
+                            <td>{work.title}</td>
+                            <td>{work.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
-                <table>
-                  <thead>
-                    <tr>
-                      <th>رقم المشروع</th>
-                      <th>عنوان المشروع</th>
-                      <th>وصف المشروع</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tender.previous_work.map((work, indexx) => (
-                      <tr key={indexx}>
-                        <td>{indexx + 1}</td>
-                        <td>{work.title}</td>
-                        <td>{work.description}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
 
                 <div className="gradient__text">
                   <h4 className="response">منتجات العرض</h4>

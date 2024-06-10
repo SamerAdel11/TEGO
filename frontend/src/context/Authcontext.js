@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode'; // Corrected import for jwtDecode
 import { useHistory } from 'react-router-dom';
 
 const AuthContext = createContext();
@@ -7,38 +7,35 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const storedAuthTokens = localStorage.getItem('authTokens');
   const initialUser = storedAuthTokens ? jwtDecode(storedAuthTokens) : null;
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(initialUser);
   const initialAuthTokens = storedAuthTokens ? JSON.parse(storedAuthTokens) : null;
   const [authTokens, setAuthTokens] = useState(initialAuthTokens);
   const [loading, setLoading] = useState(true);
   const history = useHistory();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (initialUser && loading) {
-        try {
-          console.log('Fetching user...');
-          const response = await fetch('http://localhost:8000/verified/', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authTokens.access}` },
-          });
-          const data = await response.json();
-          console.log(`Data is ${JSON.stringify(data)}`);
-          setUser({ ...initialUser, verified: data.verified });
-        } catch (error) {
-          console.error('Error fetching user:', error);
-        } finally {
-          console.log('loading has been setted to false');
-          setLoading(false);
-        }
+  const fetchUser = async () => {
+    if (authTokens) {
+      try {
+        const response = await fetch('http://localhost:8000/verified/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+        });
+        const data = await response.json();
+        setUser({ ...jwtDecode(authTokens.access), verified: data.verified });
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      } finally {
+        setLoading(false);
       }
-    };
-    console.log('Fetch user called');
-    fetchUser(); // Call the function to fetch user when component mounts or dependencies change
-  }, [initialUser, authTokens]); // Dependencies for the useEffect hook
+    } else {
+      setLoading(false);
+    }
+  };
 
   const loginUser = async (formData) => {
-    console.log('form submitted');
     const response = await fetch('http://localhost:8000/login/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -51,21 +48,16 @@ export const AuthProvider = ({ children }) => {
     if (response.status === 200) {
       setAuthTokens(tokens);
       const loggedUser = jwtDecode(tokens.access);
-      console.log(loggedUser);
       setUser(loggedUser);
       localStorage.setItem('authTokens', JSON.stringify(tokens));
       if (loggedUser.company_type === 'supplier') {
-        console.log('SUPPLIER');
-        history.push('/host');
+        history.push('/open_tenders');
       } else {
-        console.log('HOST');
-        // history.push('/host');
+        history.push('/mytender');
       }
     } else if (response.status === 401) {
       alert(tokens.detail);
     } else {
-      console.log(formData);
-      console.log(response.json());
       alert('something went wrong');
     }
   };
@@ -73,38 +65,50 @@ export const AuthProvider = ({ children }) => {
   const logoutUser = () => {
     setAuthTokens(null);
     setUser(null);
-    console.log('logged out');
     localStorage.removeItem('authTokens');
     history.push('/');
   };
 
   const updateToken = async () => {
-    if (!authTokens) {
-      console.log('authTokens are empty');
-    } else {
-      const response = await fetch('http://localhost:8000/token/refresh/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          refresh: authTokens?.refresh,
-        }),
-      });
-      const tokens = await response.json();
-      console.log(tokens);
-      console.log('refresh called');
-      if (response.status === 200) {
-        setAuthTokens(tokens);
-        setUser(jwtDecode(tokens.access));
-        localStorage.setItem('authTokens', JSON.stringify(tokens));
-      } else {
-        alert('something went wrong');
+    if (authTokens) {
+      try {
+        const response = await fetch('http://localhost:8000/token/refresh/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: authTokens.refresh }),
+        });
+        const tokens = await response.json();
+        if (response.status === 200) {
+          setAuthTokens(tokens);
+          setUser(jwtDecode(tokens.access));
+          localStorage.setItem('authTokens', JSON.stringify(tokens));
+        } else {
+          logoutUser();
+        }
+      } catch (error) {
+        console.error('Error updating token:', error);
         logoutUser();
       }
-      if (loading) {
-        setLoading(false);
-      }
+    } else {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (loading) {
+      fetchUser();
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (authTokens) {
+        updateToken();
+      }
+    }, 1000 * 60 * 60 * 23); // 23 hours
+
+    return () => clearInterval(interval);
+  }, [authTokens]);
 
   const contextData = {
     user,
@@ -113,23 +117,12 @@ export const AuthProvider = ({ children }) => {
     logout: logoutUser,
     loading,
   };
-  useEffect(() => {
-    // if (loading) {
-    //   updateToken();
-    // }
-    const delaytime = 1000 * 60 * 60 * 23;
-    const interval = setInterval(() => {
-      if (authTokens) {
-        updateToken();
-      }
-    }, delaytime);
-    return () => {
-      clearInterval(interval);
-    };
-  }, [authTokens]);
 
   return (
-    <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={contextData}>
+      {children}
+    </AuthContext.Provider>
   );
 };
+
 export default AuthContext;

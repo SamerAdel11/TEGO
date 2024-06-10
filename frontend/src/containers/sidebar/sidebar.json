@@ -6,7 +6,7 @@
             {
                 "title": "انشاء مناقصة",
                 "icon": "bi bi-pen",
-                "path": "/createtnder"
+                "path": "/create_tender"
             },
             {
                 "title": "جميع المناقصات",

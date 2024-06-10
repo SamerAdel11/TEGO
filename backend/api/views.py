@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from .models import CustomUser, Company, UserNotification, Tender, TenderResponse
+from .models import CustomUser, Company, UserNotification, Tender, TenderResponse, Transaction
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .serializer import UserSerializer, CompanySerializer, NotificationnSerializer, TenderSerializer, ResponseSerializer, TenderRetrieveSerializer
+from .serializer import TransactionSerializer, UserSerializer, CompanySerializer, NotificationnSerializer, TenderSerializer, ResponseSerializer, TenderRetrieveSerializer
 from rest_framework import generics, status, serializers
 from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
@@ -49,6 +49,20 @@ class TenderCreateView(APIView):
             response = serializer.save()
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self,request,*args,**kwargs):
+        tender_id= request.data.get('id')
+        try:
+            tender_instance = Tender.objects.get(id=tender_id)
+        except Tender.DoesNotExist:
+            return Response({"error": "Tender not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = TenderSerializer(tender_instance,
+            data=request.data, context={'request': request})
+        print(tender_id)
+        if serializer.is_valid():
+            response = serializer.save(instance=tender_instance)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RetrieveTender(generics.RetrieveAPIView):
@@ -66,6 +80,7 @@ class TenderHostView(generics.ListAPIView):
         queryset = Tender.objects.filter(user=user)
         if status:
             status_list = status.split(',')
+            print(status_list)
             return queryset.filter(status__in=status_list)
         return queryset
 
@@ -75,10 +90,12 @@ class TenderSupplierView(generics.ListAPIView):
         user = self.request.user
         responsestatus = self.request.query_params.get('responsestatus', None)
         print(responsestatus)
-        queryset = Tender.objects.filter(user=user)
+        company=Company.objects.get(user=user)
+        queryset = Tender.objects.filter(ad__field=company.company_field)
         if responsestatus:
+            status_list = responsestatus.split(',')
             # queryset=queryset.exclude(tenderresponse__user=request.user)
-            return queryset.filter(tenderresponse__status=responsestatus)
+            return queryset.filter(tenderresponse__status__in=status_list,tenderresponse__user=user)
         return queryset.exclude(tenderresponse__user=self.request.user)
 
     def get(self, request, *args, **kwargs):
@@ -128,10 +145,11 @@ class ResponseDetailAPIView(generics.ListAPIView):
         if tender_id is None:
             return Response({'message':"tender id must be passed as a url parameter"},)
         tender_instance=Tender.objects.get(id=tender_id)
-        queryset=TenderResponse.objects.filter(user=user,tender=tender_instance)
+        queryset=TenderResponse.objects.filter(tender=tender_instance)
         status = self.request.query_params.get('status', None)
         if status:
             status_list = status.split(',')
+            print(status_list)
             return queryset.filter(status__in=status_list)
         return queryset
 
@@ -191,6 +209,7 @@ class SupplierConfirmation(APIView):
             response.status='winner'
             tender.save()
             response.save()
+            Transaction.objects.create(tender=tender,response=response)
         elif confirm_status=='rejected':
             tender.status=='candidate_pool'
             response.status=='rejected'
@@ -318,4 +337,180 @@ class MakeNotificationsSeen(APIView):
         queryset.update(seen=True)
         time.sleep(5)
         return Response({"message":"Done"})
+from .models import TenderAd
+from .models import TenderAdmin
+from .models import Owner
+from .models import TenderProduct
+from .models import ResponseProductBid
+from .models import Supplier
+from .models import TenderPublicConditions
+from .models import ResponsePrivateCondition
+from word2number import w2n
+from num2words import num2words
+import arabic_reshaper
+from bidi.algorithm import get_display
+import re
+import pdfkit
+from django.shortcuts import HttpResponse
+from jinja2 import Environment, FileSystemLoader
+
+class Contract(APIView):
+    def number_to_arabic_words(self,number):
+        try:
+            # Convert number to Arabic words
+            arabic_words = num2words(number, lang='ar')
+            # Reshape for proper Arabic display
+            reshaped_text = arabic_reshaper.reshape(arabic_words)
+            # Get display-friendly version
+            bidi_text = get_display(reshaped_text)
+            pattern = r'و\s+'
+            cleaned_text = re.sub(pattern, 'و', bidi_text)
+            return reshaped_text
+        except Exception as e:
+            return str(e)
+    def get_written_number(self,number):
+        if number % 1==0:
+            print("True")
+            arabic_offer_price=self.number_to_arabic_words(int(number))+ ' جنيه'
+            print(arabic_offer_price)
+            return arabic_offer_price
+
+        else:
+            arabic_offer_price=self.number_to_arabic_words(str(number).split('.')[0])+ ' جنيه'
+            arabic_offer_price=arabic_offer_price+' و '+self.number_to_arabic_words(str(number).split('.')[1])+ ' قرش'
+            print(arabic_offer_price)
+            return arabic_offer_price
+    # arabic_offer_price=number_to_arabic_words(int(response.offered_price))
+    # print(arabic_offer_price)
+    def post(self,request, tender_id,response_id):
+        response=TenderResponse.objects.get(id=response_id)
+        tender=Tender.objects.get(id=tender_id)
+        tenderad=TenderAd.objects.get(tender=tender)
+        admins= TenderAdmin.objects.filter(tender=tender)
+        host_company=Company.objects.get(user=tender.user)
+        host_owners= Owner.objects.filter(company=host_company)
+        supplier_company= Company.objects.get(user=response.user)
+        supplier_owners= Owner.objects.filter(company=supplier_company)
+        supplier_company_details =Supplier.objects.get(company=supplier_company)
+        products=ResponseProductBid.objects.filter(response=response,supplying_status='متوفر')
+        public_conditions= TenderPublicConditions.objects.filter(tender=tender)
+        private_conditions= ResponsePrivateCondition.objects.filter(response=response)
+        print(90.00%1==0)
+        arabic_offer_price=''
+        arabic_ordinals = [
+            "السادس عشر", "السابع عشر", "الثامن عشر", "التاسع عشر", "العشرون",
+            "الحادي والعشرون", "الثاني والعشرون", "الثالث والعشرون", "الرابع والعشرون", "الخامس والعشرون", "السادس والعشرون", "السابع والعشرون", "الثامن والعشرون", "التاسع والعشرون", "الثلاثون",
+            "الحادي والثلاثون", "الثاني والثلاثون", "الثالث والثلاثون", "الرابع والثلاثون", "الخامس والثلاثون", "السادس والثلاثون", "السابع والثلاثون", "الثامن والثلاثون", "التاسع والثلاثون", "الأربعون",
+            "الحادي والأربعون", "الثاني والأربعون", "الثالث والأربعون", "الرابع والأربعون", "الخامس والأربعون", "السادس والأربعون", "السابع والأربعون", "الثامن والأربعون", "التاسع والأربعون", "الخمسون"
+        ]
+        pc=[]
+        for condition,order in zip(public_conditions,arabic_ordinals):
+            pc.append({'condition':condition.condition,
+                        'order': order})
+        private_c=[]
+        for condition,order in zip(private_conditions,arabic_ordinals[public_conditions.count():]):
+            private_c.append({'condition':condition.offered_condition,
+                'order': order})
+        products_with_full_price=[]
+        for product in products:
+            product_dict = {
+                'product':product.product,
+                'provided_quantity':product.provided_quantity,
+                'supplying_status':product.supplying_status,
+                'price':product.price,
+                'product_title':product.product_title,
+                'product_description':product.product_description,
+                'response':product.response,
+            }
+            # Calculate the full price
+            full_price = product_dict['provided_quantity'] * product_dict['price']
+            # Add the new key-value pair to the product dictionary
+            product_dict['full_price'] = full_price
+            # Append the updated dictionary to the list
+            products_with_full_price.append(product_dict)
+
+        context={
+            'tender_ad':tenderad,
+            'tender':tender,
+            'response': response,
+            'admins':admins,
+            'host_company':host_company,
+            'host_owners':host_owners,
+            'supplier_company':supplier_company,
+            'supplier_owners':supplier_owners,
+            'supplier_company_details':supplier_company_details,
+            'arabic_offer_price':self.get_written_number(response.offered_price),
+            'products':products_with_full_price,
+            'arabic_ordinals':arabic_ordinals,
+            'finalInsurancePrice': tenderad.finalInsurance*0.01*response.offered_price,
+            'arabicInsurancePrice':self.get_written_number(tenderad.finalInsurance*0.01*response.offered_price),
+            'public_condition': pc,
+            'private_condition': private_c
+            }
         
+        html=render_to_string('contract.html',context)
+        output_pdf_path = 'output.pdf'
+        pdf=pdfkit.from_string(html, False)
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="contract.pdf"'
+        return response
+        return render(request,'contract.html',context)
+
+class TransactionView(APIView):
+    def get_object(self, response_id, tender_id):
+        return Transaction.objects.get(response=response_id, tender=tender_id)
+
+    def get(self, request, response_id, tender_id):
+        transaction = self.get_object(response_id, tender_id)
+        serializer = TransactionSerializer(transaction)
+        return Response(serializer.data)
+
+    def post(self, request, response_id,tender_id):
+        serializer = TransactionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, response_id, tender_id):
+        transaction = self.get_object(response_id, tender_id)
+        serializer = TransactionSerializer(transaction, data=request.data)
+        if serializer.is_valid():
+            if request.data.get('product_review_date_status') == 'waiting_for_supplier':
+                UserNotification.objects.create(recipient=transaction.response.user,message="مالك المناقصة حدد موعد لمراجة المنتجات ‘ يرجي التأكيد علي الموعد او اختيار موعد اخر")
+            elif request.data.get('product_review_date_status') == 'waiting_for_host':
+                UserNotification.objects.create(recipient=transaction.tender.user,message="مورد المناقصة لم يوافق علي الموعد المحدد")
+            elif request.data.get('product_review_date_status') == 'accepted':
+                UserNotification.objects.create(recipient=transaction.tender.user,message=f"تم تحديد موعد {transaction.product_review_date} لمراجعة المنتجات")
+                UserNotification.objects.create(recipient=transaction.response.user,message=f"تم تحديد موعد {transaction.product_review_date} لمراجعة المنتجات")
+            elif request.data.get('product_review_status') == 'accepted':
+                UserNotification.objects.create(recipient=transaction.response.user,message=f"لقد وافق مالك مناقصه {transaction.tender.ad.title} علي المنتجات المقدمة من شركتكم" )
+            elif request.data.get('product_review_status') == 'rejected':
+                UserNotification.objects.create(recipient=transaction.response.user,message=f"لقد رفض مالك مناقصه {transaction.tender.ad.title} علي المنتجات المقدمة من شركتكم" )
+                tender.status='candidate_pool'
+                tender.save()
+                response.status='rejected'
+                response.save()
+                UserNotification.objects.create(recipient=transaction.tender.user,message=f"لقد تم اعاده فتح قائمة المرشحين مرة أخري" )
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+import requests
+class model(APIView):
+    permission_classes=[]
+    def get_model_prediction(self,input_data):
+        url = 'http://127.0.0.1:9000/annonymize/'
+        params = {
+            "input_data": input_data
+        }
+        response = requests.post(url, params=params)
+        if response.status_code == 200:
+            return response.json()['prediction']
+        else:
+            raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
+    def post(self,request):
+        print("Called")
+        prediction = self.get_model_prediction('شركة احمد محمد ابراهيم')
+        print(prediction)
+        return Response({'prediction':prediction})

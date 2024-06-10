@@ -10,7 +10,7 @@ function AwardedTenders() {
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders_supplier?responsestatus=awarded', {
+        const response = await fetch('http://localhost:8000/get_tenders_supplier?responsestatus=awarded,winner', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

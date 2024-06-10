@@ -33,7 +33,7 @@ function OpenTenders() {
   return (
     <div className="pending-container">
       <div className="gradient__text pending_title">
-        <h1 className="first_title">المناقصات المتاحه</h1>
+        <h1 className="first_title">المناقصات المتاحة</h1>
       </div>
       {tendersData && tendersData.map((tender, index) => (
         <Link style={{ 'text-decoration': 'none' }} key={index} to={`/add_response?tender_id=${tender.id}`}>
@@ -43,7 +43,7 @@ function OpenTenders() {
             </h1>
             <p className="topic">{tender.ad.topic}</p>
 
-            <h2> اخر موعد لتقديم العروض {tender.ad?.deadline} </h2>
+            <h2> اخر موعد لتقديم العروض {tender.ad?.deadline_arabic} </h2>
           </div>
         </Link>
       ))}

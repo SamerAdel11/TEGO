@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ResponsePreviousWork,CustomUser, Company, Owner, CompanyField, ResponsePrivateCondition, Supplier, UserNotification, TenderAd, Tender, TenderAdmin, TenderPublicConditions, TenderPrivateConditions, TenderProduct, ResponseProductBid, TenderResponse
+from .models import Transaction,ResponsePreviousWork,CustomUser, Company, Owner, ResponsePrivateCondition, Supplier, UserNotification, TenderAd, Tender, TenderAdmin, TenderPublicConditions, TenderPrivateConditions, TenderProduct, ResponseProductBid, TenderResponse
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id','first_name', 'last_name',
-                'email', 'password', 'password2']
+                'email', 'password', 'password2','verified']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -44,10 +44,7 @@ class OwnerSerializer(serializers.ModelSerializer):
                                                     instace.onwer_position)
         instace.address = validated_data.get('address',
                                              instace.address)
-class CompanyFieldSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CompanyField
-        exclude = ['id', 'company']
+
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
@@ -61,7 +58,6 @@ class NotificationnSerializer(serializers.ModelSerializer):
 
 class CompanySerializer(serializers.ModelSerializer):
     owners = OwnerSerializer(many=True, required=False)
-    company_fields = CompanyFieldSerializer(many=True)
     user = UserSerializer(many=False)
     supplier = SupplierSerializer(many=False, required=False)
     class Meta:
@@ -86,7 +82,6 @@ class CompanySerializer(serializers.ModelSerializer):
         owners = validated_data.get('owners')
         if owners:
             validated_data.pop('owners')
-        company_fields = validated_data.pop('company_fields')
         if validated_data.get('company_type_tego') == 'supplier':
             supplier = validated_data.pop('supplier')
             company = Company.objects.create(**validated_data, user=user)
@@ -99,8 +94,7 @@ class CompanySerializer(serializers.ModelSerializer):
             for owner in owners:
                 Owner.objects.create(**owner, company=company)
         # iterate over fields and create instances
-        for field in company_fields:
-            CompanyField.objects.create(**field, company=company)
+
         UserNotification.objects.create(
             recipient=user, message='you have successfully created your account')
         return user
@@ -137,6 +131,7 @@ class CompanySerializer(serializers.ModelSerializer):
     #     return instace
 class TenderAdSerializer(serializers.ModelSerializer):
     deadline_arabic = serializers.SerializerMethodField()
+    id = serializers.IntegerField(required=False)
     def get_deadline_arabic(self, obj):
         # Convert deadline date to Arabic format
         return self.format_date(obj.deadline)
@@ -146,26 +141,33 @@ class TenderAdSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TenderAd
-        fields = ['title', 'topic', 'deadline', 'field','deadline_arabic']
+        fields = ['id','title', 'topic', 'deadline', 'field','deadline_arabic','finalInsurance']
         read_only_fields = ['deadline_arabic']
 
 
 class TenderAdminSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = TenderAdmin
-        fields = ['name', 'job_title']
+        fields = ['id','name', 'job_title']
 
 class TenderPublicConditionsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = TenderPublicConditions
-        fields = ['condition']
+        fields = ['id','condition']
     
 class TenderPrivateConditionsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = TenderPrivateConditions
         fields = ['id','condition']
 
 class TenderProductSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
     class Meta:
         model = TenderProduct
         fields = ['id', 'title', 'quantity_unit', 'quantity', 'description']
@@ -181,9 +183,10 @@ class TenderSerializer(serializers.ModelSerializer):
     private_conditions = TenderPrivateConditionsSerializer(many=True)
     ad = TenderAdSerializer(many=False)
     products = TenderProductSerializer(many=True)
+    id = serializers.IntegerField(required=False)
     class Meta:
         model = Tender
-        fields = ['initial_price', 'status', 'admins',
+        fields = ['id','initial_price', 'status', 'admins',
                 'public_conditions', 'private_conditions', 'ad', 'products']
     def create(self, validated_data):
         original_data = validated_data.copy()
@@ -208,6 +211,81 @@ class TenderSerializer(serializers.ModelSerializer):
             TenderProduct.objects.create(tender=tender, **product_data)
         tender.save()
         return original_data
+    def update(self,instance,validated_data):
+        # print(validated_data)
+        original_data = validated_data.copy()
+        user = self.context['request'].user
+        admins_data = validated_data.pop('admins')
+        public_conditions_data = validated_data.pop('public_conditions')
+        private_conditions_data = validated_data.pop('private_conditions')
+        products_data = validated_data.pop('products')
+        ad_data = validated_data.pop('ad')
+        print(ad_data)
+        # update TenderAd
+        ad_id=ad_data.get('id')
+        print(ad_id)
+        ad_instance=TenderAd.objects.get(id=ad_id)
+        ad_instance.title=ad_data.get('title')
+        ad_instance.topic=ad_data.get('topic')
+        ad_instance.deadline=ad_data.get('deadline')
+        ad_instance.field=ad_data.get('field')
+        ad_instance.finalInsurance=ad_data.get('finalInsurance')
+        ad_instance.save()
+
+        #Update Tender instance Attributes 
+        instance.initial_price=validated_data.get('initial_price')
+        instance.status=validated_data.get('status')
+        instance.save()
+
+
+        for product in products_data:
+            product_id=product.pop('id',None)
+            if product_id:
+                product_instance=TenderProduct.objects.get(id=product_id)
+                product_instance.title=product.get('title')
+                product_instance.quantity_unit=product.get('quantity_unit')
+                product_instance.quantity=product.get('quantity')
+                product_instance.description=product.get('description')
+                product_instance.save()
+            else:
+                TenderProduct.objects.create(**product,tender=instance)
+
+        for admin in admins_data:
+            admin_id=admin.pop('id',None)
+            if admin_id:
+                admin_instance=TenderAdmin.objects.get(id=admin_id)
+                admin_instance.name=admin.get('name')
+                admin_instance.job_title=admin.get('job_title')
+                admin_instance.save()
+            else:
+                TenderAdmin.objects.create(**admin,tender=instance)
+
+        for condition in public_conditions_data:
+            public_condition_id=condition.pop('id',None)
+            if public_condition_id:
+                public_condition_instance=TenderPublicConditions.objects.get(id=public_condition_id)
+                public_condition_instance.condition=condition.get('condition')
+                public_condition_instance.save()
+            else:
+                TenderPublicConditions.objects.create(**condition,tender=instance)
+
+        for condition in private_conditions_data:
+            private_condition_id=condition.pop('id',None)
+            if private_condition_id:
+                private_condition_instance=TenderPrivateConditions.objects.get(id=private_condition_id)
+                private_condition_instance.condition=condition.get('condition')
+                private_condition_instance.save()
+            else:
+                TenderPrivateConditions.objects.create(**condition,tender=instance)
+        return instance
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        # Sort nested fields by id
+        ret['admins'] = sorted(ret['admins'], key=lambda x: x['id'])
+        ret['public_conditions'] = sorted(ret['public_conditions'], key=lambda x: x['id'])
+        ret['private_conditions'] = sorted(ret['private_conditions'], key=lambda x: x['id'])
+        ret['products'] = sorted(ret['products'], key=lambda x: x['id'])
+        return ret
 
 class TenderRetrieveSerializer(serializers.ModelSerializer):
     admins = TenderAdminSerializer(many=True, read_only=True)
@@ -327,7 +405,30 @@ class ResponseDetailSerializer(serializers.ModelSerializer):
             instance.status = validated_data['status']
             instance.save(update_fields=['status'])  # Only update 'status' field
         return instance
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # If the instance is a queryset, sort it by score in descending order
+        if isinstance(instance, list):
+            representation = sorted(representation, key=lambda x: x['score'], reverse=True)
+        return representation
 
+class TransactionSerializer(serializers.ModelSerializer):
+    review_date_arabic = serializers.SerializerMethodField()
+    def get_review_date_arabic(self, obj):
+        # Convert deadline date to Arabic format
+        if obj.product_review_date is not None:
+            return self.format_date(obj.product_review_date)
+    def format_date(self, date):
+        with translation.override('ar'):
+            return date_format(date, format='j F Y')
+    class Meta:
+        model= Transaction
+        fields= ['id','response','tender','product_review_date','product_review_date_status','product_review_status','review_date_arabic']
+        extra_kwargs = {
+            'product_review_date': {'required': False, 'allow_null': True},
+            'product_review_date_status': {'required': False, 'allow_null': True},
+            'product_review_status': {'required': False, 'allow_null': True},
+        }
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):

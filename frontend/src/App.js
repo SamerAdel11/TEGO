@@ -29,6 +29,10 @@ import CandidatePoolOffers from './containers/supplier_container/participated_te
 import RejectedOffers from './containers/supplier_container/participated_tenders/RejectedOffers/RejectedOffers.jsx';
 import OfferedOffers from './containers/supplier_container/participated_tenders/OfferedOffers/OfferedOffers.jsx';
 import Response from './containers/supplier_container/participated_tenders/ResponseView/tenderWithOffer.jsx';
+import Draft from './containers/Buyer_container/draft_tenders/DraftTenders.jsx';
+import DraftDetails from './containers/Buyer_container/draft_tenders/draftDetails.jsx';
+import Test from './containers/Buyer_container/test/test.jsx';
+import NotFoundPage from './containers/not_found/NotFoundPage.jsx';
 
 function HostComponent() {
   return (
@@ -164,6 +168,17 @@ function AwatingDetailss() {
     </div>
   );
 }
+function DraftTender() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <Draft />
+      </div>
+    </div>
+  );
+}
 function AwatingContact() {
   return (
     <div className="">
@@ -230,6 +245,17 @@ function TestFunc() {
     </div>
   );
 }
+function DraftTenderDetails() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <DraftDetails />
+      </div>
+    </div>
+  );
+}
 const App = () => (
   <Router>
     <div className="App">
@@ -255,24 +281,38 @@ const App = () => (
             <Blog />
             <Footer />
           </Route>
+          {/* <Route exact path="/not_found" />
+            <div>
+              <Header />
+              <NotFoundPage />
+            </div>
+          </Route> */}
+          <Route exact path="/not_found">
+            <div>
+              <Navbar />
+              <NotFoundPage />
+            </div>
+          </Route>
           <PrivateRoute exact path="/host" component={HostComponent} />
-          <PrivateRoute exact path="/supplier" component={SupplierComponent} />
-          <PrivateRoute exact path="/createtnder" component={CreateTenderComponent} />
+          <PrivateRoute exact path="/supplier" component={SupplierComponent} allowedRoles={['supplier']} />
+          <PrivateRoute exact path="/create_tender" component={CreateTenderComponent} />
           <PrivateRoute exact path="/mytender" component={MyTenderComponent} />
           <PrivateRoute exact path="/pendingdecision" component={PendingDecisionComponent} />
           <PrivateRoute exact path="/tender_responses/:id" component={TenderResponsesComponent} />
           <PrivateRoute exact path="/candidate_responses/:id" component={CandidateDetailsfunction} />
           <PrivateRoute exact path="/candidate" component={CandidatePooll} />
-          <PrivateRoute exact path="/open_tenders" component={OpenTendersComponent} />
-          <PrivateRoute exact path="/add_response" component={AddTenderResponse} />
+          <PrivateRoute exact path="/open_tenders" component={OpenTendersComponent} allowedRoles={['supplier']} />
+          <PrivateRoute exact path="/add_response" component={AddTenderResponse} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/awating" component={Awatingg} />
           <PrivateRoute exact path="/awating_responses/:id" component={AwatingDetailss} />
           <PrivateRoute exact path="/awating_contact/:id" component={AwatingContact} />
           <PrivateRoute exact path="/awarded_tenders" component={AwardedTendersFunc} />
-          <PrivateRoute exact path="/candidate_pool_offers" component={CandidatePoolOffersFunc} />
-          <PrivateRoute exact path="/rejected_offers" component={RejectedOffersFunc} />
-          <PrivateRoute exact path="/offered_offers" component={OfferedOffersFunc} />
-          OfferedOffersFunc
+          <PrivateRoute exact path="/candidate_pool_offers" component={CandidatePoolOffersFunc} allowedRoles={['supplier']} />
+          <PrivateRoute exact path="/rejected_offers" component={RejectedOffersFunc} allowedRoles={['supplier']} />
+          <PrivateRoute exact path="/offered_offers" component={OfferedOffersFunc} allowedRoles={['supplier']} />
+          <PrivateRoute exact path="/draft_tenders" component={DraftTender} />
+          <PrivateRoute exact path="/draft_tender_details/:id" component={DraftTenderDetails} />
+          <PrivateRoute exact path="/test" component={Test} />
         </Switch>
       </AuthProvider>
     </div>

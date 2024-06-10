@@ -33,8 +33,13 @@ function CandidatePool() {
   return (
     <div className="pending-container">
       <div className="gradient__text pending_title">
-        <h1 className="first_title">طلبات التاكيد</h1>
+        <h1 className="first_title">قائمه المرشحين</h1>
       </div>
+      {tendersData && tendersData.length === 0 && (
+        <div style={{ alignItems: 'center', textAlign: 'center', marginTop: '100px' }}>
+          <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا توجد مناقصات في هذه المرحلة بعد</p>
+        </div>
+      )}
       {tendersData && tendersData.map((tender, index) => (
         <Link style={{ 'text-decoration': 'none' }} key={index} to={`/candidate_responses/${tender.id}`}>
           <div className="tender-card">

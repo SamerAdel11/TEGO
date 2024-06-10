@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import './my_tender.css';
+import { useHistory } from 'react-router-dom';
 import AuthContext from '../../../context/Authcontext';
 
 const MyTenders = () => {
   const [tendersData, setTendersData] = useState(null);
   const { authTokens } = useContext(AuthContext);
-
+  const history = useHistory();
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -44,6 +45,21 @@ const MyTenders = () => {
         <div className="gradient__text mytender">
           <h1 className="first_title">المناقصات المنشورة</h1>
         </div>
+        {tendersData && tendersData.length === 0 && (
+          <div style={{ alignItems: 'center', textAlign: 'center', marginTop: '100px' }}>
+            <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا توجد مناقصات منشورة حاليا</p>
+            <button
+              // style={{ padding: '12px', marginLeft: '150px', marginRight: '100px' }}
+              type="submit"
+              className="button_awating"
+              onClick={() => {
+                history.push('create_tender');
+              }}
+            >
+              إنشاء مناقصة
+            </button>
+          </div>
+        )}
         {tendersData
           && tendersData.map((tender, index) => (
             <div

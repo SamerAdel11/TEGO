@@ -27,5 +27,8 @@ urlpatterns = [
     path('award_tender',views.AwardResponse.as_view()),
     path('score',views.Similarity.as_view()),
     path('supplier_confirmation',views.SupplierConfirmation.as_view()),
-    path('make_notifications_seen/',views.MakeNotificationsSeen.as_view())
+    path('make_notifications_seen/',views.MakeNotificationsSeen.as_view()),
+    path('contract/<int:tender_id>/<int:response_id>/',views.Contract.as_view()),
+    path('model/',views.model.as_view()),
+    path('transactions/<int:response_id>/<int:tender_id>/', views.TransactionView.as_view()),
 ]

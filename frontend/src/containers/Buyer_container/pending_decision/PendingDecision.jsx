@@ -35,6 +35,11 @@ function PendingDecision() {
       <div className="gradient__text pending_title">
         <h1 className="first_title">العروض المقدمة</h1>
       </div>
+      {tendersData && tendersData.length === 0 && (
+        <div style={{ alignItems: 'center', textAlign: 'center', marginTop: '100px' }}>
+          <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا توجد مناقصات في هذه المرحلة بعد</p>
+        </div>
+      )}
       {tendersData && tendersData.map((tender, index) => (
         <Link style={{ 'text-decoration': 'none' }} key={index} to={`/tender_responses/${tender.id}`}>
           <div className="tender-card">
