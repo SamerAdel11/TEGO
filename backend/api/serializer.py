@@ -129,6 +129,8 @@ class CompanySerializer(serializers.ModelSerializer):
     #             serializer.update(owner_instance,owner)
     #             owner_instance.save()
     #     return instace
+from datetime import datetime
+
 class TenderAdSerializer(serializers.ModelSerializer):
     deadline_arabic = serializers.SerializerMethodField()
     id = serializers.IntegerField(required=False)
@@ -136,13 +138,24 @@ class TenderAdSerializer(serializers.ModelSerializer):
         # Convert deadline date to Arabic format
         return self.format_date(obj.deadline)
     def format_date(self, date):
-        with translation.override('ar'):
-            return date_format(date, format='j F Y')
+        if date:
+            with translation.override('ar'):
+                return date_format(date, format='j F Y')
+        else: 
+            return None
 
     class Meta:
         model = TenderAd
         fields = ['id','title', 'topic', 'deadline', 'field','deadline_arabic','finalInsurance']
         read_only_fields = ['deadline_arabic']
+        extra_kwargs = {
+            'title': {'allow_null': True, 'required': False},
+            'topic': {'allow_null': True, 'required': False},
+            'deadline': {'allow_null': True, 'required': False},
+            'field': {'allow_null': True, 'required': False},
+            'finalInsurance': {'allow_null': True, 'required': False},
+            'condition': {'allow_null': True, 'required': False},
+        }
 
 
 class TenderAdminSerializer(serializers.ModelSerializer):
@@ -151,6 +164,11 @@ class TenderAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = TenderAdmin
         fields = ['id','name', 'job_title']
+        extra_kwargs = {
+            'name': {'allow_null': True},
+            'job_title': {'allow_null': True},
+
+        }
 
 class TenderPublicConditionsSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
@@ -158,6 +176,9 @@ class TenderPublicConditionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TenderPublicConditions
         fields = ['id','condition']
+        extra_kwargs = {
+        'condition': {'allow_null': True},
+        }
     
 class TenderPrivateConditionsSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
@@ -165,12 +186,21 @@ class TenderPrivateConditionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TenderPrivateConditions
         fields = ['id','condition']
+        extra_kwargs = {
+            'condition': {'allow_null': True},
+        }
 
 class TenderProductSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
     class Meta:
         model = TenderProduct
         fields = ['id', 'title', 'quantity_unit', 'quantity', 'description']
+        extra_kwargs = {
+            'title': {'required': False,'allow_null': True},
+            'quantity_unit': {'allow_null': True},
+            'quantity': {'allow_null': True},
+            'description': {'allow_null': True},
+        }
 
 class ResponsePreviousWorkSerializer(serializers.ModelSerializer):
     class Meta:
@@ -188,6 +218,15 @@ class TenderSerializer(serializers.ModelSerializer):
         model = Tender
         fields = ['id','initial_price', 'status', 'admins',
                 'public_conditions', 'private_conditions', 'ad', 'products']
+        extra_kwargs = {
+            'initial_price': {'required':False,'allow_null': True},
+            'status': {'allow_null': True},
+            'admins': {'allow_null': True},
+            'public_conditions': {'allow_null': True},
+            'private_conditions': {'allow_null': True},
+            'ad': {'allow_null': True},
+            'products': {'allow_null': True},
+        }
     def create(self, validated_data):
         original_data = validated_data.copy()
         user = self.context['request'].user
@@ -222,9 +261,9 @@ class TenderSerializer(serializers.ModelSerializer):
         ad_data = validated_data.pop('ad')
         print(ad_data)
         # update TenderAd
-        ad_id=ad_data.get('id')
-        print(ad_id)
-        ad_instance=TenderAd.objects.get(id=ad_id)
+        # ad_id=ad_data.get('id')
+        # print(ad_id)
+        ad_instance=TenderAd.objects.get(tender=instance)
         ad_instance.title=ad_data.get('title')
         ad_instance.topic=ad_data.get('topic')
         ad_instance.deadline=ad_data.get('deadline')

@@ -11,15 +11,25 @@ from tasks.tasks import activate_account
 from joblib import dump, load
 import torch
 from tasks.tasks import compute_similarity
+from django.utils.formats import date_format
+from django.utils import translation
 class CompanyView(APIView):
 
     permission_classes = []
     def get(self,request,*args,**kwargs):
         response_id= request.query_params.get("response_id")
-        user=TenderResponse.objects.get(id=response_id).user
-        company=Company.objects.get(user=user)
-        serialized_data= CompanySerializer(company).data
-        return Response(serialized_data)
+        tender_id=request.query_params.get("tender_id")
+        if response_id:
+            user=TenderResponse.objects.get(id=response_id).user
+            company=Company.objects.get(user=user)
+            serialized_data= CompanySerializer(company).data
+            return Response(serialized_data)
+        elif tender_id:
+            print(tender_id)
+            user=Tender.objects.get(id=tender_id).user
+            company=Company.objects.get(user=user)
+            serialized_data= CompanySerializer(company).data
+            return Response(serialized_data)
 
     def post(self, request, *args, **kwargs):
         serializer = CompanySerializer(data=request.data)
@@ -58,7 +68,6 @@ class TenderCreateView(APIView):
         
         serializer = TenderSerializer(tender_instance,
             data=request.data, context={'request': request})
-        print(tender_id)
         if serializer.is_valid():
             response = serializer.save(instance=tender_instance)
             return Response(serializer.data)
@@ -80,7 +89,6 @@ class TenderHostView(generics.ListAPIView):
         queryset = Tender.objects.filter(user=user)
         if status:
             status_list = status.split(',')
-            print(status_list)
             return queryset.filter(status__in=status_list)
         return queryset
 
@@ -89,7 +97,6 @@ class TenderSupplierView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         responsestatus = self.request.query_params.get('responsestatus', None)
-        print(responsestatus)
         company=Company.objects.get(user=user)
         queryset = Tender.objects.filter(ad__field=company.company_field)
         if responsestatus:
@@ -149,7 +156,6 @@ class ResponseDetailAPIView(generics.ListAPIView):
         status = self.request.query_params.get('status', None)
         if status:
             status_list = status.split(',')
-            print(status_list)
             return queryset.filter(status__in=status_list)
         return queryset
 
@@ -162,30 +168,51 @@ class MyResponseDetailAPIView(APIView):
         tender_id = self.request.query_params.get('tender_id', None)
         response= TenderResponse.objects.get(user=user,tender=Tender.objects.get(id=tender_id))
         serialized_version= ResponseDetailSerializer(response)
-        print(serialized_version)
         return Response(serialized_version.data)
 
 class CloseCandidatePool(APIView):
     def get(self, request, *args, **kwargs):
-        print("Entered get function")
         tender_id = self.request.query_params.get('tender_id', None)
         tender= Tender.objects.get(id=tender_id)
-        tender.status='candidate_pool'
-        tender.save()
-        print(tender_id)
         responses= TenderResponse.objects.filter(tender=tender)
-        print(responses)
+        candidate_response_exist=False
         for response in responses:
-            print(response.status)
             if response.status=='open' or response.status=='offered':
-                print(f'status is {response.status}')
                 response.status='rejected'
                 response.save()
                 UserNotification.objects.create(
                     recipient=response.user,
                     message=f'unfortunately your offer has been rejected from the tender{response.tender.ad.title}'
                 )
-        return Response({"Message":"Done"})
+            elif response.status=='candidate_pool':
+                candidate_response_exist=True
+        if candidate_response_exist:
+            tender.status='candidate_pool'
+            tender.save()
+            return Response({"Message":"candidate_pool"})
+
+        else:
+            tender.status='cancelled'
+            tender.save()
+            UserNotification.objects.create(recipient=tender.user,
+                                            message=f'تم الغاء مناقصة {tender.ad.title} لعدم اختيار عروض للمرحله القادمة')
+        return Response({"Message":"cancelled"})
+class CancelTender(APIView):
+    def post(self,request,*args,**kwargs):
+        tender_id=request.query_params.get('tender_id')
+        tender=Tender.objects.get(id=tender_id)
+        responses=TenderResponse.objects.filter(tender=tender)
+        for response in responses:
+            if response.status=='open' or response.status=='offered':
+                response.status='rejected'
+                response.save()
+                UserNotification.objects.create(
+                    recipient=response.user,
+                    message=f'unfortunately your offer has been rejected from the tender{response.tender.ad.title}'
+                )
+        tender.status='cancelled'
+        tender.save()
+        return Response({"Message":"cancelled"})
 
 class AwardResponse(APIView):
     def post(self,request):
@@ -204,17 +231,22 @@ class SupplierConfirmation(APIView):
         tender= Tender.objects.get(id=self.request.query_params.get('tender_id'))
         response= TenderResponse.objects.get(id=self.request.query_params.get('response_id'))
         confirm_status = self.request.query_params.get('confirm_status')
+        print(confirm_status)
         if confirm_status=='confirmed':
+            print("Enter the first for loop")
             tender.status='awarded'
             response.status='winner'
             tender.save()
             response.save()
             Transaction.objects.create(tender=tender,response=response)
+
         elif confirm_status=='rejected':
-            tender.status=='candidate_pool'
-            response.status=='rejected'
+            tender.status='candidate_pool'
+            response.status='rejected'
             tender.save()
             response.save()
+            UserNotification.objects.create(recipient=tender.user,message=f"Unfortunately the supplier refused to confirm at your tender {tender.ad.title} so we reopened the candidate pool, you can find your tender their")
+
         return Response({"Message":"Done"})
 
 from .serializer import ResponseDetailSerializer
@@ -260,7 +292,6 @@ from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
 def activate(request, uidb64, token):
-    print("Entered activate function")
     uid = force_str(urlsafe_base64_decode(uidb64))
     try:
         user = CustomUser.objects.get(id=uid)
@@ -304,7 +335,6 @@ def create_custom_user(request):
             user.is_active=False
             user.save()
             activateEmail.delay(request, user, form.cleaned_data.get('email'))
-            print("")
             return redirect('email')  # Redirect to a success page
     else:
         form = CustomUserForm()
@@ -370,22 +400,26 @@ class Contract(APIView):
             return str(e)
     def get_written_number(self,number):
         if number % 1==0:
-            print("True")
             arabic_offer_price=self.number_to_arabic_words(int(number))+ ' جنيه'
-            print(arabic_offer_price)
             return arabic_offer_price
 
         else:
             arabic_offer_price=self.number_to_arabic_words(str(number).split('.')[0])+ ' جنيه'
             arabic_offer_price=arabic_offer_price+' و '+self.number_to_arabic_words(str(number).split('.')[1])+ ' قرش'
-            print(arabic_offer_price)
             return arabic_offer_price
     # arabic_offer_price=number_to_arabic_words(int(response.offered_price))
     # print(arabic_offer_price)
+    def get_arabic_date(self,date):
+        with translation.override('ar'):
+            day = date_format(date, format='j', use_l10n=True)
+            month = date_format(date, format='F', use_l10n=True)
+            year = date_format(date, format='Y', use_l10n=True)
+            return f"{day} {month} عام {year}"
     def post(self,request, tender_id,response_id):
         response=TenderResponse.objects.get(id=response_id)
         tender=Tender.objects.get(id=tender_id)
         tenderad=TenderAd.objects.get(tender=tender)
+        transaction= Transaction.objects.get(response=response,tender=tender)
         admins= TenderAdmin.objects.filter(tender=tender)
         host_company=Company.objects.get(user=tender.user)
         host_owners= Owner.objects.filter(company=host_company)
@@ -395,7 +429,6 @@ class Contract(APIView):
         products=ResponseProductBid.objects.filter(response=response,supplying_status='متوفر')
         public_conditions= TenderPublicConditions.objects.filter(tender=tender)
         private_conditions= ResponsePrivateCondition.objects.filter(response=response)
-        print(90.00%1==0)
         arabic_offer_price=''
         arabic_ordinals = [
             "السادس عشر", "السابع عشر", "الثامن عشر", "التاسع عشر", "العشرون",
@@ -413,6 +446,7 @@ class Contract(APIView):
                 'order': order})
         products_with_full_price=[]
         for product in products:
+            print(product.product.quantity_unit)
             product_dict = {
                 'product':product.product,
                 'provided_quantity':product.provided_quantity,
@@ -421,6 +455,8 @@ class Contract(APIView):
                 'product_title':product.product_title,
                 'product_description':product.product_description,
                 'response':product.response,
+                'quantity_unit':product.product.quantity_unit,
+                
             }
             # Calculate the full price
             full_price = product_dict['provided_quantity'] * product_dict['price']
@@ -428,7 +464,7 @@ class Contract(APIView):
             product_dict['full_price'] = full_price
             # Append the updated dictionary to the list
             products_with_full_price.append(product_dict)
-
+            arabic_approval_date=self.get_arabic_date(transaction.product_review_date)
         context={
             'tender_ad':tenderad,
             'tender':tender,
@@ -445,9 +481,11 @@ class Contract(APIView):
             'finalInsurancePrice': tenderad.finalInsurance*0.01*response.offered_price,
             'arabicInsurancePrice':self.get_written_number(tenderad.finalInsurance*0.01*response.offered_price),
             'public_condition': pc,
-            'private_condition': private_c
+            'private_condition': private_c,
+            'transaction':transaction,
+            'arabic_approval_date':arabic_approval_date
             }
-        
+
         html=render_to_string('contract.html',context)
         output_pdf_path = 'output.pdf'
         pdf=pdfkit.from_string(html, False)
@@ -510,7 +548,5 @@ class model(APIView):
         else:
             raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
     def post(self,request):
-        print("Called")
         prediction = self.get_model_prediction('شركة احمد محمد ابراهيم')
-        print(prediction)
         return Response({'prediction':prediction})

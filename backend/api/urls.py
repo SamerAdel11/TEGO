@@ -31,4 +31,5 @@ urlpatterns = [
     path('contract/<int:tender_id>/<int:response_id>/',views.Contract.as_view()),
     path('model/',views.model.as_view()),
     path('transactions/<int:response_id>/<int:tender_id>/', views.TransactionView.as_view()),
+    path('cancel_tender',views.CancelTender.as_view()),
 ]

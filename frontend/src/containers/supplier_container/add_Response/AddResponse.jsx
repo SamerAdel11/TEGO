@@ -200,12 +200,12 @@ function AddResponse() {
             </div>
             <div className="form-fields">
               <label htmlFor="tenderSubject">موضوع المناقصة
-                <textarea type="text" id="tenderSubject" defaultValue={data && data.ad.topic} readOnly="readonly" />
+                <textarea style={{ paddingRight: '17px' }} type="text" id="tenderSubject" defaultValue={data && data.ad.topic} readOnly="readonly" />
               </label>
             </div>
             <div className="form-fields">
               <label htmlFor="tenderSubject">مجال المناقصة
-                <textarea type="text" id="tenderField" value={data && data.ad.field} readOnly="readonly" />
+                <textarea style={{ paddingRight: '17px' }} type="text" id="tenderField" value={data && data.ad.field} readOnly="readonly" />
               </label>
             </div>
             <div className="form-fields">
@@ -386,11 +386,13 @@ function AddResponse() {
           <div>
             {previousWork.map((work, index) => (
               <div key={index}>
-                <h3>المشروع رقم {index + 1}</h3>
-                <label htmlFor="prevtenderTitle">عنوان المناقصة
+                <div className="center-content">
+                  <p className="national">المشروع رقم {index + 1}</p>
+                </div>
+                <label htmlFor="prevtenderTitle">عنوان المشروع
                   <input type="text" id="prevtenderTitle" value={work.title} onChange={(e) => handlePreviousWorkChange(index, 'title', e.target.value)} />
                 </label>
-                <label htmlFor="prevtenderSubject">موضوع المناقصة
+                <label htmlFor="prevtenderSubject">موضوع المشروع
                   <textarea
                     type="text"
                     id={`prevtenderSubject${index}`}
@@ -413,7 +415,7 @@ function AddResponse() {
             )}
           </div>
 
-          <div className="button-container">
+          <div className="button-container" style={{ gap: '80px' }}>
             <button type="submit" className="button" onSubmit={handleSubmit}>
               إرسال العرض
             </button>

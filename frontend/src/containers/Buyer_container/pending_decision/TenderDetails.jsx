@@ -67,8 +67,33 @@ function TenderDetails() {
     );
 
     const data = await response.json();
+    if (data.Message === 'candidate_pool') {
+      histoyty.push(`/candidate_responses/${id}`);
+    } else if (data.Message === 'cancelled') {
+      histoyty.push('/mytender');
+    }
     console.log(data);
-    histoyty.push(`/candidate_responses/${id}`);
+    // histoyty.push(`/awating_responses/${id}`);
+  };
+  const CancelTender = async () => {
+    const response = await fetch(
+      `http://localhost:8000/cancel_tender?tender_id=${id}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authTokens.access}`,
+        },
+      },
+    );
+
+    const data = await response.json();
+    if (data.Message === 'candidate_pool') {
+      histoyty.push(`/candidate_responses/${id}`);
+    } else if (data.Message === 'cancelled') {
+      histoyty.push('/mytender');
+    }
+    console.log(data);
     // histoyty.push(`/awating_responses/${id}`);
   };
   const handleSendResponse = async (tender) => {
@@ -203,7 +228,9 @@ function TenderDetails() {
                 >
                   إرسال الرد إلى قائمة المرشح
                 </button>
-                <hr data-v-7e013592 />
+                {index + 1 !== responseDetails.length && (
+                  <hr style={{ marginRight: '150px', marginLeft: '150px' }} data-v-7e013592 />
+                )}
               </div>
             ))}
             {
@@ -214,14 +241,22 @@ function TenderDetails() {
               )
             }
             {responseDetails.length > 0 && (
-              <div className="center-content">
+              <div className="button-container">
                 <button
-                  style={{ alignItems: 'center' }}
+                  style={{ marginRight: '150px', marginLeft: '150px' }}
                   className="buton_resonpose"
                   type="button"
                   onClick={closeCandidatePool}
                 >
                   إغلاق قائمه المرشحين
+                </button>
+                <button
+                  style={{ marginLeft: '150px' }}
+                  className="button cancel"
+                  type="button"
+                  onClick={CancelTender}
+                >
+                  إلغاء المناقصة
                 </button>
               </div>
             )}

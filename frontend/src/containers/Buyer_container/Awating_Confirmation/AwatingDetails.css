@@ -13,7 +13,14 @@
     /* background-color: var(--color-bg); */
     color: var(--color-text);
   }
-  
+  .input-margin {
+    margin-top: 0px; /* Adjust the margin value as needed */
+    margin-bottom: 0px;
+  }
+  .input-margin :read-only{
+    margin-top: 100px; 
+    margin-bottom: 0px;
+  }
   .tender-details {
     padding: 20px;
     margin-bottom: 20px;

@@ -64,7 +64,6 @@ function AwatingDetails() {
 
   const handleClose = () => {
     setOpen(false);
-    alert('You closed it');
   };
   const handleAccepte = async () => {
     try {
@@ -310,6 +309,33 @@ function AwatingDetails() {
                 <div className="gradient__text">
                   {/* <h3>العرض رقم {index + 1}</h3> */}
                 </div>
+                {
+                  response.status === 'winner' && !transaction.product_review_date_status !== 'waiting_for_host' && (
+                    <div className="center-content">
+                      {!transaction.product_review_date_status && (
+                        <p className="national">المورد أكد التعاقد علي المناقصة</p>
+                      )}
+                      <div className="buttons_awating">
+                        <button
+                          style={{ border: 'none', outline: 'none', backgroundColor: activeButton === 'details' && '#AA1910' }}
+                          className="button_awating"
+                          type="button"
+                          onClick={() => showContent('details')}
+                        >
+                          تفاصيل العطاء
+                        </button>
+                        <button
+                          style={{ border: 'none', outline: 'none', backgroundColor: activeButton === 'contanct_info' && '#AA1910' }}
+                          className="button_awating"
+                          type="button"
+                          onClick={() => showContent('contanct_info')}
+                        >
+                          معلومات الاتصال
+                        </button>
+                      </div>
+                    </div>
+                  )
+                  }
                 {transaction.product_review_status === 'accepted' && (
                   <div className="center-content">
                     <p className="national">لقد وافقت علي منتجات المورد</p>
@@ -322,12 +348,19 @@ function AwatingDetails() {
                 )}
                 {transaction.product_review_date_status === 'accepted' && !transaction.product_review_status && (
                   <div className="center-content">
-                    <p className="national"> المورد أكد علي يوم {transaction.review_date_arabic} لمراجعة المنتجات</p>
+                    <p className="national"> تم تحديد يوم {transaction.review_date_arabic} لمراجعة المنتجات</p>
                   </div>
                 )}
                 {transaction && transaction.product_review_date_status === 'waiting_for_supplier' && (
                   <div className="center-content">
                     <p className="national"> في انتظار التأكيد علي الموعد من المورد</p>
+                  </div>
+                )}
+                {response.status === 'awarded' && !transaction.product_review_date_status && (
+                  <div>
+                    <div className="center-content">
+                      <p className="national">في إنتظار التاكيد من المورد</p>
+                    </div>
                   </div>
                 )}
                 {transaction && transaction.product_review_date_status === 'waiting_for_host' && (
@@ -392,51 +425,52 @@ function AwatingDetails() {
                     </div>
                   </div>
                 )}
-                {response.status === 'awarded' && !transaction.product_review_date_status && (
+                {transaction.product_review_status === 'host_decision' && (
                   <div>
-                    <div className="center-content">
-                      <p className="national">في إنتظار التاكيد من المورد</p>
-                    </div>
+                    {/* eslint-disable-next-line react/jsx-fragments */}
+                    <button
+                      style={{ border: 'none', outline: 'none' }}
+                      className="button_awating"
+                      type="button"
+                      onClick={handleClickOpen}
+                    >
+                      تأكيد / رفض المنتجات
+                    </button>
+                    <Dialog
+                      style={{ backgroundColor: '#073057' }}
+                      open={open}
+                      onClose={handleClose}
+                      aria-labelledby="alert-dialog-title"
+                      aria-describedby="alert-dialog-description"
+                    >
+                      <DialogTitle style={{ color: 'white', backgroundColor: '#073057', fontFamily: 'Alexandria', fontSize: 'x-large', marginBottom: '1px', padding: '15px' }} id="alert-dialog-title">
+                        تأكيد المنتج
+                      </DialogTitle>
+                      <DialogContent style={{ backgroundColor: '#073057', color: 'white' }}>
+                        <DialogContentText style={{ backgroundColor: '#073057', color: 'white', fontSize: 'x-large', textAlign: 'center', paddingLeft: '50px', paddingRight: '50px' }} id="alert-dialog-description">
+                          هل توافق علي المنتجات اللتي تمت مراجعتها
+                        </DialogContentText>
+                      </DialogContent>
+                      <DialogActions style={{ backgroundColor: '#073057' }}>
+                        <button type="button" style={{ backgroundColor: '#FC432E', color: 'white', margin: '20px', fontFamily: 'Alexandria' }} onClick={handleAccepte}>موافق</button>
+                        <button type="button" style={{ backgroundColor: '#F60034', color: 'white', margin: '20px', fontFamily: 'Alexandria' }} onClick={handleReject}>
+                          رفض
+                        </button>
+                      </DialogActions>
+                    </Dialog>
                   </div>
                 )}
-                {
-                  response.status === 'winner' && !transaction.product_review_date_status !== 'waiting_for_host' && (
-                    <div className="center-content">
-                      {!transaction.product_review_date_status && (
-                        <p className="national">المورد أكد التعاقد علي المناقصة</p>
-                      )}
-                      <div className="buttons_awating">
-                        <button
-                          style={{ border: 'none', outline: 'none', backgroundColor: activeButton === 'details' && '#AA1910' }}
-                          className="button_awating"
-                          type="button"
-                          onClick={() => showContent('details')}
-                        >
-                          تفاصيل العطاء
-                        </button>
-                        <button
-                          style={{ border: 'none', outline: 'none', backgroundColor: activeButton === 'contanct_info' && '#AA1910' }}
-                          className="button_awating"
-                          type="button"
-                          onClick={() => showContent('contanct_info')}
-                        >
-                          معلومات الاتصال
-                        </button>
-                      </div>
-                    </div>
-                  )
-                  }
+                { response.status === 'winner' && transaction.product_review_status === 'accepted' && (
+                  <button
+                    type="submit"
+                    className="button_awating"
+                    onClick={downloadPDF}
+                  >
+                    {loading ? 'جاري التحميل....' : 'حمل العقد'}
+                  </button>
+                )}
                 {activeContent === 'details' ? (
-                  <div style={{ marginLeft: '20px' }}>
-                    { response.status === 'winner' && (
-                      <button
-                        type="submit"
-                        className="button_awating"
-                        onClick={downloadPDF}
-                      >
-                        {loading ? 'جاري التحميل....' : 'تحميل العقد'}
-                      </button>
-                    )}
+                  <div style={{ marginLeft: '80px', width: '100%' }}>
 
                     { response.previous_work.length > 0 && (
                       <div>
@@ -525,41 +559,6 @@ function AwatingDetails() {
                         </table>
                       </div>
                     )}
-                    {transaction.product_review_status === 'host_decision' && (
-                      <div>
-                        {/* eslint-disable-next-line react/jsx-fragments */}
-                        <button
-                          style={{ border: 'none', outline: 'none' }}
-                          className="button_awating"
-                          type="button"
-                          onClick={handleClickOpen}
-                        >
-                          تأكيد / رفض المنتجات
-                        </button>
-                        <Dialog
-                          style={{ backgroundColor: '#073057' }}
-                          open={open}
-                          onClose={handleClose}
-                          aria-labelledby="alert-dialog-title"
-                          aria-describedby="alert-dialog-description"
-                        >
-                          <DialogTitle style={{ color: 'white', backgroundColor: '#073057', fontFamily: 'Alexandria', fontSize: 'x-large', marginBottom: '1px', padding: '15px' }} id="alert-dialog-title">
-                            تأكيد المنتج
-                          </DialogTitle>
-                          <DialogContent style={{ backgroundColor: '#073057', color: 'white' }}>
-                            <DialogContentText style={{ backgroundColor: '#073057', color: 'white', fontSize: 'x-large', textAlign: 'center', paddingLeft: '50px', paddingRight: '50px' }} id="alert-dialog-description">
-                              هل توافق علي المنتجات اللتي تمت مراجعتها
-                            </DialogContentText>
-                          </DialogContent>
-                          <DialogActions style={{ backgroundColor: '#073057' }}>
-                            <button type="button" style={{ backgroundColor: '#FC432E', color: 'white', margin: '20px', fontFamily: 'Alexandria' }} onClick={handleAccepte}>موافق</button>
-                            <button type="button" style={{ backgroundColor: '#F60034', color: 'white', margin: '20px', fontFamily: 'Alexandria' }} onClick={handleReject}>
-                              رفض
-                            </button>
-                          </DialogActions>
-                        </Dialog>
-                      </div>
-                    )}
                     {/* {transaction.product_review_date_status === 'waiting_for_supplier' && (
                     <div className="center-content">
                       <p className="national">في انتظار التأكيد علي الموعد من المورد</p>
@@ -617,57 +616,57 @@ function AwatingDetails() {
                     </div>
                     <div className="form-group">
                       <label htmlFor="companyName">اسم الشركة
-                        <input type="text" name="companyName" id="companyName" value={supplierDetails.name} />
+                        <input className="input-margin" type="text" name="companyName" id="companyName" value={supplierDetails.name} />
                       </label>
                     </div>
                     <div className="form-group">
                       <label htmlFor="address">العنوان على الخريطة (اللوكيشن)
-                        <input type="text" name="address" id="address" value={supplierDetails.location} />
+                        <input className="input-margin" type="text" name="address" id="address" value={supplierDetails.location} />
                       </label>
                     </div>
                     <div className="row">
                       <div className="form-group col-md-4">
                         <label htmlFor="commercialRegistrationNumber">رقم السجل التجاري
-                          <input type="text" name="commercialRegistrationNumber" id="commercialRegistrationNumber" value={supplierDetails.supplier.commercial_registration_number} />
+                          <input className="input-margin" type="text" name="commercialRegistrationNumber" id="commercialRegistrationNumber" value={supplierDetails.supplier.commercial_registration_number} />
                         </label>
                       </div>
                       <div className="form-group col-md-4">
                         <label htmlFor="registrationAuthority">جهة استخراج السجل التجاري
-                          <input type="text" name="registrationAuthority" id="registrationAuthority" value={supplierDetails.city} />
+                          <input className="input-margin" type="text" name="registrationAuthority" id="registrationAuthority" value={supplierDetails.city} />
                         </label>
                       </div>
                       <div className="form-group col-md-4">
                         <label htmlFor="taxCardNumber">رقم البطاقة الضريبية
-                          <input type="text" name="taxCardNumber" id="taxCardNumber" value={supplierDetails.supplier.tax_card_number} />
+                          <input className="input-margin" type="text" name="taxCardNumber" id="taxCardNumber" value={supplierDetails.supplier.tax_card_number} />
                         </label>
                       </div>
                     </div>
                     <div className="row">
                       <div className="form-group col-md-4">
                         <label htmlFor="mobile">موبايل
-                          <input type="text" name="mobile" id="mobile" value={supplierDetails.mobile} />
+                          <input className="input-margin" type="text" name="mobile" id="mobile" value={supplierDetails.mobile} />
                         </label>
                       </div>
                       <div className="form-group col-md-4">
                         <label htmlFor="landline">تليفون أرضي
-                          <input type="text" name="landline" id="landline" value={supplierDetails.landline} />
+                          <input className="input-margin" type="text" name="landline" id="landline" value={supplierDetails.landline} />
                         </label>
                       </div>
                       <div className="form-group col-md-4">
                         <label htmlFor="fax">فاكس
-                          <input type="text" name="fax" id="fax" value={supplierDetails.fax_number} />
+                          <input className="input-margin" type="text" name="fax" id="fax" value={supplierDetails.fax_number} />
                         </label>
                       </div>
                     </div>
                     <div className="row">
                       <div className="form-group col-md-6">
                         <label htmlFor="companyType">نوع الشركة
-                          <input type="text" name="fax" id="fax" value={supplierDetails.supplier.company_type} />
+                          <input className="input-margin" type="text" name="fax" id="fax" value={supplierDetails.supplier.company_type} />
                         </label>
                       </div>
                       <div className="form-group col-md-6">
                         <label htmlFor="capital">رأس مال الشركة من واقع السجل التجاري بالجنيه المصري
-                          <input type="text" name="capital" id="capital" value={supplierDetails.supplier.company_capital} />
+                          <input className="input-margin" type="text" name="capital" id="capital" value={supplierDetails.supplier.company_capital} />
                         </label>
                       </div>
                     </div>
@@ -688,27 +687,26 @@ function AwatingDetails() {
                           <div key={index} className="row">
                             <div className="form-group col-md-6">
                               <label htmlFor={`owner_name_${index}`}>الاسم
-                                <input type="text" name={`owner_name_${index}`} id={`owner_name_${index}`} value={admin.name} />
+                                <input className="input-margin" type="text" name={`owner_name_${index}`} id={`owner_name_${index}`} value={admin.name} />
                               </label>
                             </div>
                             <div className="form-group col-md-6">
                               <label htmlFor={`Position_of_owner_${index}`}>المنصب
-                                <input type="text" name={`The_owner_id_${index}`} id={`The_owner_id_${index}`} value={admin.onwer_position} />
+                                <input className="input-margin" type="text" name={`The_owner_id_${index}`} id={`The_owner_id_${index}`} value={admin.onwer_position} />
                               </label>
                             </div>
                             <div className="form-group col-md-12">
                               <label htmlFor={`The_owner_id_${index}`}>الرقم القومي
-                                <input type="text" name={`The_owner_id_${index}`} id={`The_owner_id_${index}`} value={admin.owner_id} />
+                                <input className="input-margin" type="text" name={`The_owner_id_${index}`} id={`The_owner_id_${index}`} value={admin.owner_id} />
                               </label>
                             </div>
                             <div className="form-group col-md-12">
                               <label htmlFor={`Owner_address_${index}`}>العنوان
-                                <input type="text" name={`Owner_address_${index}`} id={`Owner_address_${index}`} value={admin.address} />
+                                <input className="input-margin" type="text" name={`Owner_address_${index}`} id={`Owner_address_${index}`} value={admin.address} />
                               </label>
                             </div>
                           </div>
                         </div>
-
                       ))}
                     </div>
                   </div>

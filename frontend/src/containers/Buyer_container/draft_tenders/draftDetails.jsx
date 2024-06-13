@@ -1,18 +1,31 @@
-/* eslint-disable operator-linebreak */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable arrow-parens */
+/* eslint-disable quotes */
+/* eslint-disable no-else-return */
 /* eslint-disable no-unused-vars */
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import './createtender.css';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import AuthContext from '../../../context/Authcontext';
+// import './AddResponse.css';
 
-function CreateTender() {
+function DraftDetails() {
+  const { id } = useParams();
   const navigate = useHistory();
   const { authTokens } = useContext(AuthContext);
+  const [tender, setTender] = useState(null);
+  const [officials, setOfficials] = useState(['']);
+  const [officialIndex, setOfficialIndex] = useState(1);
   const [minDate, setMinDate] = useState('');
   const [maxDate, setMaxDate] = useState('');
   const [error, setError] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
-
+  const [tenderadFormData, setTenderadFormData] = useState({
+    title: '',
+    topic: '',
+    deadline: '',
+    field: '',
+    finalInsurance: '',
+  });
   useEffect(() => {
     // Get the current date
     const today = new Date();
@@ -32,15 +45,26 @@ function CreateTender() {
     const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);
   };
-  const [officials, setOfficials] = useState([
-    { id: 1, name: '', position: '' },
-  ]);
-  const [officialIndex, setOfficialIndex] = useState(1);
+  // const handleDateChange = (e) => {
+  //   const date = e.target.value;
+  //   handleChangeAd(e);
+  //   // Check if the selected date is before the min date
+  //   console.log(date);
+  //   console.log(minDate);
+  //   if (date < minDate) {
+  //     setError('يرجي اختيار موعد قادم صحيح');
+  //   } else if (date > maxDate) {
+  //     setError(`يرجي اختيار موعد قبل ${formatDate(maxDate)}`);
+  //   } else {
+  //     setError('');
+  //   }
+  // };
 
   const handleAddOfficial = () => {
-    const newOfficial = { id: officialIndex + 1, name: '', position: '' };
+    const newOfficial = { name: '', job_title: '' };
     setOfficials([...officials, newOfficial]);
     setOfficialIndex(officialIndex + 1);
+    console.log(officials);
   };
 
   const handleOfficialChange = (idx, field, value) => {
@@ -48,16 +72,15 @@ function CreateTender() {
     updatedOfficials[idx][field] = value;
     setOfficials(updatedOfficials);
   };
-  const [products, setProducts] = useState([
-    { id: 1, title: '', unit: '', quantity: '' },
-  ]);
-  const [descriptions, setDescriptions] = useState(['']);
-  const [index, setIndex] = useState(1);
-  const [conditions, setConditions] = useState([{ id: 1, value: '' }]);
-  const [privateconditions, setPrivateConditions] = useState([{ id: 1, value: '' }]);
+  const [products, setProducts] = useState(tender && tender.products);
+  // const [descriptions, setDescriptions] = useState(['']);
+  // const [index, setIndex] = useState(1);
+  const [conditions, setConditions] = useState(['']);
+  const [privateconditions, setPrivateConditions] = useState(['']);
   const [selectedTender, setSelectedTender] = useState('');
   const [selectedFinalPercentage, setSelectedPercentage] = useState('');
   const [submitType, setSubmitType] = useState('');
+  let hasErrors = false;
 
   const handleSelectChange = (event) => {
     setSelectedTender(event.target.value);
@@ -65,13 +88,20 @@ function CreateTender() {
   const handleSelectPercentageChange = (event) => {
     setSelectedPercentage(event.target.value);
   };
-
   const handleAddProduct = () => {
-    const newProduct = { id: index + 1, title: '', unit: '', quantity: '' };
+    const newProduct = { title: '', quantity_unit: '', quantity: '', description: '' };
     setProducts([...products, newProduct]);
-    setDescriptions([...descriptions, '']);
-    setIndex(index + 1);
+    console.log(products);
+    // setDescriptions([...descriptions, '']);
+    // setIndex(index + 1);
   };
+
+  // const handleAddProduct = () => {
+  //   const newProduct = { id: index + 1, title: '', unit: '', quantity: '' };
+  //   setProducts([...products, newProduct]);
+  //   setDescriptions([...descriptions, '']);
+  //   setIndex(index + 1);
+  // };
 
   const handleProductChange = (idx, field, value) => {
     const updatedProducts = [...products];
@@ -79,168 +109,58 @@ function CreateTender() {
     setProducts(updatedProducts);
   };
 
-  const handleDescriptionChange = (idx, value) => {
-    const updatedDescriptions = [...descriptions];
-    updatedDescriptions[idx] = value;
-    setDescriptions(updatedDescriptions);
-  };
+  // const handleDescriptionChange = (idx, value) => {
+  //   const updatedDescriptions = [...descriptions];
+  //   updatedDescriptions[idx] = value;
+  //   setDescriptions(updatedDescriptions);
+  // };
 
-  const handleTitleChange = (idx, value) => {
-    const updatedProducts = [...products];
-    updatedProducts[idx].title = value;
-    setProducts(updatedProducts);
-  };
+  // const handleTitleChange = (idx, value) => {
+  //   const updatedProducts = [...products];
+  //   updatedProducts[idx].title = value;
+  //   setProducts(updatedProducts);
+  // };
 
   const handleAddCondition = () => {
-    const newCondition = { id: conditions.length + 1, value: '' };
+    const newCondition = { condition: '' };
     setConditions([...conditions, newCondition]);
+    console.log(conditions);
   };
 
   const handleAddPrivateCondition = () => {
-    const newCondition = { id: privateconditions.length + 1, value: '' };
+    const newCondition = { condition: '' };
     setPrivateConditions([...privateconditions, newCondition]);
+    console.log(privateconditions);
   };
 
   const handleConditionChange = (idx, value) => {
     const updatedConditions = [...conditions];
-    updatedConditions[idx].value = value;
+    updatedConditions[idx].condition = value;
     setConditions(updatedConditions);
   };
 
   const handlePrivateConditionChange = (idx, value) => {
     const updatedPrivateConditions = [...privateconditions];
-    updatedPrivateConditions[idx].value = value;
+    updatedPrivateConditions[idx].condition = value;
     setPrivateConditions(updatedPrivateConditions);
   };
-  const textareaRef = useRef(Array.from({ length: 4 }, () => React.createRef()));
-  const handleInput = (indexx) => {
-    const textarea = textareaRef.current[indexx].current;
-    textarea.style.height = 'auto'; // Reset height to auto to measure content
-    textarea.style.height = `${textarea.scrollHeight}px`; // Set height to fit content
-  };
 
-  const handleSubjectInput = () => {
-    const textarea = document.getElementById('tenderSubject');
-    if (textarea) {
-      textarea.style.height = 'auto'; // Reset height to auto to measure content
-      textarea.style.height = `${textarea.scrollHeight}px`; // Set height to fit content
+  useEffect(() => {
+    if (tender) {
+      setTenderadFormData({
+        title: tender.ad.title,
+        topic: tender.ad.topic,
+        deadline: tender.ad.deadline,
+        field: tender.ad.field,
+        finalInsurance: tender.ad.finalInsurance,
+      });
     }
-  };
-  const [tenderadFormData, setTenderadFormData] = useState({
-    title: '',
-    topic: '',
-    deadline: '',
-    field: '',
-    finalInsurance: '',
-  });
+  }, [tender]);
   const handleTextArea = (event) => {
     const textarea = event.target;
     textarea.style.height = 'auto'; // Reset height to auto to measure content
     textarea.style.height = `${textarea.scrollHeight}px`; // Set height to fit content
   };
-
-  const [errors, setErrors] = useState({});
-  let hasErrors = false;
-  const validate = (e) => {
-    const newErrors = {
-      products: [],
-      description: [],
-      admins: [],
-      public_conditions: [],
-      private_conditions: [],
-    };
-    hasErrors = false;
-    if (!tenderadFormData.title) {
-      hasErrors = true;
-      console.log('title');
-      newErrors.title = 'عنوان المناقصة مطلوب';
-    }
-    if (!tenderadFormData.topic) {
-      hasErrors = true;
-      console.log('topic');
-
-      newErrors.topic = 'موضوع المناقصة مطلوب';
-    }
-    if (!tenderadFormData.field) {
-      hasErrors = true;
-      console.log('title');
-
-      newErrors.field = 'مجال المناقصة مطلوب';
-    }
-    if (!tenderadFormData.finalInsurance) {
-      hasErrors = true;
-      console.log('title');
-      newErrors.finalInsurance = 'نسبة التأمين النهائي مطلوب';
-    }
-    if (!tenderadFormData.deadline) {
-      console.log('title');
-      hasErrors = true;
-      newErrors.deadline = 'اخر موعد لتلقي العروض مطلوب';
-    }
-    if (!e.target.querySelector('#create_tender').value) {
-      console.log('title');
-      hasErrors = true;
-      newErrors.initialPrice = 'ألتسعيرة الداخلية مطلوبه';
-    }
-    products.forEach((product, idx) => {
-      if (!product.title) {
-        if (!newErrors.products[idx]) newErrors.products[idx] = {};
-        console.log('title');
-        hasErrors = true;
-        newErrors.products[idx].title = 'مطلوب';
-      }
-      if (!product.quantity) {
-        if (!newErrors.products[idx]) newErrors.products[idx] = {};
-        console.log('title');
-        hasErrors = true;
-        newErrors.products[idx].quantity = 'مطلوبة';
-      }
-      if (!product.unit) {
-        if (!newErrors.products[idx]) newErrors.products[idx] = {};
-        console.log('title');
-        hasErrors = true;
-        newErrors.products[idx].unit = 'مطلوبة';
-      }
-    });
-    descriptions.forEach((desc, idx) => {
-      if (!desc) {
-        hasErrors = true;
-        console.log('title');
-        newErrors.products[idx].description = 'مطلوب';
-      }
-    });
-    officials.forEach((official, idx) => {
-      if (!newErrors.admins[idx]) {
-        newErrors.admins[idx] = {};
-      }
-
-      if (!official.name) {
-        hasErrors = true;
-        newErrors.admins[idx].name = 'اسم المسوؤل مطلوب';
-      }
-
-      if (!official.position) {
-        hasErrors = true;
-        newErrors.admins[idx].position = 'المنصب مطلوب';
-      }
-    });
-    conditions.forEach((condition, idx) => {
-      if (!newErrors.public_conditions[idx]) newErrors.public_conditions[idx] = {};
-      if (!condition.value) {
-        hasErrors = true;
-        newErrors.public_conditions[idx].condition = 'هذا الشرط مطلوب';
-      }
-    });
-    privateconditions.forEach((condition, idx) => {
-      if (!newErrors.private_conditions[idx]) newErrors.private_conditions[idx] = {};
-      if (!condition.value) {
-        hasErrors = true;
-        newErrors.private_conditions[idx].condition = 'هذا الشرط مطلوب';
-      }
-    });
-    return newErrors;
-  };
-
   const handleChangeAd = (e) => {
     const { name, value } = e.target;
     if (name === 'deadline') {
@@ -260,54 +180,198 @@ function CreateTender() {
     }));
     console.log(tenderadFormData);
   };
+  const handleDateTwoMethods = (e) => {
+    const date = e.target.value;
+    handleChangeAd(e);
+    // Check if the selected date is before the min date
+    console.log(date);
+    console.log(minDate);
+    if (date < minDate) {
+      setError('يرجي اختيار موعد قادم صحيح');
+    } else if (date > maxDate) {
+      setError(`يرجي اختيار موعد قبل ${formatDate(maxDate)}`);
+    } else {
+      setError('');
+    }
+  };
+  const [errors, setErrors] = useState({});
+  const validate = (e) => {
+    const newErrors = {
+      products: [],
+      description: [],
+      admins: [],
+      public_conditions: [],
+      private_conditions: [],
+    };
+    if (!tenderadFormData.title) {
+      hasErrors = true;
+      newErrors.title = 'عنوان المناقصة مطلوب';
+    }
+    if (!tenderadFormData.topic) {
+      hasErrors = true;
+      newErrors.topic = 'موضوع المناقصة مطلوب';
+    }
+    if (!tenderadFormData.field) {
+      hasErrors = true;
+      newErrors.field = 'مجال المناقصة مطلوب';
+    }
+    if (!tenderadFormData.finalInsurance) {
+      hasErrors = true;
+      newErrors.finalInsurance = 'نسبة التأمين النهائي مطلوب';
+    }
+    if (!tenderadFormData.deadline) {
+      hasErrors = true;
+      newErrors.deadline = ' معاد فتح المظاريف مطلوب';
+    }
+    if (!e.target.querySelector('#create_tender').value) {
+      hasErrors = true;
+      newErrors.initialPrice = 'ألتسعيرة الداخلية مطلوبه';
+    }
+    products.forEach((product, idx) => {
+      if (!product.title) {
+        hasErrors = true;
+        if (!newErrors.products[idx]) newErrors.products[idx] = {};
+        newErrors.products[idx].title = 'مطلوب';
+      }
+      if (!product.quantity) {
+        hasErrors = true;
+        if (!newErrors.products[idx]) newErrors.products[idx] = {};
+        newErrors.products[idx].quantity = 'مطلوبة';
+      }
+      if (!product.quantity_unit) {
+        hasErrors = true;
+        if (!newErrors.products[idx]) newErrors.products[idx] = {};
+        newErrors.products[idx].quantity_unit = 'مطلوبة';
+      }
+      if (!product.description) {
+        hasErrors = true;
+        if (!newErrors.products[idx]) newErrors.products[idx] = {};
+        newErrors.products[idx].description = 'مطلوب';
+      }
+    });
+
+    officials.forEach((official, idx) => {
+      if (!newErrors.admins[idx]) newErrors.admins[idx] = {};
+
+      if (!official.name) {
+        hasErrors = true;
+        newErrors.admins[idx].name = 'اسم المسوؤل مطلوب';
+      }
+
+      if (!official.job_title) {
+        hasErrors = true;
+        newErrors.admins[idx].position = 'المنصب مطلوب';
+      }
+    });
+    conditions.forEach((condition, idx) => {
+      if (!newErrors.public_conditions[idx]) newErrors.public_conditions[idx] = {};
+      if (!condition.condition) {
+        hasErrors = true;
+        newErrors.public_conditions[idx].condition = 'هذا الشرط مطلوب';
+      }
+    });
+    privateconditions.forEach((condition, idx) => {
+      if (!newErrors.private_conditions[idx]) newErrors.private_conditions[idx] = {};
+      if (!condition.condition) {
+        hasErrors = true;
+        newErrors.private_conditions[idx].condition = 'هذا الشرط مطلوب';
+      }
+    });
+    return newErrors;
+  };
+  const textareaRefs = useRef([]);
+  const handleTextareaInput = (event, idx) => {
+    const textarea = event.target;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+
+    const updatedProducts = [...products];
+    updatedProducts[idx] = {
+      ...updatedProducts[idx],
+      [textarea.name]: textarea.value,
+    };
+    setProducts(updatedProducts);
+  };
+  useEffect(() => {
+    const fetchTenders = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/get_tender/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+        });
+
+        const tender1 = await response.json();
+        console.log('tender1', tender1);
+        setTender(tender1);
+        setProducts(tender1.products);
+        setConditions(tender1.public_conditions);
+        setOfficials(tender1.admins);
+        setPrivateConditions(tender1.private_conditions);
+        setSelectedPercentage(tender1.ad.finalInsurance);
+        setSelectedTender(tender1.ad.field);
+
+        const adjustTextareaHeight = () => {
+          const textarea = document.getElementById('tenderSubject');
+          if (textarea) {
+            textarea.style.height = 'auto'; // Reset height to auto to measure content
+            textarea.style.height = `${textarea.scrollHeight}px`; // Set height to fit content
+          }
+          /* eslint-disable-next-line no-plusplus */
+          for (let i = 0; i < tender1.products.length; i++) {
+            const textAreaTitle = document.getElementById(`title${i}`);
+            const textAreaDescription = document.getElementById(`description${i}`);
+
+            if (textAreaTitle) {
+              textAreaTitle.style.height = 'auto'; // Reset height to auto to measure content
+              textAreaTitle.style.height = `${textAreaTitle.scrollHeight}px`;
+            }
+
+            if (textAreaDescription) {
+              textAreaDescription.style.height = 'auto'; // Reset height to auto to measure content
+              textAreaDescription.style.height = `${textAreaDescription.scrollHeight}px`;
+            }
+          }
+        };
+
+        // Call the function to adjust textarea height on component mount
+        adjustTextareaHeight();
+      } catch (er) {
+        console.error('Error fetching tenders:', er);
+      }
+    };
+    fetchTenders();
+  }, [authTokens]);
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (submitType === 'open') {
-      const validationErrors = validate(e);
-      console.log(hasErrors);
-      if (!hasErrors) {
-        console.log('Form published:', validationErrors);
-      } else {
-        setErrors(validationErrors);
-        console.error(validationErrors);
-        return;
-      }
-    }
-    // Fetch form values
-    const tenderTitle = e.target.querySelector('#tenderTitle').value;
-    const tenderSubject = e.target.querySelector('#tenderSubject').value;
-    const tenderOpeningDate = e.target.querySelector('#tenderOpeningDate').value;
-    const initialPrice = e.target.querySelector('#create_tender').value;
+    // if (submitType === 'open') {
 
-    const cleanedTenderAd = Object.fromEntries(
-      Object.entries(tenderadFormData).filter(([_, value]) => value !== '' && value !== null),
-    );
+    // }
+
     try {
+      // console.log(e.target.querySelector('#tenderTitle').value);
+      // console.log(e.target.querySelector('#tenderSubject').value);
+      // console.log(e.target.querySelector('#tenderOpeningDate').value);
+      // console.log(e.target.querySelector('#create_tender').value);
+      // console.log(e.target.querySelector('#tenderTitle').value);
+      console.log(submitType);
+      const initialPrice = e.target.querySelector('#create_tender').value;
       const formData = {
-        ad: cleanedTenderAd,
-        admins: officials.map((official) => ({
-          name: official.name,
-          job_title: official.position,
-        })),
-        public_conditions: conditions.map((condition) => ({
-          condition: condition.value,
-        })),
-        private_conditions: privateconditions.map((condition) => ({
-          condition: condition.value,
-        })),
-        products: products.map((product, idx) => ({
-          title: product.title,
-          quantity_unit: e.target.querySelector(`#unit_${idx}`).value,
-          quantity: e.target.querySelector(`#quantity_${idx}`).value,
-          description: e.target.querySelector(`#description_${idx}`).value,
-        })),
+        ad: tenderadFormData,
+        admins: officials,
+        public_conditions: conditions,
+        private_conditions: privateconditions,
+        products,
         initial_price: initialPrice,
         status: submitType,
+        id: tender.id,
       };
       const dataToSubmit = { ...formData };
 
       // Remove initial_price if it's null or empty
-      if (!dataToSubmit.initial_price) {
+      if (!initialPrice) {
         delete dataToSubmit.initial_price;
       }
       if (!dataToSubmit.ad.finalInsurance) {
@@ -316,27 +380,69 @@ function CreateTender() {
       if (!dataToSubmit.ad.deadline) {
         delete dataToSubmit.ad.deadline;
       }
+      console.log(dataToSubmit);
 
-      const response = await fetch('http://localhost:8000/create_tender/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authTokens.access}`,
-        },
-        body: JSON.stringify(dataToSubmit),
-      });
-      if (response.ok) {
-        console.log('Data sent successfully');
-        navigate.push('/mytender');
-        // You can reset form state or take other actions if needed
-      } else {
-        const errorResponse = await response.json();
-        console.error('Failed to send data to server', errorResponse);
+      const checkForErrors = (obj) => {
+        if (Array.isArray(obj)) {
+          for (const item of obj) {
+            if (typeof item === 'object' && item !== null) {
+              if (checkForErrors(item)) return true;
+            } else if (item === null || item === "") {
+              return true;
+            }
+          }
+        } else if (typeof obj === 'object' && obj !== null) {
+          for (const key in obj) {
+            if (obj[key] === null || obj[key] === "") {
+              return true;
+            }
+          }
+        } else if (obj === null || obj === "") {
+          return true;
+        }
+        return false;
+      };
+      const validationErrors = validate(e);
+      let hasErrors2 = false;
+      for (const key in validationErrors) {
+        if (checkForErrors(validationErrors[key])) {
+          hasErrors2 = true;
+          break;
+        }
       }
-    } catch (errror) {
-      console.error('Error:', errror);
+      if (!hasErrors && !hasErrors2) {
+        const response = await fetch('http://localhost:8000/create_tender/', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+          body: JSON.stringify(dataToSubmit),
+        });
+        if (response.ok) {
+          console.log('Data sent successfully');
+          if (submitType === 'draft') {
+            navigate.push('/draft_tenders');
+          } else {
+            navigate.push('/mytender');
+          }
+          // You can reset form state or take other actions if needed
+        } else {
+          console.error('Failed to send data to server', response.json());
+        }
+      } else {
+        setErrors(validationErrors);
+        console.error(validationErrors);
+      }
+    } catch (er) {
+      console.error('Error:', er);
     }
   };
+
+  if (!tender) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
       <div className="container_create_tender">
@@ -347,17 +453,23 @@ function CreateTender() {
             </div>
             <div className="form-fields">
               <label htmlFor="tenderTitle">عنوان المناقصة
-                <input type="text" name="title" id="tenderTitle" value={tenderadFormData.title} onChange={handleChangeAd} />
+                <input
+                  type="text"
+                  name="title"
+                  id="tenderTitle"
+                  // value={tenderadFormData.title}
+                  defaultValue={tender.ad.title}
+                  onChange={handleChangeAd}
+                />
               </label>
               {errors.title && <p style={{ fontSize: '20px', color: 'red' }}>{errors.title}</p>}
 
             </div>
             <div className="form-fields">
               <label htmlFor="tenderSubject">موضوع المناقصة
-                <textarea style={{ paddingRight: '17px' }} type="text" name="topic" id="tenderSubject" onChange={handleChangeAd} value={tenderadFormData.topic} />
+                <textarea style={{ paddingRight: '17px' }} type="text" name="topic" id="tenderSubject" defaultValue={tender.ad.topic} onChange={handleChangeAd} value={tenderadFormData.topic} />
               </label>
               {errors.topic && <p style={{ fontSize: '20px', color: 'red' }}>{errors.topic}</p>}
-
             </div>
             {/* <div className="form-fields col-8">
               <label htmlFor="preInsurance">نسبه التأمين الابتدائي
@@ -370,8 +482,8 @@ function CreateTender() {
               </label>
             </div> */}
             <div className="form-fields">
-              <label htmlFor="preInsurance"> نسبة التأمين النهائي <span style={{ fontSize: 'small' }}> **نسبه التأمين النهائي تحتسب من سعر العرض الفائز **</span>
-                <select id="selectedFinalPercentage" value={tenderadFormData.finalInsurance} name="finalInsurance" onChange={handleChangeAd}>
+              <label htmlFor="preInsurance"> نسبه التأمين النهائي <span style={{ fontSize: 'small' }}> **نسبه التأمين النهائي تحتسب من سعر العرض الفائز **</span>
+                <select value={tenderadFormData.finalInsurance} onChange={handleChangeAd} name="finalInsurance">
                   <option value="">اختر نسبة التأمين النهائي </option>
                   <option value="2">2%</option>
                   <option value="2.5">2.5%</option>
@@ -386,7 +498,7 @@ function CreateTender() {
             </div>
             <div className="form-fields">
               <label htmlFor="tenderSubject">مجال المناقصة
-                <select value={tenderadFormData.field} onChange={handleChangeAd} name="field" id="selectedTender">
+                <select name="field" onChange={handleChangeAd} defaultValue={tender.ad.field} value={tenderadFormData.field}>
                   <option value="">اختر مجال</option>
                   <option value="اجهزه حاسب الي وسوفت وير">اجهزه حاسب الي وسوفت وير</option>
                   <option value="اجهزه رياضيه والعاب ترفيهية">اجهزه رياضيه والعاب ترفيهية</option>
@@ -413,22 +525,21 @@ function CreateTender() {
 
             </div>
             <div className="form-fields">
-              <div>
-                <label htmlFor="tenderOpeningDate">
-                  معاد فتح المظاريف
-                  <input
-                    type="date"
-                    id="tenderOpeningDate"
-                    name="deadline"
-                    min={minDate}
-                    value={tenderadFormData.deadline}
-                    onChange={handleChangeAd}
-                    max={maxDate}
-                  />
-                </label>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {errors.deadline && <p style={{ fontSize: '20px', color: 'red' }}>{errors.deadline}</p>}
-              </div>
+              <label htmlFor="tenderOpeningDate">
+                معاد فتح المظاريف
+                <input
+                  type="date"
+                  id="tenderOpeningDate"
+                  name="deadline"
+                  min={minDate}
+                  defaultValue={tenderadFormData.deadline}
+                  // value={selectedDate}
+                  onChange={handleChangeAd}
+                  max={maxDate}
+                />
+              </label>
+              {error && <p style={{ color: 'red' }}>{error}</p>}
+              {errors.deadline && <p style={{ fontSize: '20px', color: 'red' }}>{errors.deadline}</p>}
             </div>
           </div>
           <div className="bidding_officials">
@@ -457,8 +568,8 @@ function CreateTender() {
                     <input
                       type="text"
                       id={`officialPosition_${idx}`}
-                      value={official.position}
-                      onChange={(e) => handleOfficialChange(idx, 'position', e.target.value)}
+                      value={official.job_title}
+                      onChange={(e) => handleOfficialChange(idx, 'job_title', e.target.value)}
                     />
                   </label>
                   {errors.admins && errors.admins[idx] && errors.admins[idx].position && (
@@ -483,7 +594,7 @@ function CreateTender() {
             </div>
             <div className="form-fields">
               <label htmlFor="create_tender">التسعيرة الداخية
-                <input type="number" id="create_tender" />
+                <input type="text" id="create_tender" defaultValue={tender.initial_price} />
               </label>
               {errors.initialPrice && <p style={{ fontSize: '20px', color: 'red' }}>{errors.initialPrice}</p>}
             </div>
@@ -493,6 +604,7 @@ function CreateTender() {
             <table>
               <thead>
                 <tr>
+                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                   <th style={{ width: '1px' }}>الصف</th>
                   <th className="col-2">عنوان المنتج</th>
                   <th className="col-1">وحدة الكمية</th>
@@ -501,21 +613,17 @@ function CreateTender() {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product, idx) => (
+                { products && products.map((product, idx) => (
                   <tr key={idx}>
-                    <td>{product.id}</td>
+                    <td>{idx + 1}</td>
                     <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
-                        type="text"
-                        ref={textareaRef.current[0]}
-                        onInput={() => handleInput(0)}
-                        id={`title_${idx}`}
-                        aria-label="title"
+                        ref={(el) => { textareaRefs.current[idx] = el; }}
+                        id={`title${idx}`}
                         value={product.title}
-                        onChange={(e) => {
-                          handleProductChange(idx, 'title', e.target.value);
-                          handleTitleChange(idx, e.target.value);
-                        }}
+                        onChange={(e) => handleProductChange(idx, 'title', e.target.value)}
+                        onInput={(e) => handleTextareaInput(e, idx)}
+                        aria-label={`Title for Product ${product.id}`}
                         style={{ width: '100%' }} // Ensure the textarea takes full width
                       />
                       {errors.products && errors.products[idx] && errors.products[idx].title && (
@@ -526,49 +634,33 @@ function CreateTender() {
                     </td>
                     <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
-                        ref={textareaRef.current[1]}
-                        onInput={() => handleInput(1)}
-                        type="text"
-                        id={`unit_${idx}`}
-                        value={product.unit}
-                        aria-label="quantity_unit"
-                        onChange={(e) => handleProductChange(idx, 'unit', e.target.value)}
+                        style={{ alignItems: 'center', justifyContent: 'center' }}
+                        ref={(el) => { textareaRefs.current[idx] = el; }}
+                        id="unit"
+                        value={product.quantity_unit}
+                        onChange={(e) => handleProductChange(idx, 'quantity_unit', e.target.value)}
+                        onInput={(e) => handleTextareaInput(e, idx)}
+                        aria-label={`Unit for Product ${product.id}`}
                       />
-                      {errors.products && errors.products[idx] && errors.products[idx].unit && (
+                      {errors.products && errors.products[idx] && errors.products[idx].quantity_unit && (
                         <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
-                          {errors.products[idx].unit}
+                          {errors.products[idx].quantity_unit}
                         </p>
                       )}
                     </td>
                     <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
-                        ref={textareaRef.current[2]}
-                        onInput={() => handleInput(2)}
-                        id={`quantity_${idx}`}
-                        value={product.quantity}
-                        aria-label="quantity"
-                        onChange={(e) => handleProductChange(idx, 'quantity', e.target.value)}
-                        onKeyDown={(e) => {
-                          // Allow: backspace, delete, tab, escape, enter
-                          if (
-                            e.key === 'Backspace' ||
-                            e.key === 'Delete' ||
-                            e.key === 'Tab' ||
-                            e.key === 'Escape' ||
-                            e.key === 'Enter' ||
-                            (e.ctrlKey && (e.key === 'a' || e.key === 'c' || e.key === 'v' || e.key === 'x'))
-                          ) {
-                            return;
-                          }
-                          // Prevent: non-numeric keys
-                          if (
-                            (e.key < '0' || e.key > '9') &&
-                            (e.key !== 'ArrowLeft' &&
-                            e.key !== 'ArrowRight')
-                          ) {
-                            e.preventDefault();
-                          }
+                        ref={(el) => { textareaRefs.current[idx] = el; }}
+                        id="quantity"
+                        defaultValue={product.quantity}
+                        onChange={(e) => {
+                          handleProductChange(idx, 'quantity', e.target.value);
                         }}
+                        onInput={(e) => {
+                          handleTextareaInput(e, idx);
+                          // calculateTotalPrice();
+                        }}
+                        aria-label={`Quantity for Product ${product.id}`}
                       />
                       {errors.products && errors.products[idx] && errors.products[idx].quantity && (
                         <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
@@ -578,13 +670,12 @@ function CreateTender() {
                     </td>
                     <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
-                        ref={textareaRef.current[3]}
-                        onInput={() => handleInput(3)}
-                        type="text"
-                        id={`description_${idx}`}
-                        value={descriptions[idx]}
-                        aria-label="description"
-                        onChange={(e) => handleDescriptionChange(idx, e.target.value)}
+                        ref={(el) => { textareaRefs.current[idx] = el; }}
+                        id={`description${idx}`}
+                        defaultValue={product.description}
+                        onChange={(e) => handleProductChange(idx, 'description', e.target.value)}
+                        onInput={(e) => handleTextareaInput(e, idx)}
+                        aria-label={`Description for Product ${product.id}`}
                       />
                       {errors.products && errors.products[idx] && errors.products[idx].description && (
                         <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
@@ -605,50 +696,6 @@ function CreateTender() {
             </button>
           </div>
 
-          {/* <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th style={{ width: '3px' }}>الصف</th>
-                  <th className="col-3">عنوان المنتج</th>
-                  <th className="col-10">وصف المنتج</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product, idx) => (
-                  <tr key={idx}>
-                    <td>{product.id}</td>
-                    <td>
-                      <input
-                        type="text"
-                        value={product.title}
-                        readOnly
-                        aria-label="عنوان المنتج"
-                      />
-                    </td>
-                    <td>
-                      <label htmlFor={`description_${idx}`}>
-                        وصف المنتج
-                        <input
-                          type="text"
-                          id={`description_${idx}`}
-                          value={descriptions[idx]}
-                          onChange={(e) => handleDescriptionChange(idx, e.target.value)}
-                        />
-                      </label>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <button
-              type="button"
-              className="button condition"
-              onClick={handleAddProduct}
-            >
-              إضافة منتج جديد
-            </button>
-          </div> */}
           <hr data-v-7e013592 />
           <div className="gradient__text m-3">
             <h1>الشروط العامة</h1>
@@ -659,11 +706,12 @@ function CreateTender() {
               <div key={idx} className="condition-field1">
                 <input
                   type="text"
-                  value={condition.value}
+                  value={condition.condition}
                   onChange={(e) => handleConditionChange(idx, e.target.value)}
                   placeholder={` الشرط رقم ${idx + 1}`}
                 />
                 {errors.public_conditions && errors.public_conditions[idx] && errors.public_conditions[idx].condition && <p style={{ fontSize: '20px', color: 'red' }}>{errors.public_conditions[idx].condition}</p>}
+
               </div>
             ))}
             <button
@@ -684,11 +732,12 @@ function CreateTender() {
               <div key={idx} className="condition-field1">
                 <input
                   type="text"
-                  value={privateCondition.value}
+                  value={privateCondition.condition}
                   onChange={(e) => handlePrivateConditionChange(idx, e.target.value)}
                   placeholder={` الشرط الخاص رقم ${idx + 1}`}
                 />
                 {errors.private_conditions && errors.private_conditions[idx] && errors.private_conditions[idx].condition && <p style={{ fontSize: '20px', color: 'red' }}>{errors.private_conditions[idx].condition}</p>}
+
               </div>
             ))}
             <button
@@ -719,5 +768,4 @@ function CreateTender() {
     </>
   );
 }
-
-export default CreateTender;
+export default DraftDetails;

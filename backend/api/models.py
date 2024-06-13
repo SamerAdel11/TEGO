@@ -104,15 +104,15 @@ class UserNotification(models.Model):
 
 
 class TenderAd(models.Model):
-    title=models.TextField()
-    topic=models.TextField()
-    field=models.CharField(max_length=255)
-    deadline=models.DateField()
-    finalInsurance=models.FloatField()
+    title=models.TextField(null=True,blank=True)
+    topic=models.TextField(null=True,blank=True)
+    field=models.CharField(max_length=255,null=True,blank=True)
+    deadline=models.DateField(null=True,blank=True)
+    finalInsurance=models.FloatField(null=True,blank=True)
 
 class Tender(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    initial_price = models.IntegerField()
+    initial_price = models.IntegerField(null=True,blank=True)
     status = models.CharField(max_length=50)
     date_created = models.DateTimeField(auto_now_add=True)
     ad = models.OneToOneField(TenderAd, on_delete=models.CASCADE)
@@ -138,30 +138,30 @@ class Tender(models.Model):
 
 
 class TenderAdmin(models.Model):
-    name = models.CharField(max_length=255)
-    job_title = models.CharField(max_length=255)
+    name = models.CharField(max_length=255,null=True,blank=True)
+    job_title = models.CharField(max_length=255,null=True,blank=True)
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
     def __str__(self):
         return f"{self.name}->{self.tender}"
 
 class TenderPublicConditions(models.Model):
 
-    condition = models.TextField()
+    condition = models.TextField(null=True,blank=True)
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
 
 
 class TenderPrivateConditions(models.Model):
 
-    condition = models.TextField()
+    condition = models.TextField(null=True,blank=True)
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
 
 
 class TenderProduct(models.Model):
 
-    title = models.CharField(max_length=255)
-    quantity_unit = models.CharField(max_length=255)
-    quantity = models.CharField(max_length=255)
-    description = models.TextField()
+    title = models.CharField(max_length=255,null=True,blank=True)
+    quantity_unit = models.CharField(max_length=255,null=True,blank=True)
+    quantity = models.CharField(max_length=255,null=True,blank=True)
+    description = models.TextField(null=True,blank=True)
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
     def __str__(self):
         return f"{self.id}- {self.title}-> Tender {self.tender.id}"

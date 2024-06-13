@@ -287,12 +287,6 @@ const App = () => (
               <NotFoundPage />
             </div>
           </Route> */}
-          <Route exact path="/not_found">
-            <div>
-              <Navbar />
-              <NotFoundPage />
-            </div>
-          </Route>
           <PrivateRoute exact path="/host" component={HostComponent} />
           <PrivateRoute exact path="/supplier" component={SupplierComponent} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/create_tender" component={CreateTenderComponent} />
@@ -313,6 +307,18 @@ const App = () => (
           <PrivateRoute exact path="/draft_tenders" component={DraftTender} />
           <PrivateRoute exact path="/draft_tender_details/:id" component={DraftTenderDetails} />
           <PrivateRoute exact path="/test" component={Test} />
+          <Route exact path="/not_found">
+            <div>
+              <Navbar />
+              <NotFoundPage />
+            </div>
+          </Route>
+          <Route path="*">
+            <div>
+              <Navbar />
+              <NotFoundPage />
+            </div>
+          </Route>
         </Switch>
       </AuthProvider>
     </div>
