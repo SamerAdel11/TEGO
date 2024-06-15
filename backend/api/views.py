@@ -534,6 +534,13 @@ class TransactionView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class TransactionListView(generics.ListAPIView):
+    serializer_class=TransactionSerializer
+    def get_queryset(self):
+        queryset = Transaction.objects.filter(tender__user=self.request.user,product_review_status='accepted')
+        return queryset
+    def get(self,request,*args,**kwargs):
+        return self.list(request,*args,**kwargs)
 import requests
 class model(APIView):
     permission_classes=[]

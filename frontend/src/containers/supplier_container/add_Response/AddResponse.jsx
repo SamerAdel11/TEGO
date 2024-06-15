@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import './AddResponse.css';
@@ -6,10 +7,10 @@ import AuthContext from '../../../context/Authcontext';
 function AddResponse() {
   const { authTokens } = useContext(AuthContext);
   const [data, setData] = useState(null);
-  const [products, setProducts] = useState(data && data.products);
+  const [products, setProducts] = useState([]);
   const textareaRefs = useRef([]);
-  const [conditions, setConditions] = useState(data && data.public_conditions);
-  const [privateconditions, setPrivateConditions] = useState(data && data.private_conditions);
+  const [conditions, setConditions] = useState([]);
+  const [privateconditions, setPrivateConditions] = useState([]);
   const [previousWork, setPreviousWork] = useState([]);
   const [previousWorkIndex, setPreviousWorkIndedx] = useState(0);
   const [showAddProjectButton, setShowAddProjectButton] = useState(true);
@@ -18,24 +19,28 @@ function AddResponse() {
   const searchParams = new URLSearchParams(location.search);
   const [totalPrice, setTotalPrice] = useState(0);
   const tenderId = searchParams.get('tender_id');
+  const [errorsData, setErrorsData] = useState({});
+  let hasErrors = false;
+
   const handleAddProject = () => {
     const newPreviousWork = { id: previousWorkIndex + 1, title: '', description: '' };
     setPreviousWork([...previousWork, newPreviousWork]);
     setPreviousWorkIndedx(previousWorkIndex + 1);
     setShowAddProjectButton(false); // Hide the initial button after clicking
   };
+
   const handlePreviousWorkChange = (idx, field, value) => {
     const updatedWork = [...previousWork];
     updatedWork[idx][field] = value;
     setPreviousWork(updatedWork);
-    console.log(previousWork);
   };
-  // const textareaRef = useRef(Array.from({ length: 1 }, () => React.createRef()));
+
   const handleWorkTextArea = (event) => {
     const textarea = event.target;
     textarea.style.height = 'auto'; // Reset height to auto to measure content
     textarea.style.height = `${textarea.scrollHeight}px`; // Set height to fit content
   };
+
   const handleTextareaInput = (event, idx) => {
     const textarea = event.target;
     textarea.style.height = 'auto';
@@ -48,20 +53,97 @@ function AddResponse() {
     };
     setProducts(updatedProducts);
   };
+
   const calculateTotalPrice = () => {
     let ttotalPrice = 0;
     products.forEach((product) => {
       if (product.supplying_status === 'متوفر') {
-        console.log('entered if condition');
         ttotalPrice += product.quantity * product.price;
       }
     });
-    setTotalPrice((prevTotalPrice) => {
-      console.log('Previous total price:', prevTotalPrice);
-      console.log('New total price:', ttotalPrice);
-      return ttotalPrice;
-    });
+    setTotalPrice(ttotalPrice);
   };
+
+  const validate = () => {
+    const newErrors = {
+      products: [],
+      conditions: [],
+      privateconditions: [],
+      previousWork: [],
+    };
+    hasErrors = false;
+
+    if (!document.getElementById('offeredprice').value) {
+      hasErrors = true;
+      newErrors.offeredprice = 'السعر المعروض مطلوب';
+    }
+
+    products.forEach((product, idx) => {
+      const productErrors = {};
+      if (!product.supplying_status) {
+        console.log('entered first one');
+        hasErrors = true;
+        productErrors.supplying_status = 'مطلوب';
+      }
+      if (product.supplying_status === 'متوفر') {
+        if (!product.title) {
+          hasErrors = true;
+          productErrors.title = 'مطلوب';
+        }
+        if (!product.description) {
+          hasErrors = true;
+          productErrors.description = 'مطلوب';
+        }
+        if (!product.quantity) {
+          hasErrors = true;
+          productErrors.quantity = 'مطلوبة';
+        }
+        if (!product.quantity_unit) {
+          hasErrors = true;
+          productErrors.quantity_unit = 'مطلوبة';
+        }
+        if (!product.price) {
+          console.log('price');
+          hasErrors = true;
+          productErrors.price = 'مطلوب';
+        }
+      }
+      newErrors.products[idx] = productErrors;
+    });
+
+    conditions.forEach((condition, idx) => {
+      if (!newErrors.privateconditions[idx]) newErrors.privateconditions[idx] = {};
+      if (!condition.condition) {
+        hasErrors = true;
+        newErrors.conditions[idx] = 'هذا الشرط مطلوب';
+      }
+    });
+
+    privateconditions.forEach((condition, idx) => {
+      if (!condition.condition) {
+        console.log('conditoion not exist');
+        hasErrors = true;
+        newErrors.privateconditions[idx].condition = 'هذا الشرط مطلوب';
+      }
+    });
+
+    previousWork.forEach((work, idx) => {
+      const workErrors = {};
+      if (!work.title) {
+        hasErrors = true;
+        workErrors.title = 'مطلوب';
+      }
+      if (!work.description) {
+        hasErrors = true;
+        workErrors.description = 'مطلوب';
+      }
+      newErrors.previousWork[idx] = workErrors;
+    });
+    console.log(newErrors);
+    // setErrorsData(newErrors);
+    return newErrors;
+  };
+
   useEffect(() => {
     const fetchTenders = async () => {
       try {
@@ -89,7 +171,6 @@ function AddResponse() {
             textarea.style.height = 'auto'; // Reset height to auto to measure content
             textarea.style.height = `${textarea.scrollHeight}px`; // Set height to fit content
           }
-          // eslint-disable-next-line no-plusplus
           for (let i = 0; i < tender.products.length; i += 1) {
             const textareatitle = document.getElementById(`title${i}`);
             const textareadescription = document.getElementById(`description${i}`);
@@ -104,35 +185,52 @@ function AddResponse() {
           }
         };
 
-        // Call the function to adjust textarea height on component mount
         adjustTextareaHeight();
       } catch (error) {
         console.error('Error fetching tenders:', error);
       }
     };
     fetchTenders();
-  }, [authTokens]);
+  }, [authTokens, tenderId]);
+  console.log(errorsData);
+  console.log(hasErrors);
+
   const handleProductChange = (idx, field, value) => {
     const updatedProducts = [...products];
     updatedProducts[idx][field] = value;
     setProducts(updatedProducts);
   };
+
   const handleConditionChange = (idx, value) => {
     const updatedConditions = [...conditions];
     updatedConditions[idx].value = value;
     setConditions(updatedConditions);
   };
+
   const handleClick = () => {
     navigate.push('/open_tenders');
   };
+
   const handlePrivateConditionChange = (idx, value) => {
     const updatedPrivateConditions = [...privateconditions];
     updatedPrivateConditions[idx].condition = value;
     setPrivateConditions(updatedPrivateConditions);
-    console.log(updatedPrivateConditions);
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validate();
+    console.log(hasErrors);
+    // If there are errors, prevent form submission
+    if (hasErrors) {
+      console.error('Validation failed:', validationErrors);
+      setErrorsData(validationErrors);
+      return;
+    }
+
+    // If validation succeeds, proceed with form submission
+    console.log('Validation passed. Submitting form...');
+
     const renameKeys = (product) => ({
       product_title: product.title,
       product_description: product.description,
@@ -171,9 +269,6 @@ function AddResponse() {
         body: JSON.stringify(formData),
       });
       if (response2.ok) {
-        console.log(formData);
-        console.log('response2');
-        console.log(response2);
         navigate.push('/open_tenders');
       } else {
         console.log('ERROR', response2.json());
@@ -182,6 +277,7 @@ function AddResponse() {
       console.error('Error:', error);
     }
   };
+
   if (!data) {
     return <div>Loading...</div>;
   }
@@ -238,7 +334,7 @@ function AddResponse() {
                 { products && products.map((product, idx) => (
                   <tr key={idx}>
                     <td>{idx + 1}</td>
-                    <td>
+                    <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id={`title${idx}`}
@@ -247,6 +343,11 @@ function AddResponse() {
                         onInput={(e) => handleTextareaInput(e, idx)}
                         aria-label={`Title for Product ${product.id}`}
                       />
+                      {errorsData.products && errorsData.products[idx] && errorsData.products[idx].title && (
+                        <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
+                          {errorsData.products[idx].title}
+                        </p>
+                      )}
                     </td>
                     <td>
                       <textarea
@@ -260,7 +361,7 @@ function AddResponse() {
                         aria-label={`Unit for Product ${product.id}`}
                       />
                     </td>
-                    <td>
+                    <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id="quantity"
@@ -275,8 +376,13 @@ function AddResponse() {
                         }}
                         aria-label={`Quantity for Product ${product.id}`}
                       />
+                      {errorsData.products && errorsData.products[idx] && errorsData.products[idx].quantity && (
+                        <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
+                          {errorsData.products[idx].quantity}
+                        </p>
+                      )}
                     </td>
-                    <td>
+                    <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id={`description${idx}`}
@@ -285,8 +391,13 @@ function AddResponse() {
                         onInput={(e) => handleTextareaInput(e, idx)}
                         aria-label={`Description for Product ${product.id}`}
                       />
+                      {errorsData.products && errorsData.products[idx] && errorsData.products[idx].description && (
+                        <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
+                          {errorsData.products[idx].description}
+                        </p>
+                      )}
                     </td>
-                    <td>
+                    <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
                         value={product.price}
                         onChange={(e) => {
@@ -300,8 +411,13 @@ function AddResponse() {
                         id={`price${idx}`}
                         aria-label={`Description for Product ${product.id}`}
                       />
+                      {errorsData.products && errorsData.products[idx] && errorsData.products[idx].price && (
+                        <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
+                          {errorsData.products[idx].price}
+                        </p>
+                      )}
                     </td>
-                    <td>
+                    <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <select
                         value={product.supplying_status}
                         onChange={(e) => {
@@ -313,6 +429,11 @@ function AddResponse() {
                         <option value="متوفر">متوفر</option>
                         <option value="نأسف">نأسف</option>
                       </select>
+                      {errorsData.products && errorsData.products[idx] && errorsData.products[idx].supplying_status && (
+                        <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
+                          {errorsData.products[idx].supplying_status}
+                        </p>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -351,19 +472,28 @@ function AddResponse() {
           </div>
 
           <div className="condition-section">
-            { privateconditions && privateconditions.map((privateCondition, idx) => (
-              <div key={idx} className="private-condition-field">
-                <span className="condition-index">{idx + 1}.</span>
-                <input
-                  type="text"
-                  defaultValue={`${privateCondition.condition}`}
-                  onChange={(e) => handlePrivateConditionChange(idx, e.target.value)}
-                  placeholder={` الشرط الخاص رقم ${idx + 1}`}
-                  className="private-condition-input"
-                />
+            {privateconditions && privateconditions.map((privateCondition, idx) => (
+              <div>
+                <div key={idx} className="private-condition-field">
+                  <span className="condition-index">{idx + 1}.</span>
+                  <input
+                    type="text"
+                    defaultValue={`${privateCondition.condition}`}
+                    onChange={(e) => handlePrivateConditionChange(idx, e.target.value)}
+                    placeholder={` الشرط الخاص رقم ${idx + 1}`}
+                    className="private-condition-input"
+                  />
+                </div>
+                {errorsData.privateconditions && errorsData.privateconditions[idx] && errorsData.privateconditions[idx].condition && (
+                  <p style={{ fontSize: '20px', color: 'red', marginRight: '25px' }}>
+                    {errorsData.privateconditions[idx].condition}
+                  </p>
+                )}
               </div>
+
             ))}
           </div>
+
           { showAddProjectButton ? (
             <div style={{ textAlign: 'center' }}>
               <button
@@ -392,6 +522,8 @@ function AddResponse() {
                 <label htmlFor="prevtenderTitle">عنوان المشروع
                   <input type="text" id="prevtenderTitle" value={work.title} onChange={(e) => handlePreviousWorkChange(index, 'title', e.target.value)} />
                 </label>
+                {errorsData.previousWork && errorsData.previousWork[index] && errorsData.previousWork[index].title && <p style={{ fontSize: '20px', color: 'red' }}>{errorsData.previousWork[index].title}</p>}
+
                 <label htmlFor="prevtenderSubject">موضوع المشروع
                   <textarea
                     type="text"
@@ -401,6 +533,8 @@ function AddResponse() {
                     onChange={(e) => handlePreviousWorkChange(index, 'description', e.target.value)}
                   />
                 </label>
+                {errorsData.previousWork && errorsData.previousWork[index] && errorsData.previousWork[index].description && <p style={{ fontSize: '20px', color: 'red' }}>{errorsData.previousWork[index].description}</p>}
+
               </div>
             ))}
             {!showAddProjectButton && (

@@ -40,17 +40,9 @@
     },
     {
       "title": "العقود",
-      "icon": "bi bi-card-heading",
-      "childrens": [
-        {
-          "title": "العقد الاول",
-          "path": "/login"
-        },
-        {
-          "title": "العقد الثاني",
-          "path": "/register"
-        }
-      ]
+      "icon": "bi bi-filetype-pdf",
+      "path": "/contracts",
+      "childrens": []
     },
     {
       "title": "القوالب",

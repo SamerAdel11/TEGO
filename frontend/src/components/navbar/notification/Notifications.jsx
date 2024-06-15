@@ -31,12 +31,8 @@ const Notifications = ({ iconColor }) => {
 
     const ws = new WebSocket(url);
     ws.onmessage = (event) => {
-      console.log('there is a message');
       const data = JSON.parse(event.data);
-      console.log(data);
-
       setMessages((prevMessages) => [data, ...prevMessages]);
-      console.log(messages);
     };
 
     return () => {

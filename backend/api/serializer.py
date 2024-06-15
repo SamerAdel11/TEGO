@@ -453,6 +453,9 @@ class ResponseDetailSerializer(serializers.ModelSerializer):
 
 class TransactionSerializer(serializers.ModelSerializer):
     review_date_arabic = serializers.SerializerMethodField()
+    tender_title = serializers.SerializerMethodField()
+    def get_tender_title(self,obj):
+        return obj.tender.ad.title
     def get_review_date_arabic(self, obj):
         # Convert deadline date to Arabic format
         if obj.product_review_date is not None:
@@ -462,7 +465,7 @@ class TransactionSerializer(serializers.ModelSerializer):
             return date_format(date, format='j F Y')
     class Meta:
         model= Transaction
-        fields= ['id','response','tender','product_review_date','product_review_date_status','product_review_status','review_date_arabic']
+        fields= ['id','response','tender','product_review_date','product_review_date_status','product_review_status','review_date_arabic','tender_title']
         extra_kwargs = {
             'product_review_date': {'required': False, 'allow_null': True},
             'product_review_date_status': {'required': False, 'allow_null': True},

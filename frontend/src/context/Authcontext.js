@@ -50,7 +50,9 @@ export const AuthProvider = ({ children }) => {
       const loggedUser = jwtDecode(tokens.access);
       setUser(loggedUser);
       localStorage.setItem('authTokens', JSON.stringify(tokens));
-      if (loggedUser.company_type === 'supplier') {
+      const supplierView = localStorage.getItem('supplierView');
+
+      if (loggedUser.company_type === 'supplier' && supplierView !== false) {
         history.push('/open_tenders');
       } else {
         history.push('/mytender');
@@ -66,6 +68,7 @@ export const AuthProvider = ({ children }) => {
     setAuthTokens(null);
     setUser(null);
     localStorage.removeItem('authTokens');
+    localStorage.removeItem('supplierView');
     history.push('/');
   };
 

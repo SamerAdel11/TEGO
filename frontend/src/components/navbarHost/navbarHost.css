@@ -2,53 +2,56 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     padding: 2rem 6rem;
-}
+  }
+.gpt3__navbar button {
+    background: #ff4920c6;
+    border: none;
 
-.gpt3__navbar-links {
+}
+  
+  .gpt3__navbar-links {
     flex: 1;
     display: flex;
     justify-content: flex-start;
     align-items: center;
-}
-
-.gpt3__navbar-links_logo {
+  }
+  
+  .gpt3__navbar-links_logo {
     margin-left: 1rem;
-}
-
-.gpt3__navbar-links_logo img {
+  }
+  
+  .gpt3__navbar-links_logo img {
     width: 60px;
     height: 60px;
-}
-
-.gpt3__navbar-links_container {
+  }
+  
+  .gpt3__navbar-links_container {
     display: flex;
     flex-direction: row;
-}
-
-.gpt3__navbar-sign {
+  }
+  
+  .gpt3__navbar-sign {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-}
-
-.gpt3__navbar-links_container p,
-.gpt3__navbar-sign p,
-.gpt3__navbar-menu_container p {
+  }
+  
+  .gpt3__navbar-links_container p,
+  .gpt3__navbar-sign p,
+  .gpt3__navbar-menu_container p {
     color: #fff;
     font-family: var(--font-family);
     font-weight: 500;
     font-size: 18px;
     line-height: 25px;
     text-transform: capitalize;
-
     margin: 0 1rem;
     cursor: pointer;
-}
-
-.gpt3__navbar-sign button,
-.gpt3__navbar-menu_container button {
+  }
+  
+  .gpt3__navbar-sign button,
+  .gpt3__navbar-menu_container button {
     padding: 0.5rem 1rem;
     color: #fff;
     background: #FF4820;
@@ -60,25 +63,23 @@
     outline: none;
     cursor: pointer;
     border-radius: 5px;
-}
-
-.gpt3__navbar-menu {
+  }
+  
+  .gpt3__navbar-menu {
     margin-left: 1rem;
-
     display: none;
     position: relative;
-}
-
-.gpt3__navbar-menu svg {
+  }
+  
+  .gpt3__navbar-menu svg {
     cursor: pointer;
-}
-
-.gpt3__navbar-menu_container {
+  }
+  
+  .gpt3__navbar-menu_container {
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
     flex-direction: column;
-    
     text-align: end;
     background: var(--color-footer);
     padding: 2rem;
@@ -89,46 +90,107 @@
     min-width: 210px;
     border-radius: 5px;
     box-shadow: 0px 0px 5px rgba(0,0, 0,0.2);
-}
-
-.gpt3__navbar-menu_container p {
+  }
+  
+  .gpt3__navbar-menu_container p {
     margin: 1rem 0;
-}
-
-.gpt3__navbar-menu_container-links-sign {
+  }
+  
+  .gpt3__navbar-menu_container-links-sign {
     display: none;
-}
-
-@media screen and (max-width: 1050px) {
+  }
+  
+  @media screen and (max-width: 1050px) {
     .gpt3__navbar-links_container {
-        display: none;
+      display: none;
     }
-
+  
     .gpt3__navbar-menu {
-        display: flex;
+      display: flex;
     }
-}
-
-@media screen and (max-width: 700px) {
+  }
+  
+  @media screen and (max-width: 700px) {
     .gpt3__navbar {
-        padding: 2rem 4rem;
+      padding: 2rem 4rem;
     }
-}
-
-@media screen and (max-width: 550px) {
+  }
+  
+  @media screen and (max-width: 550px) {
     .gpt3__navbar {
-        padding: 2rem;
+      padding: 2rem;
     }
-
+  
     .gpt3__navbar-sign {
-        display: none;
+      display: none;
     }
-
+  
     .gpt3__navbar-menu_container {
-        top: 20px;
+      top: 20px;
     }
-
+  
     .gpt3__navbar-menu_container-links-sign {
-        display: block;
+      display: block;
     }
-}
+  }
+  
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  
+  @keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  
+  .toggle-button {
+    display: flex;
+    align-items: center;
+    width: 100px;
+    height: 40px;
+    background-color: #001f3f;
+    border-radius: 20px;
+    padding: 0 10px;
+    cursor: pointer;
+    position: relative;
+    margin-left: 30px;
+    transition: background-color 0.3s ease;
+    direction: rtl;
+  }
+  
+  .toggle-text {
+    color: #7FDBFF;
+    font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 25px;
+    margin-right: 10px;
+  }
+  
+  .toggle-circle {
+    width: 30px;
+    height: 30px;
+    background-color: #7FDBFF;
+    border-radius: 50%;
+    position: absolute;
+    transition: transform 0.3s ease;
+    right: 5px;
+  }
+  
+  .toggle-button.active .toggle-circle {
+    transform: translateX(-60px);
+  }
+  
+  .toggle-button .toggle-circle {
+    transform: translateX(0px);
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.1s forwards;
+  }
+  
+  .fade-out {
+    animation: fadeOut 0.1s forwards;
+  }
+  
