@@ -328,10 +328,10 @@ const App = () => (
           <PrivateRoute exact path="/candidate_pool_offers" component={CandidatePoolOffersFunc} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/rejected_offers" component={RejectedOffersFunc} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/offered_offers" component={OfferedOffersFunc} allowedRoles={['supplier']} />
+          <PrivateRoute exact path="/supplier_contracts" component={SupplierContract} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/draft_tenders" component={DraftTender} allowedRoles={['buyer']} />
           <PrivateRoute exact path="/draft_tender_details/:id" component={DraftTenderDetails} allowedRoles={['buyer']} />
           <PrivateRoute exact path="/host_contracts" component={HostContract} allowedRoles={['buyer']} />
-          <PrivateRoute exact path="/supplier_contracts" component={SupplierContract} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/test" component={Test} />
 
           <Route exact path="/not_found">

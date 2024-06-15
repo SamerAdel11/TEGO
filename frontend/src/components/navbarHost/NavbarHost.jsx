@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import logo from '../../assets/Logo4.png';
 
 import './navbarHost.css';
@@ -11,38 +11,54 @@ function Navbar() {
   const [supplierView, setSupplierView] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [hideText, setHideText] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
   const history = useHistory();
+  const location = useLocation();
+  console.log(location.pathname);
 
   useEffect(() => {
     const savedState = localStorage.getItem('supplierView');
     if (savedState !== null) {
       setSupplierView(JSON.parse(savedState));
     } else {
-      setSupplierView(JSON.parse(true));
+      setSupplierView(true);
     }
   }, []);
 
   useEffect(() => {
-    let timer;
     if (isAnimating) {
       const newSupplierView = !supplierView;
-      timer = setTimeout(() => {
+      console.log('Supplier view is ', supplierView);
+
+      const timer = setTimeout(() => {
         setSupplierView(newSupplierView);
         localStorage.setItem('supplierView', JSON.stringify(newSupplierView));
-        // history.push(newSupplierView ? '/open_tenders' : '/mytender');
         setIsAnimating(false);
-      }, 400);
-      setTimeout(() => {
-        history.push(supplierView ? '/open_tenders' : '/mytender');
-      }, 200); // Ensure this duration matches the CSS animation duration
+        setShowNotification(true);
+      }, 100); // Ensure this duration matches the CSS animation duration
+
+      return () => clearTimeout(timer);
     }
-    return () => clearTimeout(timer);
-  }, [isAnimating, supplierView, history]);
+    return undefined;
+  }, [isAnimating, supplierView]);
 
   const handleClick = () => {
     setHideText(true);
     setIsAnimating(true);
   };
+
+  useEffect(() => {
+    if (showNotification) {
+      const targetPath = supplierView ? '/open_tenders' : '/mytender';
+      const timer = setTimeout(() => {
+        history.push(targetPath);
+      }, 200);
+
+      // Cleanup the timer if the component unmounts or if the effect runs again
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [showNotification, supplierView, history]);
 
   return (
     <div className="gpt3__navbar">

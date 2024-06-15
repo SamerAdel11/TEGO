@@ -187,10 +187,10 @@
   }
   
   .fade-in {
-    animation: fadeIn 0.1s forwards;
+    animation: fadeIn 0.05s forwards;
   }
   
   .fade-out {
-    animation: fadeOut 0.1s forwards;
+    animation: fadeOut 0.05s forwards;
   }
   
