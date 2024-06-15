@@ -1,9 +1,9 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable react/button-has-type */
 import React, { useState, useEffect, useContext } from 'react';
-import AuthContext from '../../context/Authcontext';
+import AuthContext from '../../../context/Authcontext';
 
-function Contracts() {
+function HostContracts() {
   const [contractData, setContractData] = useState(null);
   const { authTokens } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
@@ -11,7 +11,7 @@ function Contracts() {
   useEffect(() => {
     const fetchContracts = async () => {
       try {
-        const response = await fetch('http://localhost:8000/list_transactions', {
+        const response = await fetch('http://localhost:8000/list_transactions?user_type=host', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -86,4 +86,4 @@ function Contracts() {
   );
 }
 
-export default Contracts;
+export default HostContracts;

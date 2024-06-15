@@ -41,7 +41,7 @@
     {
       "title": "العقود",
       "icon": "bi bi-filetype-pdf",
-      "path": "/contracts",
+      "path": "/host_contracts",
       "childrens": []
     },
     {

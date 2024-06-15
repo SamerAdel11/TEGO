@@ -36,16 +36,9 @@
     },
     {
         "title": "العقود",
-        "icon": "bi bi-card-heading",
+        "icon": "bi bi-filetype-pdf",
+        "path": "/supplier_contracts",
         "childrens": [
-            {
-                "title": "العقد الاول",
-                "path": "/login"
-            },
-            {
-                "title": "العقد الثاني",
-                "path": "/register"
-            }
         ]
     },
     {

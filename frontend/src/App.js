@@ -33,7 +33,8 @@ import Draft from './containers/Buyer_container/draft_tenders/DraftTenders.jsx';
 import DraftDetails from './containers/Buyer_container/draft_tenders/draftDetails.jsx';
 import Test from './containers/Buyer_container/test/test.jsx';
 import NotFoundPage from './containers/not_found/NotFoundPage.jsx';
-import Contracts from './containers/contracts/ContractList.jsx';
+import HostContracts from './containers/Buyer_container/host_contracts/ContractList.jsx';
+import SupplierContracts from './containers/supplier_container/contracts/Contracts.jsx';
 
 function HostComponent() {
   return (
@@ -263,7 +264,18 @@ function HostContract() {
       <NavbarHost />
       <div className="host_side">
         <Sidebar />
-        <Contracts />
+        <HostContracts />
+      </div>
+    </div>
+  );
+}
+function SupplierContract() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <SidebarSupplier />
+        <SupplierContracts />
       </div>
     </div>
   );
@@ -318,7 +330,8 @@ const App = () => (
           <PrivateRoute exact path="/offered_offers" component={OfferedOffersFunc} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/draft_tenders" component={DraftTender} allowedRoles={['buyer']} />
           <PrivateRoute exact path="/draft_tender_details/:id" component={DraftTenderDetails} allowedRoles={['buyer']} />
-          <PrivateRoute exact path="/contracts" component={HostContract} allowedRoles={['buyer']} />
+          <PrivateRoute exact path="/host_contracts" component={HostContract} allowedRoles={['buyer']} />
+          <PrivateRoute exact path="/supplier_contracts" component={SupplierContract} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/test" component={Test} />
 
           <Route exact path="/not_found">

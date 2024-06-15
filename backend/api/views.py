@@ -537,8 +537,14 @@ class TransactionView(APIView):
 class TransactionListView(generics.ListAPIView):
     serializer_class=TransactionSerializer
     def get_queryset(self):
-        queryset = Transaction.objects.filter(tender__user=self.request.user,product_review_status='accepted')
-        return queryset
+        user_type=self.request.query_params.get('user_type')
+        if user_type== 'host':
+            queryset = Transaction.objects.filter(tender__user=self.request.user,product_review_status='accepted')
+            return queryset
+        elif user_type=='supplier':
+            queryset = Transaction.objects.filter(response__user=self.request.user,product_review_status='accepted')
+            return queryset
+
     def get(self,request,*args,**kwargs):
         return self.list(request,*args,**kwargs)
 import requests

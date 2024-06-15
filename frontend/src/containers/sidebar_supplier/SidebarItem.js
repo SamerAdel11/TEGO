@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 export default function SidebarItem({ item }) {
   const [open, setOpen] = useState(false);
 
-  if (item.childrens) {
+  if (item.childrens && item.childrens.length > 0) {
     return (
       <div className={open ? 'sidebar-item open' : 'sidebar-item'}>
         <div className="sidebar-title">
@@ -23,6 +23,19 @@ export default function SidebarItem({ item }) {
           ))}
         </div>
       </div>
+    );
+  }
+  if (item.childrens && item.childrens.length === 0) {
+    return (
+      <Link to={item.path || '#'}>
+        <div className="sidebar-item sidebar-title">
+          <span>
+            {item.icon && <i className={item.icon} />}
+            {item.title}
+          </span>
+        </div>
+      </Link>
+
     );
   }
   return (
