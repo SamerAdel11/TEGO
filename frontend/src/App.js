@@ -35,6 +35,11 @@ import Test from './containers/Buyer_container/test/test.jsx';
 import NotFoundPage from './containers/not_found/NotFoundPage.jsx';
 import HostContracts from './containers/Buyer_container/host_contracts/ContractList.jsx';
 import SupplierContracts from './containers/supplier_container/contracts/Contracts.jsx';
+import OpenedTenderDetails from './containers/Buyer_container/My_tenders/OpenTenderDetails.jsx';
+import CancelledTenders from './containers/Buyer_container/cancelled_tenders/CancelledTenders.jsx';
+import CancelledTenderDetails from './containers/Buyer_container/cancelled_tenders/CancelledTendersDetails.jsx';
+import TemplateTender from './containers/Buyer_container/template/TemplateTender.jsx';
+import TemplateTenderDetails from './containers/Buyer_container/template/TemplateTenderDetails.jsx';
 
 function HostComponent() {
   return (
@@ -247,7 +252,7 @@ function TestFunc() {
     </div>
   );
 }
-function DraftTenderDetails() {
+function DraftTenderDetailsFun() {
   return (
     <div className="">
       <NavbarHost />
@@ -258,7 +263,7 @@ function DraftTenderDetails() {
     </div>
   );
 }
-function HostContract() {
+function HostContractFun() {
   return (
     <div className="">
       <NavbarHost />
@@ -269,13 +274,68 @@ function HostContract() {
     </div>
   );
 }
-function SupplierContract() {
+function SupplierContractFun() {
   return (
     <div className="">
       <NavbarHost />
       <div className="host_side">
         <SidebarSupplier />
         <SupplierContracts />
+      </div>
+    </div>
+  );
+}
+function OpenedTenderDetailFun() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <OpenedTenderDetails />
+      </div>
+    </div>
+  );
+}
+function CancelledTenderFun() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <CancelledTenders />
+      </div>
+    </div>
+  );
+}
+function TemplateTenderFun() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <TemplateTender />
+      </div>
+    </div>
+  );
+}
+function TemplateTenderDetailsFun() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <TemplateTenderDetails />
+      </div>
+    </div>
+  );
+}
+function CancelledTenderDetail() {
+  return (
+    <div className="">
+      <NavbarHost />
+      <div className="host_side">
+        <Sidebar />
+        <CancelledTenderDetails />
       </div>
     </div>
   );
@@ -293,7 +353,6 @@ const App = () => (
           <Route path="/activate/:uidb64/:token" component={ActivationPage} />
           <Route path="/waiting_for_verification" component={EmailVerificationMessage} />
           <Route path="/notification" component={WebSocketExample} />
-          <Route path="/tender_offer" component={TestFunc} />
           <Route path="/" exact>
             <div className="gradient__bg">
               <Navbar />
@@ -321,17 +380,23 @@ const App = () => (
           <PrivateRoute exact path="/awating" component={Awatingg} allowedRoles={['buyer']} />
           <PrivateRoute exact path="/awating_responses/:id" component={AwatingDetailss} allowedRoles={['buyer']} />
           <PrivateRoute exact path="/awating_contact/:id" component={AwatingContact} allowedRoles={['buyer']} />
-          <PrivateRoute exact path="/awarded_tenders" component={AwardedTendersFunc} allowedRoles={['buyer']} />
+          <PrivateRoute exact path="/awarded_tenders" component={AwardedTendersFunc} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/supplier" component={SupplierComponent} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/open_tenders" component={OpenTendersComponent} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/add_response" component={AddTenderResponse} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/candidate_pool_offers" component={CandidatePoolOffersFunc} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/rejected_offers" component={RejectedOffersFunc} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/offered_offers" component={OfferedOffersFunc} allowedRoles={['supplier']} />
-          <PrivateRoute exact path="/supplier_contracts" component={SupplierContract} allowedRoles={['supplier']} />
+          <PrivateRoute exact path="/supplier_contracts" component={SupplierContractFun} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/draft_tenders" component={DraftTender} allowedRoles={['buyer']} />
-          <PrivateRoute exact path="/draft_tender_details/:id" component={DraftTenderDetails} allowedRoles={['buyer']} />
-          <PrivateRoute exact path="/host_contracts" component={HostContract} allowedRoles={['buyer']} />
+          <PrivateRoute exact path="/draft_tender_details/:id" component={DraftTenderDetailsFun} allowedRoles={['buyer']} />
+          <PrivateRoute exact path="/host_contracts" component={HostContractFun} allowedRoles={['buyer']} />
+          <PrivateRoute exact path="/tender/:id" component={OpenedTenderDetailFun} allowedRoles={['buyer']} />
+          <PrivateRoute exact path="/cancelled_tenders_details/:id" component={CancelledTenderDetail} allowedRoles={['buyer']} />
+          <PrivateRoute exact path="/cancelled_tenders/" component={CancelledTenderFun} allowedRoles={['buyer']} />
+          <PrivateRoute exact path="/template_tenders/" component={TemplateTenderFun} allowedRoles={['buyer']} />
+          <PrivateRoute exact path="/template_tenders_details/:id" component={TemplateTenderDetailsFun} allowedRoles={['buyer']} />
+          <PrivateRoute exact path="/tender_offer" component={TestFunc} allowedRoles={['supplier']} />
           <PrivateRoute exact path="/test" component={Test} />
 
           <Route exact path="/not_found">

@@ -1,38 +1,33 @@
 [
     {
-        "title": "المناقصات",
+        "title": "العروض المشارك بها",
         "icon": "bi bi-envelope-open",
         "childrens": [
-            {
-                "title": "المناقصات المتاحه",
-                "icon": "bi bi-newspaper",
-                "path": "/open_tenders"
 
+            {
+                "title": "العروض المنتظرة",
+                "path": "/offered_offers"
             },
             {
-                "title": "العروض المشارك بها",
-                "icon": "bi bi-newspaper",
-                "childrens": [
-                    {
-                        "title": "العروض المنتظرة",
-                        "path": "/offered_offers"
-                    },
-                    {
-                        "title": "العروض الفائزة",
-                        "path": "/awarded_tenders"
-                    },
-                    {
-                        "title": "العروض المرشحه للفوز",
-                        "path": "/candidate_pool_offers"
-                    },
-                    {
-                        "title": "العروض المرفوضة",
-                        "path": "/rejected_offers"
-                    }
-                ]
-                
+                "title": "العروض الفائزة",
+                "path": "/awarded_tenders"
+            },
+            {
+                "title": "العروض المرشحه للفوز",
+                "path": "/candidate_pool_offers"
+            },
+            {
+                "title": "العروض المرفوضة",
+                "path": "/rejected_offers"
             }
         ]
+    },
+    {
+        "title": "المناقصات المتاحه",
+        "icon": "bi bi-newspaper",
+        "path": "/open_tenders",
+        "childrens": []
+
     },
     {
         "title": "العقود",
@@ -40,37 +35,6 @@
         "path": "/supplier_contracts",
         "childrens": [
         ]
-    },
-    {
-        "title": "المسودات",
-        "icon": "bi bi-basket",
-        "childrens": [
-            {
-                "title": "المسودة رقم 1",
-                "path": "/profile"
-            },
-            {
-                "title": "مسودات اخري",
-                "childrens": [
-                    {
-                        "title": "مسودة رقم 2",
-                        "path": "/settings/account"
-                    },
-                    {
-                        "title": "مسودة رقم 3",
-                        "childrens": [
-                            {
-                                "title": "مسودة رقم 4",
-                                "path": "/settings/billing/payment"
-                            },
-                            {
-                                "title": "مسودة رقم 5",
-                                "path": "/settings/billing/subscription"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
     }
+
 ]

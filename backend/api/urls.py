@@ -6,12 +6,14 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 urlpatterns = [
+    
     path('companies/', views.CompanyView.as_view()),
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('get_tenders/',views.TenderHostView.as_view(), name='get_tenders'),
     path('get_tenders_supplier/',views.TenderSupplierView.as_view()),
-    path('create_tender/',views.TenderCreateView.as_view(),name='create_tender'),
+    path('create_tender/',views.TenderCreateView.as_view(),name='create_tender'),   
+    path('update_tender_status/', views.UpdateTenderStatus.as_view()),
     path('get_tender/<int:pk>',views.RetrieveTender.as_view(),name='get_tender'),
     path('add_response/',views.ResponseView.as_view(),name='add_response'),
     path('activate/<str:uidb64>/<str:token>', views.activate, name='activate'),

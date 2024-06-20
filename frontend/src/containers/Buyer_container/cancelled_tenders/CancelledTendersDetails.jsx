@@ -5,10 +5,11 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
+import PulseLoader from 'react-spinners/PulseLoader';
 import AuthContext from '../../../context/Authcontext';
 // import './AddResponse.css';
 
-function DraftDetails() {
+function CancelledTenderDetails() {
   const { id } = useParams();
   const navigate = useHistory();
   const { authTokens } = useContext(AuthContext);
@@ -27,15 +28,6 @@ function DraftDetails() {
     finalInsurance: '',
   });
   useEffect(() => {
-    // This effect will run every time the location changes
-    const unlisten = navigate.listen(() => {
-      window.scrollTo(0, 0);
-    });
-    return () => {
-      unlisten();
-    };
-  }, [navigate]);
-  useEffect(() => {
     // Get the current date
     const today = new Date();
     // Format the date as yyyy-mm-dd
@@ -49,25 +41,20 @@ function DraftDetails() {
     setMaxDate(formattedMaxDate);
     // Set the minDate state
   }, []);
+  useEffect(() => {
+    // This effect will run every time the location changes
+    const unlisten = navigate.listen(() => {
+      window.scrollTo(0, 0);
+    });
+    return () => {
+      unlisten();
+    };
+  }, [navigate]);
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);
   };
-  // const handleDateChange = (e) => {
-  //   const date = e.target.value;
-  //   handleChangeAd(e);
-  //   // Check if the selected date is before the min date
-  //   console.log(date);
-  //   console.log(minDate);
-  //   if (date < minDate) {
-  //     setError('يرجي اختيار موعد قادم صحيح');
-  //   } else if (date > maxDate) {
-  //     setError(`يرجي اختيار موعد قبل ${formatDate(maxDate)}`);
-  //   } else {
-  //     setError('');
-  //   }
-  // };
 
   const handleAddOfficial = () => {
     const newOfficial = { name: '', job_title: '' };
@@ -432,8 +419,6 @@ function DraftDetails() {
           console.log('Data sent successfully');
           if (submitType === 'draft') {
             navigate.push('/draft_tenders');
-          } else if (submitType === 'template') {
-            navigate.push('/template_tenders');
           } else {
             navigate.push('/mytender');
           }
@@ -449,9 +434,67 @@ function DraftDetails() {
       console.error('Error:', er);
     }
   };
+  const SetTenderToDraft = async () => {
+    try {
+      // Assign 'candidate_pool' to the status variable
+      const status = 'draft';
 
+      // Send only the status in the request body
+      const response = await fetch(
+        `http://localhost:8000/update_tender_status/?tender_id=${id}&new_status=draft`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+        },
+      );
+
+      const data = await response.json();
+      if (response.ok) {
+        navigate.push(`/draft_tender_details/${id}`);
+      }
+    } catch (errr) {
+      console.error('Error sending response:', errr);
+    }
+  };
+  const CancelTender = async () => {
+    const response = await fetch(
+      `http://localhost:8000/cancel_tender?tender_id=${id}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authTokens.access}`,
+        },
+      },
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      navigate.push('/mytender');
+    }
+
+    console.log(data);
+    // histoyty.push(`/awating_responses/${id}`);
+  };
   if (!tender) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
   }
 
   return (
@@ -469,8 +512,7 @@ function DraftDetails() {
                   name="title"
                   id="tenderTitle"
                   // value={tenderadFormData.title}
-                  defaultValue={tender.ad.title}
-                  onChange={handleChangeAd}
+                  value={tender.ad.title}
                 />
               </label>
               {errors.title && <p style={{ fontSize: '20px', color: 'red' }}>{errors.title}</p>}
@@ -478,7 +520,7 @@ function DraftDetails() {
             </div>
             <div className="form-fields">
               <label htmlFor="tenderSubject">موضوع المناقصة
-                <textarea style={{ paddingRight: '17px' }} type="text" name="topic" id="tenderSubject" defaultValue={tender.ad.topic} onChange={handleChangeAd} value={tenderadFormData.topic} />
+                <textarea style={{ paddingRight: '17px' }} type="text" name="topic" id="tenderSubject" value={tender.ad.topic} />
               </label>
               {errors.topic && <p style={{ fontSize: '20px', color: 'red' }}>{errors.topic}</p>}
             </div>
@@ -494,43 +536,13 @@ function DraftDetails() {
             </div> */}
             <div className="form-fields">
               <label htmlFor="preInsurance"> نسبه التأمين النهائي <span style={{ fontSize: 'small' }}> **نسبه التأمين النهائي تحتسب من سعر العرض الفائز **</span>
-                <select value={tenderadFormData.finalInsurance} onChange={handleChangeAd} name="finalInsurance">
-                  <option value="">اختر نسبة التأمين النهائي </option>
-                  <option value="2">2%</option>
-                  <option value="2.5">2.5%</option>
-                  <option value="3">3%</option>
-                  <option value="3.5">3.5%</option>
-                  <option value="4">4%</option>
-                  <option value="4.5">4.5%</option>
-                  <option value="5">5%</option>
-                </select>
+                <input value={`${tender.ad.finalInsurance}%`} name="finalInsurance" />
               </label>
               {errors.finalInsurance && <p style={{ fontSize: '20px', color: 'red' }}>{errors.finalInsurance}</p>}
             </div>
             <div className="form-fields">
               <label htmlFor="tenderSubject">مجال المناقصة
-                <select name="field" onChange={handleChangeAd} defaultValue={tender.ad.field} value={tenderadFormData.field}>
-                  <option value="">اختر مجال</option>
-                  <option value="اجهزه حاسب الي وسوفت وير">اجهزه حاسب الي وسوفت وير</option>
-                  <option value="اجهزه رياضيه والعاب ترفيهية">اجهزه رياضيه والعاب ترفيهية</option>
-                  <option value="اجهزه هيدورليك ومعدات ثقيله">اجهزه هيدورليك ومعدات ثقيله</option>
-                  <option value="منتجات غذائيه">منتجات غذائيه</option>
-                  <option value="منتجات مقاولات">منتجات مقاولات</option>
-                  <option value="خدمات ماليه وبنوك">خدمات ماليه وبنوك</option>
-                  <option value="منتجات الدعايه والاعلان">منتجات الدعايه والاعلان</option>
-                  <option value="منتجات اثاث">منتجات اثاث</option>
-                  <option value="ادوات مكتبيه">ادوات مكتبيه</option>
-                  <option value="معدات بحريه">معدات بحريه</option>
-                  <option value="مواد خام( معادن – اخشاب – نحاس – فضه – حديد -.....)">مواد خام( معادن – اخشاب – نحاس – فضه – حديد -.....)</option>
-                  <option value="محابس">محابس</option>
-                  <option value="اجهزه كهربائيه">اجهزه كهربائيه</option>
-                  <option value="اجهزه رياضيه">اجهزه رياضيه</option>
-                  <option value="اعلاف للحيوانات">اعلاف للحيوانات</option>
-                  <option value="عدد ومسلتزمات ورش">عدد ومسلتزمات ورش</option>
-                  <option value="منتجات الطاقه الشمسيه">منتجات الطاقه الشمسيه</option>
-                  <option value="ادوات النظافه">ادوات النظافه</option>
-                  <option value="منتجات التبريد والتكييف">منتجات التبريد والتكييف</option>
-                </select>
+                <input name="field" value={tender.ad.field} />
               </label>
               {errors.field && <p style={{ fontSize: '20px', color: 'red' }}>{errors.field}</p>}
 
@@ -542,11 +554,8 @@ function DraftDetails() {
                   type="date"
                   id="tenderOpeningDate"
                   name="deadline"
-                  min={minDate}
-                  defaultValue={tenderadFormData.deadline}
+                  value={tender.ad.deadline}
                   // value={selectedDate}
-                  onChange={handleChangeAd}
-                  max={maxDate}
                 />
               </label>
               {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -558,14 +567,13 @@ function DraftDetails() {
               <h1>مسوؤلي المناقصة</h1>
             </div>
             {officials.map((official, idx) => (
-              <div key={idx} className="form-fields row">
+              <div key={idx} className="form-fields row" style={{ marginBottom: '20px' }}>
                 <div className="col-md-6">
                   <label htmlFor={`officialName_${idx}`}>الاسم
                     <input
                       type="text"
                       id={`officialName_${idx}`}
                       value={official.name}
-                      onChange={(e) => handleOfficialChange(idx, 'name', e.target.value)}
                     />
                   </label>
                   {errors.admins && errors.admins[idx] && errors.admins[idx].name && (
@@ -580,7 +588,6 @@ function DraftDetails() {
                       type="text"
                       id={`officialPosition_${idx}`}
                       value={official.job_title}
-                      onChange={(e) => handleOfficialChange(idx, 'job_title', e.target.value)}
                     />
                   </label>
                   {errors.admins && errors.admins[idx] && errors.admins[idx].position && (
@@ -591,13 +598,6 @@ function DraftDetails() {
                 </div>
               </div>
             ))}
-            <button
-              type="button"
-              className="button condition"
-              onClick={handleAddOfficial}
-            >
-              إضافة مسؤول مناقصة جديد
-            </button>
           </div>
           <div className="create_new_tender">
             <div className="gradient__text">
@@ -632,9 +632,6 @@ function DraftDetails() {
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id={`title${idx}`}
                         value={product.title}
-                        onChange={(e) => handleProductChange(idx, 'title', e.target.value)}
-                        onInput={(e) => handleTextareaInput(e, idx)}
-                        aria-label={`Title for Product ${product.id}`}
                         style={{ width: '100%' }} // Ensure the textarea takes full width
                       />
                       {errors.products && errors.products[idx] && errors.products[idx].title && (
@@ -649,9 +646,7 @@ function DraftDetails() {
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id="unit"
                         value={product.quantity_unit}
-                        onChange={(e) => handleProductChange(idx, 'quantity_unit', e.target.value)}
-                        onInput={(e) => handleTextareaInput(e, idx)}
-                        aria-label={`Unit for Product ${product.id}`}
+
                       />
                       {errors.products && errors.products[idx] && errors.products[idx].quantity_unit && (
                         <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
@@ -663,15 +658,7 @@ function DraftDetails() {
                       <textarea
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id="quantity"
-                        defaultValue={product.quantity}
-                        onChange={(e) => {
-                          handleProductChange(idx, 'quantity', e.target.value);
-                        }}
-                        onInput={(e) => {
-                          handleTextareaInput(e, idx);
-                          // calculateTotalPrice();
-                        }}
-                        aria-label={`Quantity for Product ${product.id}`}
+                        value={product.quantity}
                       />
                       {errors.products && errors.products[idx] && errors.products[idx].quantity && (
                         <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
@@ -683,10 +670,7 @@ function DraftDetails() {
                       <textarea
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id={`description${idx}`}
-                        defaultValue={product.description}
-                        onChange={(e) => handleProductChange(idx, 'description', e.target.value)}
-                        onInput={(e) => handleTextareaInput(e, idx)}
-                        aria-label={`Description for Product ${product.id}`}
+                        value={product.description}
                       />
                       {errors.products && errors.products[idx] && errors.products[idx].description && (
                         <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
@@ -698,13 +682,6 @@ function DraftDetails() {
                 ))}
               </tbody>
             </table>
-            <button
-              type="button"
-              className="button condition"
-              onClick={handleAddProduct}
-            >
-              إضافة منتج جديد
-            </button>
           </div>
 
           {/* <hr data-v-7e013592 /> */}
@@ -718,20 +695,12 @@ function DraftDetails() {
                 <input
                   type="text"
                   value={condition.condition}
-                  onChange={(e) => handleConditionChange(idx, e.target.value)}
                   placeholder={` الشرط رقم ${idx + 1}`}
                 />
                 {errors.public_conditions && errors.public_conditions[idx] && errors.public_conditions[idx].condition && <p style={{ fontSize: '20px', color: 'red' }}>{errors.public_conditions[idx].condition}</p>}
 
               </div>
             ))}
-            <button
-              type="button"
-              className="button condition"
-              onClick={handleAddCondition}
-            >
-              اضافة شرط
-            </button>
           </div>
 
           <div className="gradient__text m-3">
@@ -744,34 +713,30 @@ function DraftDetails() {
                 <input
                   type="text"
                   value={privateCondition.condition}
-                  onChange={(e) => handlePrivateConditionChange(idx, e.target.value)}
                   placeholder={` الشرط الخاص رقم ${idx + 1}`}
                 />
                 {errors.private_conditions && errors.private_conditions[idx] && errors.private_conditions[idx].condition && <p style={{ fontSize: '20px', color: 'red' }}>{errors.private_conditions[idx].condition}</p>}
 
               </div>
             ))}
-            <button
-              type="button"
-              className="button condition"
-              onClick={handleAddPrivateCondition}
-            >
-              اضافة شرط
-            </button>
           </div>
 
           <div className="button-container">
-            <button type="submit" className="button" onClick={() => setSubmitType('open')} onSubmit={handleSubmit}>
-              نشر
+            <button
+              style={{ marginRight: '150px', marginLeft: '150px' }}
+              className="buton_resonpose"
+              type="button"
+              onClick={SetTenderToDraft}
+            >
+              إعاده نشر المناقصة
             </button>
-            <button type="submit" className="button" onClick={() => setSubmitType('draft')} onSubmit={handleSubmit}>
-              حفظ كمسودة
-            </button>
-            <button type="submit" className="button" onClick={() => setSubmitType('template')} onSubmit={handleSubmit}>
-              حفظ كنموذج
-            </button>
-            <button type="button" className="button cancel">
-              الغاء
+            <button
+              style={{ marginLeft: '150px' }}
+              className="button cancel"
+              type="button"
+              onClick={CancelTender}
+            >
+              تعديل المناقصة
             </button>
           </div>
         </form>
@@ -779,4 +744,4 @@ function DraftDetails() {
     </>
   );
 }
-export default DraftDetails;
+export default CancelledTenderDetails;

@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom'; // Import Link from React Router
-import './OpenTenders.css';
+import '../pending_decision/pendingdecision.css';
 import PulseLoader from 'react-spinners/PulseLoader';
+
 import AuthContext from '../../../context/Authcontext';
 
-function OpenTenders() {
+function TemplateTender() {
   const [tendersData, setTendersData] = useState(null);
   const { authTokens } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders_supplier', {
+        const response = await fetch('http://localhost:8000/get_tenders?status=template', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -49,22 +50,19 @@ function OpenTenders() {
   return (
     <div className="pending-container">
       <div className="gradient__text pending_title">
-        <h1 className="first_title">المناقصات المتاحة</h1>
+        <h1 className="first_title">نماذج المناقصات</h1>
       </div>
       {tendersData.length === 0 && (
         <div style={{ alignItems: 'center', textAlign: 'center', marginTop: '100px' }}>
-          <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا يوجد مناقصات  تناسب مجال عملكم</p>
+          <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا توجد نماذج مناقصات بعد</p>
         </div>
       )}
       {tendersData && tendersData.map((tender, index) => (
-        <Link style={{ 'text-decoration': 'none' }} key={index} to={`/add_response?tender_id=${tender.id}`}>
-          <div className="tender-cards">
+        <Link style={{ 'text-decoration': 'none' }} key={index} to={`/template_tenders_details/${tender.id}`}>
+          <div className="tender-card">
             <h1 className="tender-title gradient__text">
               {tender.ad?.title}
             </h1>
-            <p className="topic">{tender.ad.topic}</p>
-
-            <h2> اخر موعد لتقديم العروض {tender.ad?.deadline_arabic} </h2>
           </div>
         </Link>
       ))}
@@ -72,4 +70,4 @@ function OpenTenders() {
   );
 }
 
-export default OpenTenders;
+export default TemplateTender;

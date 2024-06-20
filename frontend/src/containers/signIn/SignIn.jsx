@@ -8,6 +8,8 @@ function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useContext(AuthContext); // Destructure loginUser from the context
+  const [errorMessage, setErrorMessage] = useState(''); // State for error message
+
   // const { getNotification, Notification } = useContext(AuthContext); // Destructure loginUser from the context
 
   const handleEmailChange = (event) => {
@@ -27,7 +29,12 @@ function SignIn() {
     };
     formData.email = e.target.email.value;
     formData.passWord = e.target.password.value;
-    login(formData); // Pass the event object to the loginUser function
+    const response = await login(formData);
+    if (response.status === 401) {
+      setErrorMessage('لا يوجد حساب بهذه البيانات');
+    } else if (response.status !== 200) {
+      setErrorMessage(response.message);
+    }
   };
 
   return (
@@ -38,6 +45,7 @@ function SignIn() {
           <div className="gradient__text">
             <h1>تسجيل الدخول</h1>
           </div>
+          {errorMessage && <div style={{ color: 'red', fontSize: 'x-large' }} className="error-message">{errorMessage}</div>} {/* Display error message */}
           <form onSubmit={handleSubmit}> {/* Use handleSubmit for form submission */}
             <div>
               <label htmlFor="email">

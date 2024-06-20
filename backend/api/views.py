@@ -92,6 +92,18 @@ class TenderHostView(generics.ListAPIView):
             return queryset.filter(status__in=status_list)
         return queryset
 
+class UpdateTenderStatus(APIView):
+    def put(self,request):
+        tender_id=request.query_params.get('tender_id',None)
+        new_status=request.query_params.get('new_status',None)
+        if tender_id != None and new_status != None:
+            tender_instance= Tender.objects.get(id=tender_id)
+            tender_instance.status=new_status
+            tender_instance.save()
+            return Response({"Message":"Done"})
+        else:
+            return Response({"Message":"tender_id or status is missing"},
+            status=status.HTTP_400_BAD_REQUEST)
 class TenderSupplierView(generics.ListAPIView):
     serializer_class = TenderRetrieveSerializer
     def get_queryset(self):

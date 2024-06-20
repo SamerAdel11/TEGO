@@ -97,7 +97,7 @@ const SignUpPage = () => {
         console.error(response.json());
       } else {
         await login(formData);
-        history.push('/waiting_for_verification');
+        history.push('/mytender');
         console.log(response.json());
       }
       // Optionally, you can handle the response here

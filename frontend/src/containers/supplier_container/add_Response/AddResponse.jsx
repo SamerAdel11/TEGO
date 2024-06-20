@@ -2,6 +2,8 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import './AddResponse.css';
+import PulseLoader from 'react-spinners/PulseLoader';
+
 import AuthContext from '../../../context/Authcontext';
 
 function AddResponse() {
@@ -279,7 +281,20 @@ function AddResponse() {
   };
 
   if (!data) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
   }
   return (
     <>

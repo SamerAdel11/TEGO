@@ -50,6 +50,7 @@ export const AuthProvider = ({ children }) => {
       const loggedUser = jwtDecode(tokens.access);
       setUser(loggedUser);
       localStorage.setItem('authTokens', JSON.stringify(tokens));
+      localStorage.setItem('supplierView', JSON.stringify(true));
       const supplierView = localStorage.getItem('supplierView');
 
       if (loggedUser.company_type === 'supplier' && supplierView !== false) {
@@ -57,11 +58,11 @@ export const AuthProvider = ({ children }) => {
       } else {
         history.push('/mytender');
       }
-    } else if (response.status === 401) {
-      alert(tokens.detail);
-    } else {
-      alert('something went wrong');
     }
+    return {
+      status: response.status,
+      message: tokens.detail || 'something went wrong',
+    };
   };
 
   const logoutUser = () => {

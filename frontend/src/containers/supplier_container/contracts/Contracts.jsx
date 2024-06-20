@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable react/button-has-type */
 import React, { useState, useEffect, useContext } from 'react';
+import PulseLoader from 'react-spinners/PulseLoader';
 import AuthContext from '../../../context/Authcontext';
 
 function SupplierContracts() {
@@ -60,12 +61,32 @@ function SupplierContracts() {
   };
 
   // Remove expandedTender state, as we will use useParams to track tender details
-
+  if (!contractData) {
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
+  }
   return (
     <div className="pending-container">
       <div className="gradient__text pending_title">
         <h1 className="first_title">العقود</h1>
       </div>
+      {contractData.length === 0 && (
+        <div style={{ alignItems: 'center', textAlign: 'center', marginTop: '100px' }}>
+          <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا يوجد عقود بعد</p>
+        </div>
+      )}
       {contractData && contractData.map((transaction, index) => (
         <a
           style={{ 'text-decoration': 'none', padding: '0px', background: 'transparent', border: 'none', borderColor: 'transparent' }}

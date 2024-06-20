@@ -3,6 +3,8 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import './createtender.css';
 import { useHistory } from 'react-router-dom';
+import PulseLoader from 'react-spinners/PulseLoader';
+
 import AuthContext from '../../../context/Authcontext';
 
 function CreateTender() {
@@ -337,6 +339,22 @@ function CreateTender() {
       console.error('Error:', errror);
     }
   };
+  if (!tenderadFormData) {
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
+  }
   return (
     <>
       <div className="container_create_tender">
@@ -649,7 +667,7 @@ function CreateTender() {
               إضافة منتج جديد
             </button>
           </div> */}
-          <hr data-v-7e013592 />
+          {/* <hr data-v-7e013592 /> */}
           <div className="gradient__text m-3">
             <h1>الشروط العامة</h1>
           </div>
@@ -701,14 +719,14 @@ function CreateTender() {
           </div>
 
           <div className="button-container">
+            <button type="submit" className="button" onClick={() => setSubmitType('open')} onSubmit={handleSubmit}>
+              نشر
+            </button>
             <button type="submit" className="button" onClick={() => setSubmitType('draft')} onSubmit={handleSubmit}>
               حفظ كمسودة
             </button>
-            {/* <button type="button" className="button">
+            <button type="submit" className="button" onClick={() => setSubmitType('template')} onSubmit={handleSubmit}>
               حفظ كقالب
-            </button> */}
-            <button type="submit" className="button" onClick={() => setSubmitType('open')} onSubmit={handleSubmit}>
-              نشر
             </button>
             <button type="button" className="button cancel">
               الغاء

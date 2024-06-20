@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom'; // Import Link from React Router
 import './pendingdecision.css';
+import PulseLoader from 'react-spinners/PulseLoader';
+
 import AuthContext from '../../../context/Authcontext';
 
 function PendingDecision() {
@@ -29,7 +31,22 @@ function PendingDecision() {
   }, [authTokens]);
 
   // Remove expandedTender state, as we will use useParams to track tender details
-
+  if (!tendersData) {
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
+  }
   return (
     <div className="pending-container">
       <div className="gradient__text pending_title">

@@ -214,10 +214,13 @@ class TenderSerializer(serializers.ModelSerializer):
     ad = TenderAdSerializer(many=False)
     products = TenderProductSerializer(many=True)
     id = serializers.IntegerField(required=False)
+    number_of_responses= serializers.SerializerMethodField()
+    def get_number_of_responses(self,object):
+        return TenderResponse.objects.filter(tender_id=object.id).count()
     class Meta:
         model = Tender
         fields = ['id','initial_price', 'status', 'admins',
-                'public_conditions', 'private_conditions', 'ad', 'products']
+                'public_conditions', 'private_conditions', 'ad', 'products','number_of_responses']
         extra_kwargs = {
             'initial_price': {'required':False,'allow_null': True},
             'status': {'allow_null': True},

@@ -4,6 +4,8 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import PulseLoader from 'react-spinners/PulseLoader';
+
 import AuthContext from '../../../../context/Authcontext';
 
 // import './AddResponse.css';
@@ -62,7 +64,7 @@ function Response() {
         );
         const hostinfo = await response.json();
         setHostDetails(hostinfo);
-        console.log('تفاصيل المورد:', data);
+        console.log('تفاصيل الهوست:', hostinfo);
       } catch (error) {
         console.error('خطأ في جلب تفاصيل المورد:', error);
       }
@@ -357,7 +359,20 @@ function Response() {
     setActiveButton(contentId);
   };
   if (!data || !offer) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
   }
   return (
     <>
@@ -765,6 +780,26 @@ function Response() {
           </form>
         ) : (HostDetails && (
           <div style={{ marginLeft: '80px' }}>
+            <div className="gradient__text">
+              <h1 className="account_h1">بيانات المورد</h1>
+            </div>
+            <div className="row">
+              <div className="form-group col-md-6">
+                <label htmlFor="First_Name">الاسم الاول
+                  <input type="text" name="First_Name" id="First_Name" value={HostDetails.user.first_name} />
+                </label>
+              </div>
+              <div className="form-group col-md-6">
+                <label htmlFor="Second_Name">الاسم الثاني
+                  <input type="text" name="Second_Name" id="Second_Name" value={HostDetails.user.last_name} />
+                </label>
+              </div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="email">البريد الالكتروني
+                <input type="text" name="email" id="email" value={HostDetails.user.email} />
+              </label>
+            </div>
             <div className="gradient__text">
               <h1>بيانات الشركة</h1>
             </div>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom'; // Import Link from React Router
 import './OfferedOffers.css';
+import PulseLoader from 'react-spinners/PulseLoader';
+
 import AuthContext from '../../../../context/Authcontext';
 
 function OfferedOffers() {
@@ -29,7 +31,22 @@ function OfferedOffers() {
   }, [authTokens]);
 
   // Remove expandedTender state, as we will use useParams to track tender details
-
+  if (!tendersData) {
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
+  }
   return (
     <div className="pending-container">
       <div className="gradient__text pending_title">
@@ -37,6 +54,9 @@ function OfferedOffers() {
       </div>
       <div className="gradient__text">
         <h2 style={{ marginTop: '-20px' }}>(العروض التي لم تحصل علي رد)</h2>
+      </div>
+      <div style={{ alignItems: 'center', textAlign: 'center', marginTop: '100px' }}>
+        <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا يوجد عروض في هذه المرحلة بعد</p>
       </div>
       {tendersData && tendersData.map((tender, index) => (
         <Link style={{ 'text-decoration': 'none' }} key={index} to={`/tender_offer?tender_id=${tender.id}`}>

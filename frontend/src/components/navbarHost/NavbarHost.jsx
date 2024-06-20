@@ -18,6 +18,7 @@ function Navbar() {
 
   useEffect(() => {
     const savedState = localStorage.getItem('supplierView');
+    console.log('saved stats is ', localStorage.getItem('supplierView'));
     if (savedState !== null) {
       setSupplierView(JSON.parse(savedState));
     } else {
@@ -72,17 +73,21 @@ function Navbar() {
           <CustomNotifications />
         </div>
       </div>
-      {supplierView !== null
-      && user && user.company_type === 'supplier' && (
+      {(supplierView !== null
+      && user) && user.company_type === 'supplier' ? (
         <div className={`toggle-button ${supplierView ? 'active' : ''}`} onClick={handleClick}>
-          {supplierView ? (
+          {supplierView && supplierView ? (
             <span className={`toggle-text ${isAnimating ? 'fade-out' : 'fade-in'}`}>{!hideText && 'مورد'}</span>
           ) : (
             <span style={{ marginRight: '40px' }} className={`toggle-text ${isAnimating ? 'fade-out' : 'fade-in'}`}>{!hideText && 'بائع'}</span>
           )}
           <span className="toggle-circle" />
         </div>
-      )}
+        ) : (
+          <div className="toggle-button-buyer">
+            <span style={{ textAlign: 'center' }} className="toggle-text">{!hideText && 'بائع'}</span>
+          </div>
+        )}
 
       <div>
         <button style={{ width: '100%', background: '' }} onClick={logout} type="button">تسجيل الخروج</button>

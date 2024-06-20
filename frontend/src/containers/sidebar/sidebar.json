@@ -27,6 +27,10 @@
             {
               "title": "بانتظار التأكيد",
               "path": "/awating"
+            },
+            {
+              "title": "ملغاة",
+              "path": "/cancelled_tenders"
             }
           ]
         }
@@ -45,18 +49,10 @@
       "childrens": []
     },
     {
-      "title": "القوالب",
-      "icon": "bi bi-box-seam",
-      "childrens": [
-        {
-          "title": "القالب الاول",
-          "path": "/search"
-        },
-        {
-          "title": "القالب الثاني",
-          "path": "/history"
-        }
-      ]
+      "title": "نماذج المناقصات",
+      "icon": "bi bi-archive",
+      "path": "/template_tenders",
+      "childrens": []
     }
   ]
   

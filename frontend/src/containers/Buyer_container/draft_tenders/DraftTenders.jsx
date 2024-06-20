@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom'; // Import Link from React Router
 import '../pending_decision/pendingdecision.css';
+import PulseLoader from 'react-spinners/PulseLoader';
+
 import AuthContext from '../../../context/Authcontext';
 
 function Draft() {
@@ -29,12 +31,32 @@ function Draft() {
   }, [authTokens]);
 
   // Remove expandedTender state, as we will use useParams to track tender details
-
+  if (!tendersData) {
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
+  }
   return (
     <div className="pending-container">
       <div className="gradient__text pending_title">
         <h1 className="first_title">المناقصات الغير مكتملة</h1>
       </div>
+      {tendersData && tendersData.length === 0 && (
+        <div style={{ alignItems: 'center', textAlign: 'center', marginTop: '100px' }}>
+          <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا توجد مناقصات غير مكتملة </p>
+        </div>
+      )}
       {tendersData && tendersData.map((tender, index) => (
         <Link style={{ 'text-decoration': 'none' }} key={index} to={`/draft_tender_details/${tender.id}`}>
           <div className="tender-card">

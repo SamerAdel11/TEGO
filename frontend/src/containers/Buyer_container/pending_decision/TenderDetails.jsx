@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import './TenderDetails.css';
 import { useParams, useHistory } from 'react-router-dom';
+import PulseLoader from 'react-spinners/PulseLoader';
+
 import AuthContext from '../../../context/Authcontext';
 
 function TenderDetails() {
@@ -126,6 +128,22 @@ function TenderDetails() {
       console.error('Error sending response:', error);
     }
   };
+  if (!responseDetails) {
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
+  }
   return (
     <div className="tender-details-container">
       <div className="center-content">

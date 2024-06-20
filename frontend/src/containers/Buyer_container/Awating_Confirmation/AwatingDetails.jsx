@@ -7,6 +7,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import './AwatingDetails.css';
 import { useParams } from 'react-router-dom';
+import PulseLoader from 'react-spinners/PulseLoader';
 import AuthContext from '../../../context/Authcontext';
 
 function AwatingDetails() {
@@ -294,7 +295,22 @@ function AwatingDetails() {
       setLoading(false);
     }
   };
-
+  if (!responseDetails) {
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
+  }
   return (
     <div className="tender-details-container" style={{ marginBottom: '50px' }}>
       <div className="center-content">
@@ -611,6 +627,26 @@ function AwatingDetails() {
                   </div>
                 ) : (supplierDetails && (
                   <div style={{ marginLeft: '80px' }}>
+                    <div className="gradient__text">
+                      <h1 className="account_h1">بيانات المورد</h1>
+                    </div>
+                    <div className="row">
+                      <div className="form-group col-md-6">
+                        <label htmlFor="First_Name">الاسم الاول
+                          <input type="text" name="First_Name" id="First_Name" value={supplierDetails.user.first_name} />
+                        </label>
+                      </div>
+                      <div className="form-group col-md-6">
+                        <label htmlFor="Second_Name">الاسم الثاني
+                          <input type="text" name="Second_Name" id="Second_Name" value={supplierDetails.user.last_name} />
+                        </label>
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="email">البريد الالكتروني
+                        <input type="text" name="email" id="email" value={supplierDetails.user.email} />
+                      </label>
+                    </div>
                     <div className="gradient__text">
                       <h1>بيانات الشركة</h1>
                     </div>
