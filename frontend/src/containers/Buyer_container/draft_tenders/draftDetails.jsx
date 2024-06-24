@@ -5,6 +5,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
+import PulseLoader from 'react-spinners/PulseLoader';
 import AuthContext from '../../../context/Authcontext';
 // import './AddResponse.css';
 
@@ -89,6 +90,8 @@ function DraftDetails() {
   const [selectedTender, setSelectedTender] = useState('');
   const [selectedFinalPercentage, setSelectedPercentage] = useState('');
   const [submitType, setSubmitType] = useState('');
+  const [loading, setLoading] = useState(false);
+
   let hasErrors = false;
 
   const handleSelectChange = (event) => {
@@ -420,6 +423,7 @@ function DraftDetails() {
         }
       }
       if (!hasErrors && !hasErrors2) {
+        setLoading(true);
         const response = await fetch('http://localhost:8000/create_tender/', {
           method: 'PUT',
           headers: {
@@ -442,6 +446,7 @@ function DraftDetails() {
           console.error('Failed to send data to server', response.json());
         }
       } else {
+        alert('يرجي إكمال بيانات المناقصة');
         setErrors(validationErrors);
         console.error(validationErrors);
       }
@@ -451,7 +456,20 @@ function DraftDetails() {
   };
 
   if (!tender) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
   }
 
   return (
@@ -596,7 +614,7 @@ function DraftDetails() {
               className="button condition"
               onClick={handleAddOfficial}
             >
-              إضافة مسؤول مناقصة جديد
+              إضافة مسؤول جديد
             </button>
           </div>
           <div className="create_new_tender">
@@ -748,7 +766,6 @@ function DraftDetails() {
                   placeholder={` الشرط الخاص رقم ${idx + 1}`}
                 />
                 {errors.private_conditions && errors.private_conditions[idx] && errors.private_conditions[idx].condition && <p style={{ fontSize: '20px', color: 'red' }}>{errors.private_conditions[idx].condition}</p>}
-
               </div>
             ))}
             <button
@@ -761,8 +778,8 @@ function DraftDetails() {
           </div>
 
           <div className="button-container">
-            <button type="submit" className="button" onClick={() => setSubmitType('open')} onSubmit={handleSubmit}>
-              نشر
+            <button disabled={loading} type="submit" className="button submit" onClick={() => setSubmitType('open')} onSubmit={handleSubmit}>
+              { !loading ? 'نشر' : 'جاري نشر المناقصه......'}
             </button>
             <button type="submit" className="button" onClick={() => setSubmitType('draft')} onSubmit={handleSubmit}>
               حفظ كمسودة
@@ -770,8 +787,8 @@ function DraftDetails() {
             <button type="submit" className="button" onClick={() => setSubmitType('template')} onSubmit={handleSubmit}>
               حفظ كنموذج
             </button>
-            <button type="button" className="button cancel">
-              الغاء
+            <button type="button" className="button cancel" onClick={() => navigate.goBack()}>
+              رجوع
             </button>
           </div>
         </form>

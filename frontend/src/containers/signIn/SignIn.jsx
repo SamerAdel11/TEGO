@@ -45,7 +45,6 @@ function SignIn() {
           <div className="gradient__text">
             <h1>تسجيل الدخول</h1>
           </div>
-          {errorMessage && <div style={{ color: 'red', fontSize: 'x-large' }} className="error-message">{errorMessage}</div>} {/* Display error message */}
           <form onSubmit={handleSubmit}> {/* Use handleSubmit for form submission */}
             <div>
               <label htmlFor="email">
@@ -71,6 +70,7 @@ function SignIn() {
                 />
               </label>
             </div>
+            {errorMessage && <div style={{ color: 'red', fontSize: 'x-large' }} className="error-message">{errorMessage}</div>} {/* Display error message */}
             <button className="button_signin" type="submit">تسجيل الدخول</button>
           </form>
         </div>

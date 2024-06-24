@@ -146,7 +146,7 @@ function AddTenderResponse() {
     <div className="">
       <NavbarHost />
       <div className="supplier_side">
-        {/* <SidebarSupplier /> */}
+        <SidebarSupplier />
         <AddResponse />
       </div>
     </div>

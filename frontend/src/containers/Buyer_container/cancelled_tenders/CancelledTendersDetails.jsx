@@ -434,14 +434,13 @@ function CancelledTenderDetails() {
       console.error('Error:', er);
     }
   };
-  const SetTenderToDraft = async () => {
+  const SetTenderToOpen = async () => {
     try {
       // Assign 'candidate_pool' to the status variable
-      const status = 'draft';
 
       // Send only the status in the request body
       const response = await fetch(
-        `http://localhost:8000/update_tender_status/?tender_id=${id}&new_status=draft`,
+        `http://localhost:8000/update_tender_status/?tender_id=${id}&new_status=open`,
         {
           method: 'PUT',
           headers: {
@@ -453,17 +452,17 @@ function CancelledTenderDetails() {
 
       const data = await response.json();
       if (response.ok) {
-        navigate.push(`/draft_tender_details/${id}`);
+        navigate.push(`/mytender`);
       }
     } catch (errr) {
       console.error('Error sending response:', errr);
     }
   };
-  const CancelTender = async () => {
+  const SetTenderToDraft = async () => {
     const response = await fetch(
-      `http://localhost:8000/cancel_tender?tender_id=${id}`,
+      `http://localhost:8000/update_tender_status/?tender_id=${id}&new_status=draft`,
       {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authTokens.access}`,
@@ -474,7 +473,7 @@ function CancelledTenderDetails() {
     const data = await response.json();
 
     if (response.ok) {
-      navigate.push('/mytender');
+      navigate.push(`/draft_tender_details/${id}`);
     }
 
     console.log(data);
@@ -726,15 +725,15 @@ function CancelledTenderDetails() {
               style={{ marginRight: '150px', marginLeft: '150px' }}
               className="buton_resonpose"
               type="button"
-              onClick={SetTenderToDraft}
+              onClick={SetTenderToOpen}
             >
               إعاده نشر المناقصة
             </button>
             <button
               style={{ marginLeft: '150px' }}
-              className="button cancel"
+              className="button"
               type="button"
-              onClick={CancelTender}
+              onClick={SetTenderToDraft}
             >
               تعديل المناقصة
             </button>

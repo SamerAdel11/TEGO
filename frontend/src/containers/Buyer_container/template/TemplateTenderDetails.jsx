@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable arrow-parens */
 /* eslint-disable quotes */
@@ -76,8 +77,8 @@ function TemplateTenderDetails() {
   const [privateconditions, setPrivateConditions] = useState(['']);
   const [selectedTender, setSelectedTender] = useState('');
   const [selectedFinalPercentage, setSelectedPercentage] = useState('');
-  const [submitType, setSubmitType] = useState('');
-  let hasErrors = false;
+  const [submitType, setSubmitType] = useState('draft');
+  const hasErrors = false;
 
   const handleSelectChange = (event) => {
     setSelectedTender(event.target.value);
@@ -191,91 +192,6 @@ function TemplateTenderDetails() {
       setError('');
     }
   };
-  const [errors, setErrors] = useState({});
-  const validate = (e) => {
-    const newErrors = {
-      products: [],
-      description: [],
-      admins: [],
-      public_conditions: [],
-      private_conditions: [],
-    };
-    if (!tenderadFormData.title) {
-      hasErrors = true;
-      newErrors.title = 'عنوان المناقصة مطلوب';
-    }
-    if (!tenderadFormData.topic) {
-      hasErrors = true;
-      newErrors.topic = 'موضوع المناقصة مطلوب';
-    }
-    if (!tenderadFormData.field) {
-      hasErrors = true;
-      newErrors.field = 'مجال المناقصة مطلوب';
-    }
-    if (!tenderadFormData.finalInsurance) {
-      hasErrors = true;
-      newErrors.finalInsurance = 'نسبة التأمين النهائي مطلوب';
-    }
-    if (!tenderadFormData.deadline) {
-      hasErrors = true;
-      newErrors.deadline = ' معاد فتح المظاريف مطلوب';
-    }
-    if (!e.target.querySelector('#create_tender').value) {
-      hasErrors = true;
-      newErrors.initialPrice = 'ألتسعيرة الداخلية مطلوبه';
-    }
-    products.forEach((product, idx) => {
-      if (!product.title) {
-        hasErrors = true;
-        if (!newErrors.products[idx]) newErrors.products[idx] = {};
-        newErrors.products[idx].title = 'مطلوب';
-      }
-      if (!product.quantity) {
-        hasErrors = true;
-        if (!newErrors.products[idx]) newErrors.products[idx] = {};
-        newErrors.products[idx].quantity = 'مطلوبة';
-      }
-      if (!product.quantity_unit) {
-        hasErrors = true;
-        if (!newErrors.products[idx]) newErrors.products[idx] = {};
-        newErrors.products[idx].quantity_unit = 'مطلوبة';
-      }
-      if (!product.description) {
-        hasErrors = true;
-        if (!newErrors.products[idx]) newErrors.products[idx] = {};
-        newErrors.products[idx].description = 'مطلوب';
-      }
-    });
-
-    officials.forEach((official, idx) => {
-      if (!newErrors.admins[idx]) newErrors.admins[idx] = {};
-
-      if (!official.name) {
-        hasErrors = true;
-        newErrors.admins[idx].name = 'اسم المسوؤل مطلوب';
-      }
-
-      if (!official.job_title) {
-        hasErrors = true;
-        newErrors.admins[idx].position = 'المنصب مطلوب';
-      }
-    });
-    conditions.forEach((condition, idx) => {
-      if (!newErrors.public_conditions[idx]) newErrors.public_conditions[idx] = {};
-      if (!condition.condition) {
-        hasErrors = true;
-        newErrors.public_conditions[idx].condition = 'هذا الشرط مطلوب';
-      }
-    });
-    privateconditions.forEach((condition, idx) => {
-      if (!newErrors.private_conditions[idx]) newErrors.private_conditions[idx] = {};
-      if (!condition.condition) {
-        hasErrors = true;
-        newErrors.private_conditions[idx].condition = 'هذا الشرط مطلوب';
-      }
-    });
-    return newErrors;
-  };
   const textareaRefs = useRef([]);
   const handleTextareaInput = (event, idx) => {
     const textarea = event.target;
@@ -342,97 +258,52 @@ function TemplateTenderDetails() {
     fetchTenders();
   }, [authTokens]);
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    // if (submitType === 'open') {
+    // Create a copy of the tender state
+    const updatedTender = { ...tender };
 
-    // }
+    // Remove id from tender.ad and tender
+    delete updatedTender.ad.id;
+    delete updatedTender.id;
 
-    try {
-      // console.log(e.target.querySelector('#tenderTitle').value);
-      // console.log(e.target.querySelector('#tenderSubject').value);
-      // console.log(e.target.querySelector('#tenderOpeningDate').value);
-      // console.log(e.target.querySelector('#create_tender').value);
-      // console.log(e.target.querySelector('#tenderTitle').value);
-      console.log(submitType);
-      const initialPrice = e.target.querySelector('#create_tender').value;
-      const formData = {
-        ad: tenderadFormData,
-        admins: officials,
-        public_conditions: conditions,
-        private_conditions: privateconditions,
-        products,
-        initial_price: initialPrice,
-        status: submitType,
-        id: tender.id,
-      };
-      const dataToSubmit = { ...formData };
+    // Remove id from each admin in updatedTender.admins
+    updatedTender.admins = updatedTender.admins.map((admin) => {
+      const newAdmin = { ...admin };
+      delete newAdmin.id;
+      return newAdmin;
+    });
 
-      // Remove initial_price if it's null or empty
-      if (!initialPrice) {
-        delete dataToSubmit.initial_price;
-      }
-      if (!dataToSubmit.ad.finalInsurance) {
-        delete dataToSubmit.ad.finalInsurance;
-      }
-      if (!dataToSubmit.ad.deadline) {
-        delete dataToSubmit.ad.deadline;
-      }
-      console.log(dataToSubmit);
+    // Log the updated admins
+    console.log("newAdmins", updatedTender.admins);
 
-      const checkForErrors = (obj) => {
-        if (Array.isArray(obj)) {
-          for (const item of obj) {
-            if (typeof item === 'object' && item !== null) {
-              if (checkForErrors(item)) return true;
-            } else if (item === null || item === "") {
-              return true;
-            }
-          }
-        } else if (typeof obj === 'object' && obj !== null) {
-          for (const key in obj) {
-            if (obj[key] === null || obj[key] === "") {
-              return true;
-            }
-          }
-        } else if (obj === null || obj === "") {
-          return true;
-        }
-        return false;
-      };
-      const validationErrors = validate(e);
-      let hasErrors2 = false;
-      for (const key in validationErrors) {
-        if (checkForErrors(validationErrors[key])) {
-          hasErrors2 = true;
-          break;
-        }
-      }
-      if (!hasErrors && !hasErrors2) {
-        const response = await fetch('http://localhost:8000/create_tender/', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authTokens.access}`,
-          },
-          body: JSON.stringify(dataToSubmit),
-        });
-        if (response.ok) {
-          console.log('Data sent successfully');
-          if (submitType === 'draft') {
-            navigate.push('/draft_tenders');
-          } else {
-            navigate.push('/mytender');
-          }
-          // You can reset form state or take other actions if needed
-        } else {
-          console.error('Failed to send data to server', response.json());
-        }
+    // Remove id from each product in updatedTender.products
+    updatedTender.products = updatedTender.products.map((product) => {
+      const newProduct = { ...product };
+      delete newProduct.id;
+      return newProduct;
+    });
+
+    // Set the updated tender state
+    setTender(updatedTender);
+    console.log(updatedTender);
+    updatedTender.status = submitType;
+    const response = await fetch('http://localhost:8000/create_tender/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authTokens.access}`,
+      },
+      body: JSON.stringify(updatedTender),
+    });
+    if (response.ok) {
+      console.log('Data sent successfully');
+      if (submitType === 'draft') {
+        navigate.push('/draft_tenders');
       } else {
-        setErrors(validationErrors);
-        console.error(validationErrors);
+        navigate.push('/mytender');
       }
-    } catch (er) {
-      console.error('Error:', er);
+      // You can reset form state or take other actions if needed
+    } else {
+      console.error('Failed to send data to server', response.json());
     }
   };
   const SetTenderToDraft = async () => {
@@ -531,14 +402,11 @@ function TemplateTenderDetails() {
                   value={tender.ad.title}
                 />
               </label>
-              {errors.title && <p style={{ fontSize: '20px', color: 'red' }}>{errors.title}</p>}
-
             </div>
             <div className="form-fields">
               <label htmlFor="tenderSubject">موضوع المناقصة
                 <textarea style={{ paddingRight: '17px' }} type="text" name="topic" id="tenderSubject" value={tender.ad.topic} />
               </label>
-              {errors.topic && <p style={{ fontSize: '20px', color: 'red' }}>{errors.topic}</p>}
             </div>
             {/* <div className="form-fields col-8">
               <label htmlFor="preInsurance">نسبه التأمين الابتدائي
@@ -554,14 +422,11 @@ function TemplateTenderDetails() {
               <label htmlFor="preInsurance"> نسبه التأمين النهائي <span style={{ fontSize: 'small' }}> **نسبه التأمين النهائي تحتسب من سعر العرض الفائز **</span>
                 <input value={`${tender.ad.finalInsurance}%`} name="finalInsurance" />
               </label>
-              {errors.finalInsurance && <p style={{ fontSize: '20px', color: 'red' }}>{errors.finalInsurance}</p>}
             </div>
             <div className="form-fields">
               <label htmlFor="tenderSubject">مجال المناقصة
                 <input name="field" value={tender.ad.field} />
               </label>
-              {errors.field && <p style={{ fontSize: '20px', color: 'red' }}>{errors.field}</p>}
-
             </div>
             <div className="form-fields">
               <label htmlFor="tenderOpeningDate">
@@ -574,8 +439,6 @@ function TemplateTenderDetails() {
                   // value={selectedDate}
                 />
               </label>
-              {error && <p style={{ color: 'red' }}>{error}</p>}
-              {errors.deadline && <p style={{ fontSize: '20px', color: 'red' }}>{errors.deadline}</p>}
             </div>
           </div>
           <div className="bidding_officials">
@@ -592,11 +455,6 @@ function TemplateTenderDetails() {
                       value={official.name}
                     />
                   </label>
-                  {errors.admins && errors.admins[idx] && errors.admins[idx].name && (
-                    <p style={{ fontSize: '20px', color: 'red' }}>
-                      {errors.admins[idx].name}
-                    </p>
-                  )}
                 </div>
                 <div className="col-md-6">
                   <label htmlFor={`officialPosition_${idx}`}>الوظيفة
@@ -606,11 +464,6 @@ function TemplateTenderDetails() {
                       value={official.job_title}
                     />
                   </label>
-                  {errors.admins && errors.admins[idx] && errors.admins[idx].position && (
-                    <p style={{ fontSize: '20px', color: 'red' }}>
-                      {errors.admins[idx].position}
-                    </p>
-                  )}
                 </div>
               </div>
             ))}
@@ -623,7 +476,6 @@ function TemplateTenderDetails() {
               <label htmlFor="create_tender">التسعيرة الداخية
                 <input type="text" id="create_tender" value={tender.initial_price} />
               </label>
-              {errors.initialPrice && <p style={{ fontSize: '20px', color: 'red' }}>{errors.initialPrice}</p>}
             </div>
           </div>
 
@@ -650,11 +502,6 @@ function TemplateTenderDetails() {
                         value={product.title}
                         style={{ width: '100%' }} // Ensure the textarea takes full width
                       />
-                      {errors.products && errors.products[idx] && errors.products[idx].title && (
-                        <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
-                          {errors.products[idx].title}
-                        </p>
-                      )}
                     </td>
                     <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
@@ -662,13 +509,7 @@ function TemplateTenderDetails() {
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id="unit"
                         value={product.quantity_unit}
-
                       />
-                      {errors.products && errors.products[idx] && errors.products[idx].quantity_unit && (
-                        <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
-                          {errors.products[idx].quantity_unit}
-                        </p>
-                      )}
                     </td>
                     <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
@@ -676,11 +517,6 @@ function TemplateTenderDetails() {
                         id="quantity"
                         value={product.quantity}
                       />
-                      {errors.products && errors.products[idx] && errors.products[idx].quantity && (
-                        <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
-                          {errors.products[idx].quantity}
-                        </p>
-                      )}
                     </td>
                     <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
@@ -688,11 +524,6 @@ function TemplateTenderDetails() {
                         id={`description${idx}`}
                         value={product.description}
                       />
-                      {errors.products && errors.products[idx] && errors.products[idx].description && (
-                        <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
-                          {errors.products[idx].description}
-                        </p>
-                      )}
                     </td>
                   </tr>
                 ))}
@@ -713,8 +544,6 @@ function TemplateTenderDetails() {
                   value={condition.condition}
                   placeholder={` الشرط رقم ${idx + 1}`}
                 />
-                {errors.public_conditions && errors.public_conditions[idx] && errors.public_conditions[idx].condition && <p style={{ fontSize: '20px', color: 'red' }}>{errors.public_conditions[idx].condition}</p>}
-
               </div>
             ))}
           </div>
@@ -731,21 +560,17 @@ function TemplateTenderDetails() {
                   value={privateCondition.condition}
                   placeholder={` الشرط الخاص رقم ${idx + 1}`}
                 />
-                {errors.private_conditions && errors.private_conditions[idx] && errors.private_conditions[idx].condition && <p style={{ fontSize: '20px', color: 'red' }}>{errors.private_conditions[idx].condition}</p>}
-
               </div>
             ))}
           </div>
-
           <button
             style={{ width: '30%' }}
             className="buton_resonpose"
-            type="button"
+            type="submit"
             onClick={SetTenderToDraft}
           >
             استعمال هذا النموذج
           </button>
-
         </form>
       </div>
     </>

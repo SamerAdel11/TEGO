@@ -192,11 +192,11 @@ class ResponsePreviousWork(models.Model):
 
 class ResponseProductBid(models.Model):
     product = models.ForeignKey(TenderProduct, on_delete=models.CASCADE)
-    provided_quantity = models.IntegerField(null=True)
+    provided_quantity = models.IntegerField(null=True,blank=True)
     supplying_status = models.CharField()
     price = models.FloatField(null=True,blank=True)
-    product_title=models.CharField(max_length=255)
-    product_description = models.TextField(null=True)
+    product_title=models.CharField(max_length=255,null=True,blank=True)
+    product_description = models.TextField(null=True,blank=True)
     response = models.ForeignKey(TenderResponse, on_delete=models.CASCADE)
 
 class Transaction(models.Model):

@@ -52,9 +52,11 @@ function CandidatePoolOffers() {
       <div className="gradient__text pending_title">
         <h1 className="first_title">المناقصات المرشح الفوز بها</h1>
       </div>
-      <div style={{ alignItems: 'center', textAlign: 'center', marginTop: '100px' }}>
-        <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا يوجد عروض في هذه المرحلة بعد</p>
-      </div>
+      {tendersData.length === 0 && (
+        <div style={{ alignItems: 'center', textAlign: 'center', marginTop: '100px' }}>
+          <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا يوجد عروض في هذه المرحلة بعد</p>
+        </div>
+      )}
       {tendersData && tendersData.map((tender, index) => (
         <Link style={{ 'text-decoration': 'none' }} key={index} to={`/tender_offer?tender_id=${tender.id}`}>
           <div className="tender-cards">
@@ -62,8 +64,7 @@ function CandidatePoolOffers() {
               {tender.ad?.title}
             </h1>
             <p className="topic">{tender.ad.topic}</p>
-
-            <h2> اخر موعد لتقديم العروض {tender.ad?.deadline} </h2>
+            <h2> اخر موعد لتقديم العروض {tender.ad?.deadline_arabic} </h2>
           </div>
         </Link>
       ))}

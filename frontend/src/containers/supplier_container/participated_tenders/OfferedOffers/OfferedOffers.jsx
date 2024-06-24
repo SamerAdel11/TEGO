@@ -55,9 +55,12 @@ function OfferedOffers() {
       <div className="gradient__text">
         <h2 style={{ marginTop: '-20px' }}>(العروض التي لم تحصل علي رد)</h2>
       </div>
-      <div style={{ alignItems: 'center', textAlign: 'center', marginTop: '100px' }}>
-        <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا يوجد عروض في هذه المرحلة بعد</p>
-      </div>
+      {tendersData.length === 0 && (
+        <div style={{ alignItems: 'center', textAlign: 'center', marginTop: '100px' }}>
+          <p className="national" style={{ alignItems: 'center', textAlign: 'center' }}>لا يوجد عروض في هذه المرحلة بعد</p>
+        </div>
+      )}
+
       {tendersData && tendersData.map((tender, index) => (
         <Link style={{ 'text-decoration': 'none' }} key={index} to={`/tender_offer?tender_id=${tender.id}`}>
           <div className="tender-cards">
@@ -66,7 +69,7 @@ function OfferedOffers() {
             </h1>
             <p className="topic">{tender.ad.topic}</p>
 
-            <h2> اخر موعد لتقديم العروض {tender.ad?.deadline} </h2>
+            <h2> اخر موعد لتقديم العروض {tender.ad?.deadline_arabic} </h2>
           </div>
         </Link>
       ))}

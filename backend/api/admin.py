@@ -8,7 +8,8 @@ from . import models
 
 # from django.contrib.auth.models import User
 
-
+class TenderAdminPanel(admin.ModelAdmin):
+    exclude=['initial_price']
 # Register your models here.
 
 admin.site.register(CustomUser)
@@ -16,7 +17,7 @@ admin.site.register(Company)
 admin.site.register(Owner)
 admin.site.register(Supplier)
 admin.site.register(UserNotification)
-admin.site.register(Tender)
+admin.site.register(Tender,TenderAdminPanel)
 admin.site.register(TenderProduct)
 admin.site.register(TenderAdmin)
 admin.site.register(TenderPublicConditions)

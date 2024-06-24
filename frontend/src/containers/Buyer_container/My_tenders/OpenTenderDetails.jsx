@@ -21,6 +21,7 @@ function OpenedTenderDetails() {
   const [maxDate, setMaxDate] = useState('');
   const [error, setError] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
+  const [loading, setLoading] = useState(false);
   const [tenderadFormData, setTenderadFormData] = useState({
     title: '',
     topic: '',
@@ -439,7 +440,7 @@ function OpenedTenderDetails() {
     try {
       // Assign 'candidate_pool' to the status variable
       const status = 'draft';
-
+      setLoading(true);
       // Send only the status in the request body
       const response = await fetch(
         `http://localhost:8000/update_tender_status/?tender_id=${id}&new_status=draft`,
@@ -482,13 +483,6 @@ function OpenedTenderDetails() {
     // histoyty.push(`/awating_responses/${id}`);
   };
   if (!tender) {
-    return (
-      <div>
-        <h1>LOL</h1>
-      </div>
-    );
-  }
-  if (tender) {
     return (
       <div>
         <PulseLoader
@@ -693,12 +687,10 @@ function OpenedTenderDetails() {
               </tbody>
             </table>
           </div>
-
           {/* <hr data-v-7e013592 /> */}
           <div className="gradient__text m-3">
             <h1>الشروط العامة</h1>
           </div>
-
           <div className="condition-section">
             {conditions.map((condition, idx) => (
               <div key={idx} className="condition-field1">
@@ -734,11 +726,12 @@ function OpenedTenderDetails() {
           <div className="button-container">
             <button
               style={{ marginRight: '150px', marginLeft: '150px' }}
-              className="buton_resonpose"
+              className="buton_resonpose submit"
+              disabled={loading}
               type="button"
               onClick={SetTenderToDraft}
             >
-              تعديل المناقصة
+              {loading ? 'جاري فتح صفحة التعديل ....' : 'تعديل المناقصة'}
             </button>
             <button
               style={{ marginLeft: '150px' }}

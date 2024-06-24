@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
         style={'input_type': 'password'}, write_only=True)
     class Meta:
         model = CustomUser
-        fields = ['id','first_name', 'last_name',
+        fields = ['id',
                 'email', 'password', 'password2','verified']
         extra_kwargs = {
             'password': {'write_only': True}
@@ -202,10 +202,6 @@ class TenderProductSerializer(serializers.ModelSerializer):
             'description': {'allow_null': True},
         }
 
-class ResponsePreviousWorkSerializer(serializers.ModelSerializer):
-    class Meta:
-        model=ResponsePreviousWork
-        fields=['title','description']
 
 class TenderSerializer(serializers.ModelSerializer):
     admins = TenderAdminSerializer(many=True)
@@ -241,6 +237,7 @@ class TenderSerializer(serializers.ModelSerializer):
         ad_instance = TenderAd.objects.create(**ad_data)
         tender = Tender.objects.create(
             **validated_data, user=user, ad=ad_instance)
+        original_data['id']=tender.id
         for admin_data in admins_data:
             TenderAdmin.objects.create(tender=tender, **admin_data)
         for public_condition_data in public_conditions_data:
@@ -252,7 +249,7 @@ class TenderSerializer(serializers.ModelSerializer):
         for product_data in products_data:
             TenderProduct.objects.create(tender=tender, **product_data)
         tender.save()
-        return original_data
+        return tender
     def update(self,instance,validated_data):
         # print(validated_data)
         original_data = validated_data.copy()
@@ -281,6 +278,7 @@ class TenderSerializer(serializers.ModelSerializer):
 
 
         for product in products_data:
+            print(product)
             product_id=product.pop('id',None)
             if product_id:
                 product_instance=TenderProduct.objects.get(id=product_id)
@@ -290,6 +288,7 @@ class TenderSerializer(serializers.ModelSerializer):
                 product_instance.description=product.get('description')
                 product_instance.save()
             else:
+                print("CREATE NEW PRODUCT")
                 TenderProduct.objects.create(**product,tender=instance)
 
         for admin in admins_data:
@@ -330,6 +329,7 @@ class TenderSerializer(serializers.ModelSerializer):
         return ret
 
 class TenderRetrieveSerializer(serializers.ModelSerializer):
+    
     admins = TenderAdminSerializer(many=True, read_only=True)
     public_conditions = TenderPublicConditionsSerializer(
         many=True, read_only=True)
@@ -342,19 +342,34 @@ class TenderRetrieveSerializer(serializers.ModelSerializer):
         fields = ['id', 'initial_price', 'status', 'admins',
                 'public_conditions', 'private_conditions', 'ad', 'products']
 
+class ResponsePreviousWorkSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+    class Meta:
+        model=ResponsePreviousWork
+        fields=['title','description']
+
+
 
 class ProductResponseSerializer(serializers.ModelSerializer):
-    productid = serializers.CharField(write_only=True)
+    productid = serializers.CharField(write_only=True,required=False)
+    id = serializers.IntegerField(required=False)
+
     # supplying_duration = serializers.CharField(allow_null=True, required=False)
     class Meta:
         model = ResponseProductBid
-        fields = ['id', 'productid', 'provided_quantity','product_title','product_description',
-                  'supplying_status', 'product_description','price']
-        # extra_kwargs = {"supplying_duration": {"required": False, "allow_null": True},}
+        fields = ['id','provided_quantity','productid','product_title','product_description',
+                 'supplying_status', 'product_description','price']
+        extra_kwargs = {
+        "price":  {'required':False,'allow_null': True},
+        "provided_quantity": {"required": False, "allow_null": True},
+        "product_title": {"required": False, "allow_null": True},
+        "product_description": {"required": False, "allow_null": True},
+        "provided_quantity": {"required": False, "allow_null": True},
+        }
 
 
 class ResponsePrivateConditionSerializer(serializers.ModelSerializer):
-    # offered_condition = serializers.CharField(allow_null=True, required=False)
+    id = serializers.IntegerField(required=False)
     class Meta:
         model = ResponsePrivateCondition
         fields = ['id', 'condition','offered_condition']
@@ -371,8 +386,10 @@ class ResponseSerializer(serializers.ModelSerializer):
         model = TenderResponse
         fields = ['id', 'offered_price', 'tender_id','previous_work',
                 'status', 'offer_products', 'offer_conditions']
+        extra_kwargs={'offer_products':{"required":False,"allow_null": True}}
 
     def create(self, validated_data):
+        print("validated_data is ",validated_data)
         user = self.context['request'].user
         data = validated_data.copy()
         offer_products_data = validated_data.pop('offer_products')
@@ -391,7 +408,9 @@ class ResponseSerializer(serializers.ModelSerializer):
         tender_data=''
         response_data=''
         for product_data in offer_products_data:
-            productid = product_data.pop('productid')
+            productid = product_data.pop('productid',None)
+            if not productid:
+                productid = product_data.pop('id',None)
             product = TenderProduct.objects.get(id=productid)
             tender_data=tender_data+product.title+"|"+product.description+"|"+product.quantity+"|"
             if product_data.get('supplying_status')!="متوفر":
@@ -413,15 +432,53 @@ class ResponseSerializer(serializers.ModelSerializer):
             condition_instance=condition_data.get('condition')
             tender_data= tender_data +condition_instance.condition+"|"
             response_data = response_data+ condition_data.get('offered_condition') + "|"
-            ResponsePrivateCondition.objects.create(
+            new_condition=ResponsePrivateCondition.objects.create(
                 condition=condition_data.get('condition'),
                 response=response,
                 offered_condition=condition_data.get('offered_condition'))
+            print("new_condition id is ",new_condition)
 
         compute_similarity.delay(tender_data,response_data,response.id,offer_previous_work,tender_ad)
-        return data
+        return response
+    def update(self, instance, validated_data):
+        offer_products_data = validated_data.pop('offer_products', [])
+        offer_conditions_data = validated_data.pop('offer_conditions', [])
+        previous_work_data = validated_data.pop('previous_work', [])
+        print("offer_products_data",offer_products_data)
+
+        instance.offered_price = validated_data.get('offered_price', instance.offered_price)
+        instance.status = validated_data.get('status', instance.status)
+        instance.save()
+
+        for product_data in offer_products_data:
+            productid = product_data.get('id', None)
+            print("product_id is ",productid)
+            product = ResponseProductBid.objects.get(id=productid)
+            product.provided_quantity=product_data.get('provided_quantity')
+            product.product_title=product_data.get('product_title')
+            product.product_description=product_data.get('product_description')
+            product.supplying_status=product_data.get('supplying_status')
+            product.price=product_data.get('price')
+            product.save()
+            print("Product saved")
+
+        for condition_data in offer_conditions_data:
+            condition_id=condition_data.get('id')
+
+            condition=ResponsePrivateCondition.objects.get(id=condition_id)
+            condition.offered_condition=condition_data.get('offered_condition')
+            condition.save()
+
+        for work_data in previous_work_data:
+            work_id=work_data.get('id')
+
+            work=ResponsePreviousWork.objects.get(id=work_id)
+            work.title=work_data.get('title')
+            work.description=work_data.get('description')
+            work.save()
+        return instance
 class ProductResponseRetrieveSerializer(serializers.ModelSerializer):
-    title = serializers.CharField(source='product.title', read_only=True)
+    title = serializers.CharField(source='product_title', read_only=True)
     quantity_unit= serializers.CharField(source='product.quantity_unit')
     product_id=serializers.CharField(source='product.id',read_only=True)
     class Meta:

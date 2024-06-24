@@ -1,3 +1,5 @@
+/* eslint-disable arrow-body-style */
+/* eslint-disable operator-linebreak */
 /* eslint-disable no-unused-vars */
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
@@ -253,7 +255,7 @@ function AddResponse() {
     const renamedPrcondition = privateconditions.map(renameKeys2);
     const renamedWork = previousWork.map(renamepreviouswork);
     try {
-      const formData = {
+      let formData = {
         offer_products: renamedProducts,
         offer_conditions: renamedPrcondition,
         tender_id: tenderId,
@@ -261,7 +263,43 @@ function AddResponse() {
         previous_work: renamedWork,
         offered_price: document.getElementById('offeredprice').value,
       };
+      const cleanOfferProducts = (offerProducts) => {
+        return offerProducts.map((product) => {
+          const currentProduct = { ...product };
+          if (!currentProduct.price || currentProduct.price === '') {
+            console.log('Remove price');
+            delete currentProduct.price;
+          }
+          if (!currentProduct.provided_quantity || currentProduct.provided_quantity === '') {
+            console.log('Remove provided_quantity');
+            delete currentProduct.provided_quantity;
+          }
+          return currentProduct;
+        });
+      };
 
+      const cleanFormData = (formData1) => {
+        // Create a copy of formData
+        const updatedFormData = { ...formData1 };
+        // Check if offer_products is an array and clean it
+        if (Array.isArray(updatedFormData.offer_products)) {
+          updatedFormData.offer_products = cleanOfferProducts(updatedFormData.offer_products);
+        } else {
+          // Handle the case where offer_products is not an array
+          const updatedOfferProducts = { ...updatedFormData.offer_products };
+
+          if (!updatedOfferProducts.price || updatedOfferProducts.price === '') {
+            delete updatedOfferProducts.price;
+          }
+          if (!updatedOfferProducts.provided_quantity || updatedOfferProducts.provided_quantity === '') {
+            delete updatedOfferProducts.provided_quantity;
+          }
+          updatedFormData.offer_products = updatedOfferProducts;
+        }
+        return updatedFormData;
+      };
+      formData = cleanFormData(formData);
+      console.log(formData);
       const response2 = await fetch('http://localhost:8000/add_response/', {
         method: 'POST',
         headers: {
@@ -336,7 +374,7 @@ function AddResponse() {
               <thead>
                 <tr>
                   {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <th style={{ width: '0.1px' }} />
+                  <th style={{ width: '1px' }}>الصف</th>
                   <th className="col-2">عنوان المنتج</th>
                   <th style={{ width: '0.8px' }}>وحدة الكمية</th>
                   <th style={{ width: '0.8px' }}>الكمية</th>
@@ -378,6 +416,7 @@ function AddResponse() {
                     </td>
                     <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
+                        style={{ textAlign: 'center' }}
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id="quantity"
                         value={product.quantity}
@@ -390,6 +429,27 @@ function AddResponse() {
                           // calculateTotalPrice();
                         }}
                         aria-label={`Quantity for Product ${product.id}`}
+                        onKeyDown={(e) => {
+                          // Allow: backspace, delete, tab, escape, enter
+                          if (
+                            e.key === 'Backspace' ||
+                            e.key === 'Delete' ||
+                            e.key === 'Tab' ||
+                            e.key === 'Escape' ||
+                            e.key === 'Enter' ||
+                            (e.ctrlKey && (e.key === 'a' || e.key === 'c' || e.key === 'v' || e.key === 'x'))
+                          ) {
+                            return;
+                          }
+                          // Prevent: non-numeric keys
+                          if (
+                            (e.key < '0' || e.key > '9') &&
+                            (e.key !== 'ArrowLeft' &&
+                            e.key !== 'ArrowRight')
+                          ) {
+                            e.preventDefault();
+                          }
+                        }}
                       />
                       {errorsData.products && errorsData.products[idx] && errorsData.products[idx].quantity && (
                         <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
@@ -414,6 +474,7 @@ function AddResponse() {
                     </td>
                     <td style={{ position: 'relative', paddingBottom: '20px' }}>
                       <textarea
+                        style={{ textAlign: 'center' }}
                         value={product.price}
                         onChange={(e) => {
                           handleProductChange(idx, 'price', e.target.value);
@@ -425,6 +486,27 @@ function AddResponse() {
                         }}
                         id={`price${idx}`}
                         aria-label={`Description for Product ${product.id}`}
+                        onKeyDown={(e) => {
+                          // Allow: backspace, delete, tab, escape, enter
+                          if (
+                            e.key === 'Backspace' ||
+                            e.key === 'Delete' ||
+                            e.key === 'Tab' ||
+                            e.key === 'Escape' ||
+                            e.key === 'Enter' ||
+                            (e.ctrlKey && (e.key === 'a' || e.key === 'c' || e.key === 'v' || e.key === 'x'))
+                          ) {
+                            return;
+                          }
+                          // Prevent: non-numeric keys
+                          if (
+                            (e.key < '0' || e.key > '9') &&
+                            (e.key !== 'ArrowLeft' &&
+                            e.key !== 'ArrowRight')
+                          ) {
+                            e.preventDefault();
+                          }
+                        }}
                       />
                       {errorsData.products && errorsData.products[idx] && errorsData.products[idx].price && (
                         <p style={{ fontSize: '12px', color: 'red', position: 'absolute', bottom: '0px' }}>
@@ -563,8 +645,8 @@ function AddResponse() {
               </button>
             )}
           </div>
-
-          <div className="button-container" style={{ gap: '80px' }}>
+          {hasErrors && <p style={{ fontSize: '20px', color: 'red' }}>يرجي إكمال باقي بيانات العرض</p>}
+          <div className="button-container" style={{ gap: '80px', marginBottom: '75px' }}>
             <button type="submit" className="button" onSubmit={handleSubmit}>
               إرسال العرض
             </button>

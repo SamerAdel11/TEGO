@@ -242,7 +242,7 @@ function CreateTender() {
     });
     return newErrors;
   };
-
+  const [loading, setLoading] = useState(false);
   const handleChangeAd = (e) => {
     const { name, value } = e.target;
     if (name === 'deadline') {
@@ -269,7 +269,9 @@ function CreateTender() {
       console.log(hasErrors);
       if (!hasErrors) {
         console.log('Form published:', validationErrors);
+        setLoading(true);
       } else {
+        alert('يرجي إكمال بيانات المناقصة');
         setErrors(validationErrors);
         console.error(validationErrors);
         return;
@@ -318,7 +320,6 @@ function CreateTender() {
       if (!dataToSubmit.ad.deadline) {
         delete dataToSubmit.ad.deadline;
       }
-
       const response = await fetch('http://localhost:8000/create_tender/', {
         method: 'POST',
         headers: {
@@ -492,7 +493,7 @@ function CreateTender() {
               className="button condition"
               onClick={handleAddOfficial}
             >
-              إضافة مسؤول مناقصة جديد
+              إضافة مسؤول مناقصة
             </button>
           </div>
           <div className="create_new_tender">
@@ -719,16 +720,22 @@ function CreateTender() {
           </div>
 
           <div className="button-container">
-            <button type="submit" className="button" onClick={() => setSubmitType('open')} onSubmit={handleSubmit}>
-              نشر
+            <button
+              disabled={loading} // or another condition that sets the disabled state
+              type="submit"
+              className="button submit"
+              onClick={() => setSubmitType('open')}
+              onSubmit={handleSubmit}
+            >
+              {loading ? 'جاري نشر المناقصه......' : 'نشر'}
             </button>
-            <button type="submit" className="button" onClick={() => setSubmitType('draft')} onSubmit={handleSubmit}>
+            <button disabled={loading} type="submit" className="button" onClick={() => setSubmitType('draft')} onSubmit={handleSubmit}>
               حفظ كمسودة
             </button>
-            <button type="submit" className="button" onClick={() => setSubmitType('template')} onSubmit={handleSubmit}>
+            <button disabled={loading} type="submit" className="button" onClick={() => setSubmitType('template')} onSubmit={handleSubmit}>
               حفظ كقالب
             </button>
-            <button type="button" className="button cancel">
+            <button disabled={loading} type="button" className="button cancel">
               الغاء
             </button>
           </div>

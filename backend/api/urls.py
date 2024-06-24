@@ -27,7 +27,7 @@ urlpatterns = [
     path('test/',views.test.as_view(),name='test'),
     path('close_candidate_pool',views.CloseCandidatePool.as_view()),
     path('award_tender',views.AwardResponse.as_view()),
-    path('score',views.Similarity.as_view()),
+    path('score',views.Similarity),
     path('supplier_confirmation',views.SupplierConfirmation.as_view()),
     path('make_notifications_seen/',views.MakeNotificationsSeen.as_view()),
     path('contract/<int:tender_id>/<int:response_id>/',views.Contract.as_view()),

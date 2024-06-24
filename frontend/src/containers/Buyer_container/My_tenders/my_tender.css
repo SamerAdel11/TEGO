@@ -29,7 +29,10 @@
   .tender-card.shrunk {
     margin-bottom: 0; /* Adjusted margin for shrunk state */
   }
-
+  .button.submit:disabled {
+    background-color: #c73d1e9d !important;
+    border: none;
+  }
 .tender-details{
   font-family: var(--font-family);
     font-weight: 500;

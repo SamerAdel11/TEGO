@@ -22,7 +22,7 @@ function SupplierHome() {
           </button>
         </label>
       </div>
-      <hr data-v-7e013592 className="full-width" />
+      {/* <hr data-v-7e013592 className="full-width" /> */}
       <h1 className="gradient__text">الاشعارات</h1>
       <WebSocketExample />
     </div>

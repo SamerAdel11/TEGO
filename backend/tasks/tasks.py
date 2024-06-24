@@ -50,6 +50,9 @@ def compute_similarity(tender,response,response_id,offer_previous_work,tender_ad
 
     # Iterate over each pair of corresponding requirements
     for req1, req2 in zip(requirements_1, requirements_2):
+        # if req2=="" or req2== '':
+        #     row_similarities.append(0)
+        #     continue
         # Tokenize the requirements
         tokens1 = tokenizer(req1, return_tensors='pt', padding=True, truncation=True)
         tokens2 = tokenizer(req2, return_tensors='pt', padding=True, truncation=True)
@@ -89,4 +92,4 @@ def compute_similarity(tender,response,response_id,offer_previous_work,tender_ad
     response=TenderResponse.objects.get(id=response_id)
     response.score=round(mean_similarity_score*100)
     response.save()
-    return mean_similarity_score*100
+    return mean_similarity_score

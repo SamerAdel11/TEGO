@@ -69,7 +69,7 @@ const CancelledTenders = () => {
         )}
         {tendersData
           && tendersData.map((tender, index) => (
-            <Link style={{ 'text-decoration': 'none' }} key={index} to={`/cancelled_tender/${tender.id}`}>
+            <Link style={{ 'text-decoration': 'none' }} key={index} to={`/cancelled_tenders_details/${tender.id}`}>
               <div className="tender-cards">
                 <h1 className="tender-title gradient__text">
                   {tender.ad?.title}

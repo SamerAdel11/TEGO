@@ -50,15 +50,137 @@ class CompanyView(APIView):
         serializer.update(instance, request.data)
         return Response(CompanySerializer(instance).data)
 
+def extract_keys_and_values(data, parent_key='', sep='_'):
+    keys = []
+    values = []
+    if isinstance(data, dict):
+        for k, v in data.items():
+            new_key = f"{parent_key}{sep}{k}" if parent_key else k
+            keys.append(new_key)
+            if isinstance(v, (dict, list)):
+                nested_keys, nested_values = extract_keys_and_values(v, new_key, sep=sep)
+                if keys =='admins' or keys =='public_conditions' or keys=='private_conditions' or keys == 'products' or keys =='ad':
+                    values.extend(nested_values)
+                else:
+                    values.extend(nested_values)
+                    keys.extend(nested_keys)
+            else:
+                values.append(str(v))
+    elif isinstance(data, list):
+        for i, item in enumerate(data):
+            new_key = f"{parent_key}{sep}{i}"
+            nested_keys, nested_values = extract_keys_and_values(item, new_key, sep=sep)
+            keys.extend(nested_keys)
+            values.extend(nested_values)
+    return keys, values
 
-class TenderCreateView(APIView):
+def assign_empty_values_to_json(data):
+    if isinstance(data, dict):
+        for k in data.keys():
+            if isinstance(data[k], (dict, list)):
+                assign_empty_values_to_json(data[k])
+            else:
+                data[k] = ""
+    elif isinstance(data, list):
+        for i in range(len(data)):
+            if isinstance(data[i], (dict, list)):
+                assign_empty_values_to_json(data[i])
+            else:
+                data[i] = ""
+    return data
+
+def assign_values_from_list(json_with_empty_values, values_list):
+    value_index = 0
+    def assign_values(data):
+        nonlocal value_index
+        if isinstance(data, dict):
+            for k in data.keys():
+                if isinstance(data[k], (dict, list)):
+                    assign_values(data[k])
+                else:
+                    if value_index < len(values_list):
+                        data[k] = values_list[value_index].strip()
+                        value_index += 1
+        elif isinstance(data, list):
+            for i in range(len(data)):
+                if isinstance(data[i], (dict, list)):
+                    assign_values(data[i])
+                else:
+                    if value_index < len(values_list):
+                        data[i] = values_list[value_index].strip()
+                        value_index += 1
+    assign_values(json_with_empty_values)
+    return json_with_empty_values
+
+def toggle_anonymity(json_data,anonymize,object_type,object_id):
+    keys,values=extract_keys_and_values(json_data)
+    values_string = (" , ".join(values))
+    empty_json=assign_empty_values_to_json(json_data)
+
+    url=''
+    if anonymize:
+        url = "http://127.0.0.1:9000/predict/"  # Replace with the actual API URL
+    else:
+        url = "http://127.0.0.1:9000/decrypt/"  # Replace with the actual API URL
+    headers = {
+        "Content-Type": "application/json"
+    }
+    params={
+        "input_data":values_string,
+        "object_type":object_type,
+        "object_id":object_id
+    }
+    try:
+        response = requests.post(url, params=params, headers=headers)
+        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")  # Handle HTTP errors
+        return None
+    except Exception as err:
+        print(f"An error occurred: {err}")  # Handle other possible errors
+        return None
+    # print("the list is ",response.json().get('prediction').split(','))
+    new_json_data=assign_values_from_list(empty_json,response.json().get('prediction').split(','))
+    return new_json_data
+from rest_framework import generics, status
+from rest_framework.response import Response
+from .models import Tender
+from .serializer import TenderSerializer
+import json
+class TenderCreateView(generics.CreateAPIView):
+    queryset = Tender.objects.all()
+    serializer_class = TenderSerializer
     def post(self, request, *args, **kwargs):
-        serializer = TenderSerializer(
-            data=request.data, context={'request': request})
+        serializer = TenderSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            response = serializer.save()
-            return Response(response, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            saved_instance = serializer.save()
+            tender_id=saved_instance.id
+            serialized_data = serializer.data
+            admins_data=serialized_data.pop('admins')
+            # Convert serialized data to regular dictionary
+            # converted_data = self.convert_ordered_dict_to_dict(serialized_data)
+            print("dict data",type(serialized_data))
+            if request.data.get('status') == 'open':
+                # Perform actions specific to 'open' status
+                status=serialized_data.pop('status')
+                anonymized_data = toggle_anonymity(serialized_data, True, object_type='t', object_id=tender_id)
+                anonymized_data['admins']=admins_data
+                anonymized_data['status']=status
+                serializer_anonymized = TenderSerializer(
+                    instance=Tender.objects.get(id=tender_id),
+                    data=anonymized_data,
+                    context={'request': request}
+                )
+                if serializer_anonymized.is_valid():
+                    serializer_anonymized.save()
+                    return Response({"Message": "Done"}, status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serializer_anonymized.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def put(self,request,*args,**kwargs):
         tender_id= request.data.get('id')
         try:
@@ -69,8 +191,26 @@ class TenderCreateView(APIView):
         serializer = TenderSerializer(tender_instance,
             data=request.data, context={'request': request})
         if serializer.is_valid():
-            response = serializer.save(instance=tender_instance)
-            return Response(serializer.data)
+                admins_data=request.data.pop('admins')
+                anonymized_data={}
+                if request.data.get('status')=='open':
+                    print("Being annomyze")
+                    anonymized_data=toggle_anonymity(request.data,True,object_type='t',object_id=tender_id)
+                else:
+                    print("Being deannomyze")
+                    anonymized_data=toggle_anonymity(request.data,False,object_type='t',object_id=tender_id)
+                print(anonymized_data)
+                anonymized_data['admins']=admins_data
+                serializer_encrpted_version=TenderSerializer(
+                    instance=tender_instance,
+                    data=anonymized_data,
+                    context={'request': request})
+                if serializer_encrpted_version.is_valid():
+                    response = serializer_encrpted_version.save()
+                    return Response(serializer.data)
+                else :
+                    return Response(serializer_encrpted_version.errors, status=status.HTTP_400_BAD_REQUEST)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -86,7 +226,7 @@ class TenderHostView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         status = self.request.query_params.get('status', None)
-        queryset = Tender.objects.filter(user=user)
+        queryset = Tender.objects.filter(user=user).order_by('-date_created')
         if status:
             status_list = status.split(',')
             return queryset.filter(status__in=status_list)
@@ -96,8 +236,35 @@ class UpdateTenderStatus(APIView):
     def put(self,request):
         tender_id=request.query_params.get('tender_id',None)
         new_status=request.query_params.get('new_status',None)
+        tender_instance= Tender.objects.get(id=tender_id)
+        responses=TenderResponse.objects.filter(tender=tender_id)
+        anonymized_data=''
+        tender_data=TenderSerializer(tender_instance).data
+        admins_data=tender_data.pop('admins')
+        if new_status=='open':
+            print("Being annomyze")
+            tender_data.pop('status')
+            anonymized_data=toggle_anonymity(tender_data,True,object_type='t',object_id=tender_id)
+            anonymized_data['status']='open'
+        else:
+            print("Being deannomyze")
+            anonymized_data=toggle_anonymity(tender_data,False,object_type='t',object_id=tender_id)
+        anonymized_data['admins']=admins_data
+        serializer_encrpted_version=TenderSerializer(
+            instance=tender_instance,
+            data=anonymized_data,
+            context={'request': request})
+        if serializer_encrpted_version.is_valid():
+            response = serializer_encrpted_version.save()
+        if len(responses)>0:
+            UserNotification.objects.create(recipient=tender_instance.user,
+            message=f"تم ازاله العروض التي كانت مقدمه علي مناقصة {tender_instance.ad.title} ")
+        if new_status in ['draft','cancelled']:
+            for response in responses:
+                UserNotification.objects.create(recipient=response.user,
+                message=f"تم ازاله عرضك نظراً لالغاء المناقصة{tender_instance.ad.title} ")
+                response.delete()
         if tender_id != None and new_status != None:
-            tender_instance= Tender.objects.get(id=tender_id)
             tender_instance.status=new_status
             tender_instance.save()
             return Response({"Message":"Done"})
@@ -110,7 +277,7 @@ class TenderSupplierView(generics.ListAPIView):
         user = self.request.user
         responsestatus = self.request.query_params.get('responsestatus', None)
         company=Company.objects.get(user=user)
-        queryset = Tender.objects.filter(ad__field=company.company_field)
+        queryset = Tender.objects.filter(ad__field=company.company_field,status='open').exclude(user=user)
         if responsestatus:
             status_list = responsestatus.split(',')
             # queryset=queryset.exclude(tenderresponse__user=request.user)
@@ -139,10 +306,24 @@ class ResponseView(APIView):
         serializer = ResponseSerializer(
             data=request.data, context={'request': request})
         if serializer.is_valid():
-            response = serializer.save()
+            response_instance = serializer.save()
+            serialized_data=serializer.data
+            print("serialized data is ",serialized_data)
+            status=serialized_data.pop('status')
+            anonymized_data=toggle_anonymity(serialized_data,True,object_type='r',object_id=response_instance.id)
+            anonymized_data['status']=status
+            print("anonymized_data in view funciton is ",anonymized_data)
+            anonmyized_serializer=ResponseSerializer(
+                instance=response_instance,
+                data=anonymized_data,
+                context={'request': request}
+            )
+            if anonmyized_serializer.is_valid():
+                anonmyized_serializer.save()
+            else:
+                return Response(anonmyized_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(request.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 # class ResponseListAPIView(generics.ListAPIView):
 #     serializer_class = ResponseSerializer
@@ -211,9 +392,18 @@ class CloseCandidatePool(APIView):
         return Response({"Message":"cancelled"})
 class CancelTender(APIView):
     def post(self,request,*args,**kwargs):
+        print("ENTERCANCEL")
         tender_id=request.query_params.get('tender_id')
         tender=Tender.objects.get(id=tender_id)
         responses=TenderResponse.objects.filter(tender=tender)
+        json_data=TenderSerializer(tender).data
+        anonymized_data=toggle_anonymity(json_data,False,object_type='t',object_id=tender_id)
+        serializer_encrpted_version=TenderSerializer(
+            instance=tender,
+            data=anonymized_data,
+            context={'request': request})
+        if serializer_encrpted_version.is_valid():
+            response = serializer_encrpted_version.save()
         for response in responses:
             if response.status=='open' or response.status=='offered':
                 response.status='rejected'
@@ -363,14 +553,84 @@ class test(APIView):
         pprint(request.data)
         return Response(request.data)
 
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+def Similarity(APIView):
+    tokenizer=load('api\models\Tokenizer_BERT_Similarity_Model.joblib')
+    model=load('api\models\BERT_Similarity_Model.joblib')
+    # Split the requirements from the row
+    tender='حاسوب مكتبي|حاسوب مكتبي بمواصفات عالية يشمل معالج i7 وذاكرة RAM 16GB|50|طابعة ليزر|طابعة ليزرية ملونة ذات سرعة طباعة عالية ودقة تصل إلى 1200x1200 نقطة لكل بوصة|23|شاشة عرض|شاشة عرض LED بحجم 27 بوصة ودقة 4K مع منفذ HDMI ومعدل تحديث 60Hz|12|وحدة تخزين خارجية|وحدة تخزين خارجية سعة 2 تيرابايت مع واجهة USB 3.0 وسرعة نقل بيانات تصل إلى 5 جيجابت في الثانية|20|ماسح ضوئي|وصف المنتج: ماسح ضوئي متعدد الوظائف مع سرعة مسح تصل إلى 30 صفحة في الدقيقة ودقة تصل إلى 600 نقطة لكل بوصة|15|جهاز توجيه (راوتر)|وصف المنتج: جهاز توجيه لاسلكي يدعم ترددات 2.4GHz و 5GHz مع سرعة تصل إلى 1200 ميجابت في الثانية ونظام حماية متقدم|80|يجب تقديم ضمان لمدة سنه على الأقل.|يجب توفير خدمات الصيانة والدعم الفني لمدة عام.|'
+    response=""" | | | | | |شاشة عرض|شاشة عرض LED بحجم 27 بوصة ودقة 4K مع منفذ HDMI ومعدل تحديث 60Hz|12|وحدة تخزين خارجية|وحدة تخزين خارجية سعة 2 تيرابايت مع واجهة USB 
+3.0 وسرعة نقل بيانات تصل إلى 5 جيجابت في الثانية|20|ماسح ضوئي|وصف المنتج: ماسح ضوئي متعدد الوظائف مع سرعة مسح تصل إلى 30 صفحة في الدقيقة ودقة تصل إلى 600 نقطة لكل بوصة|15|جهاز توجيه (راوتر)|وصف المنتج: جهاز توجيه لاسلكي يدعم ترددات 2.4GHz و 5GHz مع سرعة تصل إلى 1200 ميجابت في الثانية ونظام حماية متقدم|80|يجب تقديم ضمان لمدة سنه على الأقل.|يجب توفير خدمات الصيانة والدعم الفني لمدة عام.|"""
+    requirements_1 = tender.split('|')
+    requirements_2 = response.split('|')
+    print(requirements_2)
+    # List to store similarity scores for this row
+    row_similarities = []
+    row_similarities_dict =[]
+    # Iterate over each pair of corresponding requirements
+    for req1, req2 in zip(requirements_1, requirements_2):
+        if req2==' ' or req2 =='':
+            req2='.'*len(req1)
+            print(req2)
+            similiarity_score=0
+            row_similarities.append(similiarity_score)
+            row_similarities_dict.append({
+            "tender_req":req1,
+            "res_req":req2,
+            "score":similiarity_score,
+            })
+            continue
+        # Tokenize the requirements
+        tokens1 = tokenizer(req1, return_tensors='pt', padding=True, truncation=True)
+        tokens2 = tokenizer(req2, return_tensors='pt', padding=True, truncation=True)
+        
+        # Get embeddings for the requirements
+        with torch.no_grad():
+            output1 = model(**tokens1)
+            output2 = model(**tokens2)
+        
+        # Compute the mean embeddings
+        embedding1 = output1.last_hidden_state.mean(dim=1).squeeze().numpy()
+        embedding2 = output2.last_hidden_state.mean(dim=1).squeeze().numpy()
+        
+        # Compute cosine similarity between the embeddings
+        similarity_score = cosine_similarity([embedding1], [embedding2])[0][0]
+        row_similarities.append(similarity_score)
+        row_similarities_dict.append({
+            "tender_req":req1,
+            "res_req":req2,
+            "score":similarity_score,
+            })
+    
+    # for previous_work in offer_previous_work:
+    #     tokens1 = tokenizer(previous_work, return_tensors='pt', padding=True, truncation=True)
+    #     tokens2 = tokenizer(tender_ad, return_tensors='pt', padding=True, truncation=True)
+        
+    #     # Get embeddings for the requirements
+    #     with torch.no_grad():
+    #         output1 = model(**tokens1)
+    #         output2 = model(**tokens2)
+        
+    #     # Compute the mean embeddings
+    #     embedding1 = output1.last_hidden_state.mean(dim=1).squeeze().numpy()
+    #     embedding2 = output2.last_hidden_state.mean(dim=1).squeeze().numpy()
+        
+    #     # Compute cosine similarity between the embeddings
+    #     similarity_score = cosine_similarity([embedding1], [embedding2])[0][0]
+    #     row_similarities.append(similarity_score)
 
-class Similarity(APIView):
-    permission_classes=[]
-    def post(self,request):
-        tender=request.data['tender']
-        response=request.data['response']
-        score=compute_similarity.delay(tender,response)
-        return Response({"message":"Score will be calculated"})
+    # Calculate mean similarity score for this row
+    # mean_similarity_score = np.mean(row_similarities)
+    # response=TenderResponse.objects.get(id=response_id)
+    # response.score=round(mean_similarity_score*100)
+    # response.save()
+    # return row_similarities
+    print(row_similarities)
+    print(row_similarities_dict)
+    print("Mean is ",np.mean(row_similarities[0:len(row_similarities)-2]))
+
+    return Response({"message":"Score will be calculated"})
 import time
 class MakeNotificationsSeen(APIView):
     def post(self, request):
@@ -563,7 +823,7 @@ import requests
 class model(APIView):
     permission_classes=[]
     def get_model_prediction(self,input_data):
-        url = 'http://127.0.0.1:9000/annonymize/'
+        url = 'http://127.0.0.1:9000/predict/'
         params = {
             "input_data": input_data
         }

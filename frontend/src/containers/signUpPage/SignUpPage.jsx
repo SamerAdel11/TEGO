@@ -130,9 +130,9 @@ const SignUpPage = () => {
       <div className="suplier-signUp section__padding">
         <form onSubmit={handleSubmit}>
           <div className="gradient__text">
-            <h1 className="account_h1">بيانات المورد</h1>
+            <h1 className="account_h1">بيانات حساب المورد</h1>
           </div>
-          <div className="row">
+          {/* <div className="row">
             <div className="form-group col-md-6">
               <label htmlFor="First_Name">الاسم الاول
                 <input type="text" name="First_Name" id="First_Name" value={formData.First_Name} onChange={handleChange} />
@@ -143,7 +143,7 @@ const SignUpPage = () => {
                 <input type="text" name="Second_Name" id="Second_Name" value={formData.Second_Name} onChange={handleChange} />
               </label>
             </div>
-          </div>
+          </div> */}
           <div className="form-group">
             <label htmlFor="email">البريد الالكتروني
               <input type="text" name="email" id="email" value={formData.email} onChange={handleChange} />

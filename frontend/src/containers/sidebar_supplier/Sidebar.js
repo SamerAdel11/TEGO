@@ -11,7 +11,7 @@ const Sidebar = () => {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.pathname === '/create_tender') {
+    if (location.pathname === '/add_response' || location.pathname === '/add_response') {
       setIsCollapsed(true);
     } else {
       setIsCollapsed(false);

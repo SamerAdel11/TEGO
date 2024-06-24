@@ -41,6 +41,10 @@
   margin: 0 10px;
   border-radius: 10px;
 }
+.buton_resonpose.submit:disabled {
+  background-color: #c73d1e9d !important;
+  border: none;
+}
 
 button[type="submit"]:hover {
   background-color: #ac1f00;
