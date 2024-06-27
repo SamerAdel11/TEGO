@@ -22,6 +22,7 @@ function OfferedOffers() {
 
         const data = await response.json();
         setTendersData(data);
+        console.log('offer', data);
       } catch (error) {
         console.error('Error fetching tenders:', error);
       }
@@ -69,7 +70,6 @@ function OfferedOffers() {
             </h1>
             <p className="topic">{tender.ad.topic}</p>
 
-            <h2> اخر موعد لتقديم العروض {tender.ad?.deadline_arabic} </h2>
           </div>
         </Link>
       ))}

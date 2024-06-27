@@ -84,19 +84,23 @@
     <div class="no-page-break contract-section">
         <h3>عقد شراء منقولات لمناقصة {{ tender_ad.title }}</h3>
         <p>إنه في يوم : {{ arabic_approval_date }} تم إبرام هذا العقد بين كلٍ من:</p>
-        <p>أول شركةا: <span style="text-decoration: underline">{{ host_company.name }}</span> </p>
+        <p>أولاََ شركة: <span style="text-decoration: underline">{{ host_company.name }}</span> </p>
         <p>بصفتها الجهة المعنية والمستفيدة من مناقصة {{ tender_ad.title }}.</p>
         <p>ومقرها: {{ host_company.location }} -{{ host_company.city }} </p>
         <p>ويمثلها قانونا:-</p>
         {% for owner in host_owners %}
         <p style="margin-right: 70px;">السيد/ة <span style="font-weight: 600;"> {{ owner.name }}  </span> بصفته {{ owner.onwer_position }}  – رقم قومي <span>{{ owner.owner_id }}</span></p>
         {% endfor %}
+        <p>مسوؤلي المناقصة:-</p>
+        {% for admin in admins %}
+        <p style="margin-right: 70px;">السيد/ة <span style="font-weight: 600;"> {{ admin.name }}  </span> بصفته {{ admin.job_title }}</p>
+        {% endfor %}
         <p>تليفون : {{ host_company.mobile }}</p>
         <p>تليفون أرضي  : {{ host_company.landline }}</p>
         <p>فاكس : {{ host_company.fax_number }}</p>
         <p style="margin-left: 20%; text-align: left;">(طرف اول)</p>
 
-        <p >ثانيا شركة: <span style="text-decoration: underline">{{supplier_company.name}}</span> </p>
+        <p >ثانياََ شركة: <span style="text-decoration: underline">{{supplier_company.name}}</span> </p>
         <p>الكائن مقـرهـا: {{ supplier_company.location }} - {{ supplier_company.city }}</p>
         <p>ويمثلها قانونا:-</p>
         {% for owner in supplier_owners %}
@@ -209,7 +213,6 @@
                   <th style="width: 10%;">الكمية</th>
                   <th style="width: 10%;">سعر الوحده</th>
                   <th style="width: 10%;">سعر الكميه</th>
-                  
                 </tr>
               </thead>
               <tbody>

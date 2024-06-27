@@ -36,7 +36,7 @@ def activate_account(user_id):
     message.attach_alternative(html_message,'text/html')
     message.send()
     return "Email sent"
-
+import re
 @shared_task
 def compute_similarity(tender,response,response_id,offer_previous_work,tender_ad):
     tokenizer=load('api\models\Tokenizer_BERT_Similarity_Model.joblib')
@@ -47,15 +47,17 @@ def compute_similarity(tender,response,response_id,offer_previous_work,tender_ad
 
     # List to store similarity scores for this row
     row_similarities = []
-
+    pattern = r'\(\w+-\w+_\w+-\d+\)'
     # Iterate over each pair of corresponding requirements
     for req1, req2 in zip(requirements_1, requirements_2):
         # if req2=="" or req2== '':
         #     row_similarities.append(0)
         #     continue
         # Tokenize the requirements
-        tokens1 = tokenizer(req1, return_tensors='pt', padding=True, truncation=True)
-        tokens2 = tokenizer(req2, return_tensors='pt', padding=True, truncation=True)
+        cleaned_req1= re.sub(pattern, '', req1).strip()
+        cleaned_req2=re.sub(pattern,'',req2).strip()
+        tokens1 = tokenizer(cleaned_req1, return_tensors='pt', padding=True, truncation=True)
+        tokens2 = tokenizer(cleaned_req2, return_tensors='pt', padding=True, truncation=True)
         
         # Get embeddings for the requirements
         with torch.no_grad():
@@ -70,26 +72,31 @@ def compute_similarity(tender,response,response_id,offer_previous_work,tender_ad
         similarity_score = cosine_similarity([embedding1], [embedding2])[0][0]
         row_similarities.append(similarity_score)
     
-    for previous_work in offer_previous_work:
-        tokens1 = tokenizer(previous_work, return_tensors='pt', padding=True, truncation=True)
-        tokens2 = tokenizer(tender_ad, return_tensors='pt', padding=True, truncation=True)
-        
-        # Get embeddings for the requirements
-        with torch.no_grad():
-            output1 = model(**tokens1)
-            output2 = model(**tokens2)
-        
-        # Compute the mean embeddings
-        embedding1 = output1.last_hidden_state.mean(dim=1).squeeze().numpy()
-        embedding2 = output2.last_hidden_state.mean(dim=1).squeeze().numpy()
-        
-        # Compute cosine similarity between the embeddings
-        similarity_score = cosine_similarity([embedding1], [embedding2])[0][0]
-        row_similarities.append(similarity_score)
+    tender_ad_list=tender_ad.split('|')
+    for work in offer_previous_work:
+        work_list=work.split('|')
+        for i in range(len(work_list)):
+            cleaned_previous_work= re.sub(pattern, '', work_list[i]).strip()
+            cleaned_tender_itme=re.sub(pattern, '', tender_ad_list[i]).strip()
+            tokens1 = tokenizer(cleaned_previous_work, return_tensors='pt', padding=True, truncation=True)
+            tokens2 = tokenizer(cleaned_tender_itme, return_tensors='pt', padding=True, truncation=True)
+            
+            # Get embeddings for the requirements
+            with torch.no_grad():
+                output1 = model(**tokens1)
+                output2 = model(**tokens2)
+            
+            # Compute the mean embeddings
+            embedding1 = output1.last_hidden_state.mean(dim=1).squeeze().numpy()
+            embedding2 = output2.last_hidden_state.mean(dim=1).squeeze().numpy()
+            
+            # Compute cosine similarity between the embeddings
+            similarity_score = cosine_similarity([embedding1], [embedding2])[0][0]
+            row_similarities.append(similarity_score)
 
     # Calculate mean similarity score for this row
     mean_similarity_score = np.mean(row_similarities)
     response=TenderResponse.objects.get(id=response_id)
     response.score=round(mean_similarity_score*100)
     response.save()
-    return mean_similarity_score
+    return mean_similarity_score,row_similarities

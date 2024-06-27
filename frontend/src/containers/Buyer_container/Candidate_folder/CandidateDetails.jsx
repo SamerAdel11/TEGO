@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import './CandidateDetails.css';
 import { useParams, useHistory } from 'react-router-dom';
+import PulseLoader from 'react-spinners/PulseLoader';
 import AuthContext from '../../../context/Authcontext';
 
 function CandidateDetails() {
@@ -80,7 +81,22 @@ function CandidateDetails() {
   // const handleNationalIDChange = (event) => { // Added function to handle changes in the national ID input field
   //   setNationalID(event.target.value);
   // };
-
+  if (!responseDetails) {
+    return (
+      <div>
+        <PulseLoader
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            width: '135vh' }}
+          color="#77E6FD"
+          size="20"
+        />
+      </div>
+    );
+  }
   return (
     <div className="tender-details-container">
       <div className="center-content">
@@ -145,7 +161,7 @@ function CandidateDetails() {
                         <td>{innerIndex + 1}</td>
                         <td>{product.title}</td>
                         <td>
-                          {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit } {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity }
+                          {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity } {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit }
                         </td>
                         <td>{product.supplying_status !== 'متوفر' ? '-' : product.price }</td>
                         <td>{product.supplying_status !== 'متوفر' ? '-' : product.price * product.provided_quantity }</td>
@@ -204,7 +220,9 @@ function CandidateDetails() {
                 >
                   اختيار المرشح
                 </button>
-                <hr data-v-7e013592 />
+                {index < responseDetails.length - 1 && (
+                  <hr style={{ marginLeft: '5%' }} />
+                )}
               </div>
             ))}
           </div>

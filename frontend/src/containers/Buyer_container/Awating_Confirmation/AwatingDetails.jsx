@@ -6,13 +6,13 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import './AwatingDetails.css';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import PulseLoader from 'react-spinners/PulseLoader';
 import AuthContext from '../../../context/Authcontext';
 
 function AwatingDetails() {
   const { id } = useParams();
-
+  const history = useHistory();
   const [responseDetails, setResponseDetails] = useState(null);
   const [supplierDetails, setSupplierDetails] = useState(null);
   const [activeButton, setActiveButton] = useState('details');
@@ -116,7 +116,7 @@ function AwatingDetails() {
 
       // const data = await response.json();
       if (response.ok) {
-        window.location.reload();
+        history.push(`/candidate_responses/${id}`);
       }
     } catch (error) {
       alert(error);
@@ -346,7 +346,7 @@ function AwatingDetails() {
                           type="button"
                           onClick={() => showContent('contanct_info')}
                         >
-                          معلومات الاتصال
+                          بيانات الشركة
                         </button>
                       </div>
                     </div>
@@ -588,7 +588,7 @@ function AwatingDetails() {
                           type="button"
                           onClick={handleClickOpen}
                         >
-                          تحديد موعد لمراجعة المنتج
+                          تحديد موعد لمراجعةالمنتجات
                         </button>
                         <Dialog
                           style={{ backgroundColor: '#073057' }}
@@ -628,31 +628,16 @@ function AwatingDetails() {
                 ) : (supplierDetails && (
                   <div style={{ marginLeft: '80px' }}>
                     <div className="gradient__text">
-                      <h1 className="account_h1">بيانات المورد</h1>
-                    </div>
-                    <div className="row">
-                      <div className="form-group col-md-6">
-                        <label htmlFor="First_Name">الاسم الاول
-                          <input type="text" name="First_Name" id="First_Name" value={supplierDetails.user.first_name} />
-                        </label>
-                      </div>
-                      <div className="form-group col-md-6">
-                        <label htmlFor="Second_Name">الاسم الثاني
-                          <input type="text" name="Second_Name" id="Second_Name" value={supplierDetails.user.last_name} />
-                        </label>
-                      </div>
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="email">البريد الالكتروني
-                        <input type="text" name="email" id="email" value={supplierDetails.user.email} />
-                      </label>
-                    </div>
-                    <div className="gradient__text">
                       <h1>بيانات الشركة</h1>
                     </div>
                     <div className="form-group">
                       <label htmlFor="companyName">اسم الشركة
                         <input className="input-margin" type="text" name="companyName" id="companyName" value={supplierDetails.name} />
+                      </label>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="email">البريد الالكتروني
+                        <input type="text" name="email" id="email" value={supplierDetails.user.email} />
                       </label>
                     </div>
                     <div className="form-group">

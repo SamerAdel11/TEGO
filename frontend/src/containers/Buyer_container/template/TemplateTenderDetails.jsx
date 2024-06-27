@@ -472,11 +472,6 @@ function TemplateTenderDetails() {
             <div className="gradient__text">
               <h1>عمل مناقصة جديدة</h1>
             </div>
-            <div className="form-fields">
-              <label htmlFor="create_tender">التسعيرة الداخية
-                <input type="text" id="create_tender" value={tender.initial_price} />
-              </label>
-            </div>
           </div>
 
           <div className="table-container">

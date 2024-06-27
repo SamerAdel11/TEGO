@@ -179,11 +179,6 @@ function CreateTender() {
       hasErrors = true;
       newErrors.deadline = 'اخر موعد لتلقي العروض مطلوب';
     }
-    if (!e.target.querySelector('#create_tender').value) {
-      console.log('title');
-      hasErrors = true;
-      newErrors.initialPrice = 'ألتسعيرة الداخلية مطلوبه';
-    }
     products.forEach((product, idx) => {
       if (!product.title) {
         if (!newErrors.products[idx]) newErrors.products[idx] = {};
@@ -281,11 +276,11 @@ function CreateTender() {
     const tenderTitle = e.target.querySelector('#tenderTitle').value;
     const tenderSubject = e.target.querySelector('#tenderSubject').value;
     const tenderOpeningDate = e.target.querySelector('#tenderOpeningDate').value;
-    const initialPrice = e.target.querySelector('#create_tender').value;
 
     const cleanedTenderAd = Object.fromEntries(
       Object.entries(tenderadFormData).filter(([_, value]) => value !== '' && value !== null),
     );
+    const initialPrice = 90;
     try {
       const formData = {
         ad: cleanedTenderAd,
@@ -499,12 +494,6 @@ function CreateTender() {
           <div className="create_new_tender">
             <div className="gradient__text">
               <h1>عمل مناقصة جديدة</h1>
-            </div>
-            <div className="form-fields">
-              <label htmlFor="create_tender">التسعيرة الداخية
-                <input type="number" id="create_tender" />
-              </label>
-              {errors.initialPrice && <p style={{ fontSize: '20px', color: 'red' }}>{errors.initialPrice}</p>}
             </div>
           </div>
 
@@ -733,7 +722,7 @@ function CreateTender() {
               حفظ كمسودة
             </button>
             <button disabled={loading} type="submit" className="button" onClick={() => setSubmitType('template')} onSubmit={handleSubmit}>
-              حفظ كقالب
+              حفظ كنموذج
             </button>
             <button disabled={loading} type="button" className="button cancel">
               الغاء

@@ -33,12 +33,12 @@ function ToSign() {
       </div>
       <div className="container supplier-signUp">
         <div className="card">
-          <h1 className="gradient__text">سجل كمشتري</h1>
+          <h1 className="gradient__text">سجل كمُعلِن</h1>
           <div className="icon">
             <Icon component={LocalMallOutlinedIcon} fontSize="large" />
           </div>
           <div className="p-container">
-            <p className="p-content">يمكنك التسجيل علي المنصة الان كمشتري</p>
+            <p className="p-content">يمكنك التسجيل علي المنصة الان كمُعلِن</p>
           </div>
           <Link to="/signup2">
             <button type="button" className="submit_button">

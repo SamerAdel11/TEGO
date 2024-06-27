@@ -219,10 +219,6 @@ function CancelledTenderDetails() {
       hasErrors = true;
       newErrors.deadline = ' معاد فتح المظاريف مطلوب';
     }
-    if (!e.target.querySelector('#create_tender').value) {
-      hasErrors = true;
-      newErrors.initialPrice = 'ألتسعيرة الداخلية مطلوبه';
-    }
     products.forEach((product, idx) => {
       if (!product.title) {
         hasErrors = true;
@@ -353,23 +349,17 @@ function CancelledTenderDetails() {
       // console.log(e.target.querySelector('#create_tender').value);
       // console.log(e.target.querySelector('#tenderTitle').value);
       console.log(submitType);
-      const initialPrice = e.target.querySelector('#create_tender').value;
       const formData = {
         ad: tenderadFormData,
         admins: officials,
         public_conditions: conditions,
         private_conditions: privateconditions,
         products,
-        initial_price: initialPrice,
         status: submitType,
         id: tender.id,
       };
       const dataToSubmit = { ...formData };
 
-      // Remove initial_price if it's null or empty
-      if (!initialPrice) {
-        delete dataToSubmit.initial_price;
-      }
       if (!dataToSubmit.ad.finalInsurance) {
         delete dataToSubmit.ad.finalInsurance;
       }
@@ -601,12 +591,6 @@ function CancelledTenderDetails() {
           <div className="create_new_tender">
             <div className="gradient__text">
               <h1>عمل مناقصة جديدة</h1>
-            </div>
-            <div className="form-fields">
-              <label htmlFor="create_tender">التسعيرة الداخية
-                <input type="text" id="create_tender" defaultValue={tender.initial_price} />
-              </label>
-              {errors.initialPrice && <p style={{ fontSize: '20px', color: 'red' }}>{errors.initialPrice}</p>}
             </div>
           </div>
 

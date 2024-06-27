@@ -14,6 +14,8 @@ function Response() {
   const history = useHistory();
   const { authTokens } = useContext(AuthContext);
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const [products, setProducts] = useState(data && data.products);
   const [offer, setOffer] = useState(null);
   const textareaRefs = useRef([]);
@@ -33,7 +35,6 @@ function Response() {
   const [maxDate, setMaxDate] = useState('');
   const [dateerror, setError] = useState('');
   const [HostDetails, setHostDetails] = useState(null);
-  const [loading, setLoading] = useState(false);
   useEffect(() => {
     // Get the current date
     const today = new Date();
@@ -252,6 +253,7 @@ function Response() {
   };
   const confirmNotification = async (decision) => {
     // e.preventDefault();
+    setLoading(true);
     const confirmationApi = await fetch(`http://localhost:8000/supplier_confirmation?tender_id=${tenderId}&response_id=${offer.id}&confirm_status=${decision}`, {
       method: 'POST',
       headers: {
@@ -261,16 +263,17 @@ function Response() {
     });
     if (confirmationApi.ok) {
       console.log('Done');
+      setLoading(false);
       if (decision === 'rejected') {
         history.push('/rejected_offers');
       }
     } else {
+      setLoading(false);
       console.error('Error in submitting the data');
     }
   };
   const downloadPDF = async () => {
     try {
-      setLoading(true);
       const response = await fetch(`http://localhost:8000/contract/${tenderId}/${offer.id}/`, {
         method: 'POST',
         headers: {
@@ -376,13 +379,10 @@ function Response() {
   }
   return (
     <>
-      <div className="container_create_tender" style={{ marginRight: '-20px' }}>
+      <div className="container_create_tender">
         {
         offer.status === 'winner' && transaction && !transaction.product_review_date_status !== 'waiting_for_host' && (
           <div className="center-content">
-            {!transaction.product_review_date_status && (
-              <p className="national">المورد أكد التعاقد علي المناقصة</p>
-            )}
             <div className="buttons_awating">
               <button
                 style={{ border: 'none', outline: 'none', backgroundColor: activeButton === 'details' && '#AA1910' }}
@@ -398,12 +398,17 @@ function Response() {
                 type="button"
                 onClick={() => showContent('contanct_info')}
               >
-                معلومات الاتصال
+                بيانات الشركة
               </button>
             </div>
           </div>
         )
         }
+        {transaction && transaction.product_review_date_status === 'waiting_for_host' && (
+        <div className="center-content">
+          <p style={{ fontSize: '20px' }} className="national">في انتظار التأكيد علي الموعد من البائع</p>
+        </div>
+        )}
         {offer.status === 'awarded' && (
           <div>
             <div className="center-content">
@@ -612,7 +617,7 @@ function Response() {
                     {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                     <th style={{ width: '0.1px' }} />
                     <th className="col-2">عنوان المنتج</th>
-                    <th style={{ width: '0.8px' }}>وحدة الكمية</th>
+                    <th className="col-1">وحدة الكمية</th>
                     <th style={{ width: '0.8px' }}>الكمية</th>
                     <th className="col-">وصف المنتج</th>
                     <th className="col-1">سعر الوحده</th>
@@ -781,26 +786,6 @@ function Response() {
         ) : (HostDetails && (
           <div style={{ marginLeft: '80px' }}>
             <div className="gradient__text">
-              <h1 className="account_h1">بيانات المورد</h1>
-            </div>
-            <div className="row">
-              <div className="form-group col-md-6">
-                <label htmlFor="First_Name">الاسم الاول
-                  <input type="text" name="First_Name" id="First_Name" value={HostDetails.user.first_name} />
-                </label>
-              </div>
-              <div className="form-group col-md-6">
-                <label htmlFor="Second_Name">الاسم الثاني
-                  <input type="text" name="Second_Name" id="Second_Name" value={HostDetails.user.last_name} />
-                </label>
-              </div>
-            </div>
-            <div className="form-group">
-              <label htmlFor="email">البريد الالكتروني
-                <input type="text" name="email" id="email" value={HostDetails.user.email} />
-              </label>
-            </div>
-            <div className="gradient__text">
               <h1>بيانات الشركة</h1>
             </div>
             <div className="form-group">
@@ -809,7 +794,12 @@ function Response() {
               </label>
             </div>
             <div className="form-group">
-              <label htmlFor="address">العنوان على الخريطة (اللوكيشن)
+              <label htmlFor="email">البريد الالكتروني
+                <input type="text" name="email" id="email" value={HostDetails.user.email} />
+              </label>
+            </div>
+            <div className="form-group">
+              <label htmlFor="address">العنوان
                 <input className="input-margin" type="text" name="address" id="address" value={HostDetails.location} />
               </label>
             </div>
@@ -825,7 +815,7 @@ function Response() {
                 </label>
               </div> */}
               <div className="form-group col-md-6">
-                <label htmlFor="registrationAuthority">جهة استخراج السجل التجاري
+                <label htmlFor="registrationAuthority">المحافظة
                   <input className="input-margin" type="text" name="registrationAuthority" id="registrationAuthority" value={HostDetails.city} />
                 </label>
               </div>

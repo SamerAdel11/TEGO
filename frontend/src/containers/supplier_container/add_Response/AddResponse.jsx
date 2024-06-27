@@ -22,6 +22,7 @@ function AddResponse() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [loading, setLoading] = useState(false);
   const tenderId = searchParams.get('tender_id');
   const [errorsData, setErrorsData] = useState({});
   let hasErrors = false;
@@ -222,13 +223,16 @@ function AddResponse() {
   };
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     const validationErrors = validate();
     console.log(hasErrors);
     // If there are errors, prevent form submission
     if (hasErrors) {
+      alert('يرجي إكمال بيانات ألعرض');
       console.error('Validation failed:', validationErrors);
       setErrorsData(validationErrors);
+      setLoading(false);
       return;
     }
 
@@ -268,7 +272,7 @@ function AddResponse() {
           const currentProduct = { ...product };
           if (!currentProduct.price || currentProduct.price === '') {
             console.log('Remove price');
-            delete currentProduct.price;
+            currentProduct.price = 0;
           }
           if (!currentProduct.provided_quantity || currentProduct.provided_quantity === '') {
             console.log('Remove provided_quantity');
@@ -289,7 +293,7 @@ function AddResponse() {
           const updatedOfferProducts = { ...updatedFormData.offer_products };
 
           if (!updatedOfferProducts.price || updatedOfferProducts.price === '') {
-            delete updatedOfferProducts.price;
+            updatedOfferProducts.price = 0;
           }
           if (!updatedOfferProducts.provided_quantity || updatedOfferProducts.provided_quantity === '') {
             delete updatedOfferProducts.provided_quantity;
@@ -310,10 +314,13 @@ function AddResponse() {
       });
       if (response2.ok) {
         navigate.push('/open_tenders');
+        setLoading(false);
       } else {
+        setLoading(false);
         console.log('ERROR', response2.json());
       }
     } catch (error) {
+      setLoading(false);
       console.error('Error:', error);
     }
   };
@@ -376,7 +383,7 @@ function AddResponse() {
                   {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                   <th style={{ width: '1px' }}>الصف</th>
                   <th className="col-2">عنوان المنتج</th>
-                  <th style={{ width: '0.8px' }}>وحدة الكمية</th>
+                  <th className="col-1">وحدة الكمية</th>
                   <th style={{ width: '0.8px' }}>الكمية</th>
                   <th className="col-">وصف المنتج</th>
                   <th className="col-1">سعر الوحده</th>
@@ -404,7 +411,7 @@ function AddResponse() {
                     </td>
                     <td>
                       <textarea
-                        style={{ alignItems: 'center', justifyContent: 'center' }}
+                        style={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}
                         readOnly="readonly"
                         ref={(el) => { textareaRefs.current[idx] = el; }}
                         id="unit"
@@ -647,8 +654,9 @@ function AddResponse() {
           </div>
           {hasErrors && <p style={{ fontSize: '20px', color: 'red' }}>يرجي إكمال باقي بيانات العرض</p>}
           <div className="button-container" style={{ gap: '80px', marginBottom: '75px' }}>
-            <button type="submit" className="button" onSubmit={handleSubmit}>
-              إرسال العرض
+            <button disabled={loading} type="submit" className="button submit" onSubmit={handleSubmit}>
+              {loading ? 'جاري إرسال العرض......' : 'إرسال العرض'}
+
             </button>
             <button type="button" className="button cancel" onClick={handleClick}>
               الغاء

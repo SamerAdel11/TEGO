@@ -215,10 +215,9 @@ class TenderSerializer(serializers.ModelSerializer):
         return TenderResponse.objects.filter(tender_id=object.id).count()
     class Meta:
         model = Tender
-        fields = ['id','initial_price', 'status', 'admins',
+        fields = ['id','status', 'admins',
                 'public_conditions', 'private_conditions', 'ad', 'products','number_of_responses']
         extra_kwargs = {
-            'initial_price': {'required':False,'allow_null': True},
             'status': {'allow_null': True},
             'admins': {'allow_null': True},
             'public_conditions': {'allow_null': True},
@@ -272,7 +271,6 @@ class TenderSerializer(serializers.ModelSerializer):
         ad_instance.save()
 
         #Update Tender instance Attributes 
-        instance.initial_price=validated_data.get('initial_price')
         instance.status=validated_data.get('status')
         instance.save()
 
@@ -339,15 +337,24 @@ class TenderRetrieveSerializer(serializers.ModelSerializer):
     products = TenderProductSerializer(many=True, read_only=True)
     class Meta:
         model = Tender
-        fields = ['id', 'initial_price', 'status', 'admins',
+        fields = ['id', 'status', 'admins',
                 'public_conditions', 'private_conditions', 'ad', 'products']
 
 class ResponsePreviousWorkSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
     class Meta:
         model=ResponsePreviousWork
-        fields=['title','description']
+        fields=['id','title','description']
+    def to_representation(self, instance):
+        # Get the original representation
+        representation = super().to_representation(instance)
+        
+        # Order by id if instance is a queryset
+        if isinstance(instance, list):
+            print("enter if function")
+            representation.sort(key=lambda x: x.get('id', 0))
 
+        return representation
 
 
 class ProductResponseSerializer(serializers.ModelSerializer):
@@ -366,7 +373,15 @@ class ProductResponseSerializer(serializers.ModelSerializer):
         "product_description": {"required": False, "allow_null": True},
         "provided_quantity": {"required": False, "allow_null": True},
         }
-
+    def to_representation(self, instance):
+        # Get the original representation
+        representation = super().to_representation(instance)
+        
+        # Order by id if instance is a queryset
+        if isinstance(instance, list):
+            print("enter if function")
+            representation.sort(key=lambda x: x.get('id', 0))
+        return representation
 
 class ResponsePrivateConditionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
@@ -374,7 +389,16 @@ class ResponsePrivateConditionSerializer(serializers.ModelSerializer):
         model = ResponsePrivateCondition
         fields = ['id', 'condition','offered_condition']
         extra_kwargs = {"offered_condition": {"required": False, "allow_null": True},}
+    def to_representation(self, instance):
+        # Get the original representation
+        representation = super().to_representation(instance)
+        
+        # Order by id if instance is a queryset
+        if isinstance(instance, list):
+            print("enter if function")
+            representation.sort(key=lambda x: x.get('id', 0))
 
+        return representation
 
 class ResponseSerializer(serializers.ModelSerializer):
     offer_products = ProductResponseSerializer(many=True)
@@ -389,14 +413,12 @@ class ResponseSerializer(serializers.ModelSerializer):
         extra_kwargs={'offer_products':{"required":False,"allow_null": True}}
 
     def create(self, validated_data):
-        print("validated_data is ",validated_data)
         user = self.context['request'].user
         data = validated_data.copy()
         offer_products_data = validated_data.pop('offer_products')
         offer_conditions_data = validated_data.pop('offer_conditions')
         previous_work_data=validated_data.pop('previous_work')
 
-        # print(validated_data)
         tender = Tender.objects.get(id=validated_data['tender_id'])
         response = TenderResponse.objects.create(
             offered_price=validated_data.get('offered_price'),
@@ -460,7 +482,6 @@ class ResponseSerializer(serializers.ModelSerializer):
             product.supplying_status=product_data.get('supplying_status')
             product.price=product_data.get('price')
             product.save()
-            print("Product saved")
 
         for condition_data in offer_conditions_data:
             condition_id=condition_data.get('id')

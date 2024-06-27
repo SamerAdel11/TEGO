@@ -195,7 +195,7 @@ const SignUpPage = () => {
             </label>
           </div>
           <div className="form-group">
-            <label htmlFor="address">العنوان على الخريطة (اللوكيشن)
+            <label htmlFor="address">العنوان
               <input type="text" name="address" id="address" value={formData.address} onChange={handleChange} />
             </label>
           </div>
@@ -206,9 +206,9 @@ const SignUpPage = () => {
               </label>
             </div>
             <div className="form-group col-md-4">
-              <label htmlFor="registrationAuthority">جهة استخراج السجل التجاري
+              <label htmlFor="registrationAuthority"> المحافظة
                 <select name="registrationAuthority" id="registrationAuthority" value={formData.registrationAuthority} onChange={handleChange}>
-                  <option value="">اختر الجهة</option>
+                  <option value="">اختر المحافظة</option>
                   <option value="القاهرة">القاهرة</option>
                   <option value="الإسكندرية">الإسكندرية</option>
                   <option value="الجيزة">الجيزة</option>

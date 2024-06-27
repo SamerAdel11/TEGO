@@ -25,7 +25,6 @@ class CompanyView(APIView):
             serialized_data= CompanySerializer(company).data
             return Response(serialized_data)
         elif tender_id:
-            print(tender_id)
             user=Tender.objects.get(id=tender_id).user
             company=Company.objects.get(user=user)
             serialized_data= CompanySerializer(company).data
@@ -139,7 +138,6 @@ def toggle_anonymity(json_data,anonymize,object_type,object_id):
     except Exception as err:
         print(f"An error occurred: {err}")  # Handle other possible errors
         return None
-    # print("the list is ",response.json().get('prediction').split(','))
     new_json_data=assign_values_from_list(empty_json,response.json().get('prediction').split(','))
     return new_json_data
 from rest_framework import generics, status
@@ -159,13 +157,12 @@ class TenderCreateView(generics.CreateAPIView):
             admins_data=serialized_data.pop('admins')
             # Convert serialized data to regular dictionary
             # converted_data = self.convert_ordered_dict_to_dict(serialized_data)
-            print("dict data",type(serialized_data))
             if request.data.get('status') == 'open':
                 # Perform actions specific to 'open' status
-                status=serialized_data.pop('status')
+                status_data=serialized_data.pop('status')
                 anonymized_data = toggle_anonymity(serialized_data, True, object_type='t', object_id=tender_id)
                 anonymized_data['admins']=admins_data
-                anonymized_data['status']=status
+                anonymized_data['status']=status_data
                 serializer_anonymized = TenderSerializer(
                     instance=Tender.objects.get(id=tender_id),
                     data=anonymized_data,
@@ -192,15 +189,13 @@ class TenderCreateView(generics.CreateAPIView):
             data=request.data, context={'request': request})
         if serializer.is_valid():
                 admins_data=request.data.pop('admins')
-                anonymized_data={}
+                anonymized_data=''
                 if request.data.get('status')=='open':
-                    print("Being annomyze")
                     anonymized_data=toggle_anonymity(request.data,True,object_type='t',object_id=tender_id)
                 else:
-                    print("Being deannomyze")
                     anonymized_data=toggle_anonymity(request.data,False,object_type='t',object_id=tender_id)
-                print(anonymized_data)
                 anonymized_data['admins']=admins_data
+                anonymized_data['status']=request.data.get('status')
                 serializer_encrpted_version=TenderSerializer(
                     instance=tender_instance,
                     data=anonymized_data,
@@ -242,12 +237,10 @@ class UpdateTenderStatus(APIView):
         tender_data=TenderSerializer(tender_instance).data
         admins_data=tender_data.pop('admins')
         if new_status=='open':
-            print("Being annomyze")
             tender_data.pop('status')
             anonymized_data=toggle_anonymity(tender_data,True,object_type='t',object_id=tender_id)
             anonymized_data['status']='open'
         else:
-            print("Being deannomyze")
             anonymized_data=toggle_anonymity(tender_data,False,object_type='t',object_id=tender_id)
         anonymized_data['admins']=admins_data
         serializer_encrpted_version=TenderSerializer(
@@ -277,12 +270,13 @@ class TenderSupplierView(generics.ListAPIView):
         user = self.request.user
         responsestatus = self.request.query_params.get('responsestatus', None)
         company=Company.objects.get(user=user)
-        queryset = Tender.objects.filter(ad__field=company.company_field,status='open').exclude(user=user)
+        queryset = Tender.objects.filter(ad__field=company.company_field).exclude(user=user)
         if responsestatus:
             status_list = responsestatus.split(',')
             # queryset=queryset.exclude(tenderresponse__user=request.user)
             return queryset.filter(tenderresponse__status__in=status_list,tenderresponse__user=user)
-        return queryset.exclude(tenderresponse__user=self.request.user)
+        
+        return queryset.filter(status='open').exclude(tenderresponse__user=self.request.user)
 
     def get(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
@@ -308,11 +302,10 @@ class ResponseView(APIView):
         if serializer.is_valid():
             response_instance = serializer.save()
             serialized_data=serializer.data
-            print("serialized data is ",serialized_data)
-            status=serialized_data.pop('status')
+            
+            status_data=serialized_data.pop('status')
             anonymized_data=toggle_anonymity(serialized_data,True,object_type='r',object_id=response_instance.id)
-            anonymized_data['status']=status
-            print("anonymized_data in view funciton is ",anonymized_data)
+            anonymized_data['status']=status_data
             anonmyized_serializer=ResponseSerializer(
                 instance=response_instance,
                 data=anonymized_data,
@@ -345,7 +338,7 @@ class ResponseDetailAPIView(generics.ListAPIView):
         if tender_id is None:
             return Response({'message':"tender id must be passed as a url parameter"},)
         tender_instance=Tender.objects.get(id=tender_id)
-        queryset=TenderResponse.objects.filter(tender=tender_instance)
+        queryset=TenderResponse.objects.filter(tender=tender_instance).order_by('-score')
         status = self.request.query_params.get('status', None)
         if status:
             status_list = status.split(',')
@@ -368,6 +361,10 @@ class CloseCandidatePool(APIView):
         tender_id = self.request.query_params.get('tender_id', None)
         tender= Tender.objects.get(id=tender_id)
         responses= TenderResponse.objects.filter(tender=tender)
+        UserNotification.objects.create(
+            recipient=tender.user,
+            message=f"لقد تم نقل مناقصة \"{tender.ad.title}\" لمرحلة قائمة المرشحين"
+        )
         candidate_response_exist=False
         for response in responses:
             if response.status=='open' or response.status=='offered':
@@ -375,7 +372,7 @@ class CloseCandidatePool(APIView):
                 response.save()
                 UserNotification.objects.create(
                     recipient=response.user,
-                    message=f'unfortunately your offer has been rejected from the tender{response.tender.ad.title}'
+                    message=f'للأسف لقد تم رفض عرضك لمناقصة "{response.tender.ad.title}"'
                 )
             elif response.status=='candidate_pool':
                 candidate_response_exist=True
@@ -392,7 +389,6 @@ class CloseCandidatePool(APIView):
         return Response({"Message":"cancelled"})
 class CancelTender(APIView):
     def post(self,request,*args,**kwargs):
-        print("ENTERCANCEL")
         tender_id=request.query_params.get('tender_id')
         tender=Tender.objects.get(id=tender_id)
         responses=TenderResponse.objects.filter(tender=tender)
@@ -422,6 +418,14 @@ class AwardResponse(APIView):
         response_id=request.query_params.get("response")
         tender=Tender.objects.get(id=tender_id)
         response=TenderResponse.objects.get(id=response_id)
+        UserNotification.objects.create(
+            recipient=tender.user,
+            message=f"لقد تم إختيار مورد فائز بمناقصة \"{tender.ad.title}\" \n في إنتظار التأكيد من خلال المورد"
+        )
+        UserNotification.objects.create(
+            recipient=response.user,
+            message=f"تهانينا لقد تم اختيار عرضك علي مناقصة \"{tender.ad.title}\" يرجي التأكيد لإستكمال الاجرائات"
+        )
         tender.status="awaiting_confirmation"
         tender.save()
         response.status="awarded"
@@ -433,14 +437,39 @@ class SupplierConfirmation(APIView):
         tender= Tender.objects.get(id=self.request.query_params.get('tender_id'))
         response= TenderResponse.objects.get(id=self.request.query_params.get('response_id'))
         confirm_status = self.request.query_params.get('confirm_status')
-        print(confirm_status)
         if confirm_status=='confirmed':
-            print("Enter the first for loop")
-            tender.status='awarded'
-            response.status='winner'
-            tender.save()
-            response.save()
             Transaction.objects.create(tender=tender,response=response)
+            new_tender_status='awarded'
+            new_response_status='winner'
+            UserNotification.objects.create(recipient=tender.user,
+                message=f"لقد أكد المورد علي قبول مناقصة \"{tender.ad.title}\"")
+            tender_data=TenderSerializer(tender).data
+            response_data=ResponseSerializer(response).data
+            tender_data['status']=new_tender_status
+            response_data['status']=new_response_status
+            de_annomyzed_tender=toggle_anonymity(tender_data,False,'t',tender.id)
+            print("de_annomyzed_tender is ",de_annomyzed_tender)
+            de_annomyzed_response=toggle_anonymity(response_data,False,'r',response.id)
+            de_annomyzed_response=toggle_anonymity(de_annomyzed_response,False,'t',tender.id)
+
+            de_annomyzed_tender_serializer=TenderSerializer(
+                instance=tender,
+                data=de_annomyzed_tender,
+                context={'request': request})
+            de_annomyzed_response_serializer=ResponseSerializer(
+                instance=response,
+                data=de_annomyzed_response,
+                context={'request': request})
+            if de_annomyzed_tender_serializer.is_valid():
+                de_annomyzed_tender_serializer.save()
+            else:
+                print(de_annomyzed_tender_serializer.errors)
+                return Response(de_annomyzed_tender_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            if de_annomyzed_response_serializer.is_valid():
+                de_annomyzed_response_serializer.save()
+            else:
+                print(de_annomyzed_response_serializer.errors)
+                return Response(de_annomyzed_response_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
         elif confirm_status=='rejected':
             tender.status='candidate_pool'
@@ -462,7 +491,7 @@ class ResponseStatusUpdateAPIView(APIView):
         if serializer.is_valid():
             serializer.save(instance=response_instance)  # Passing instance argument
             UserNotification.objects.create(recipient=response_instance.user,
-            message="Congratulations your offer has been awarded to the candidate pool stage")
+            message=f"لقد تم إضافه عرضك لمناقصة \"{response_instance.tender.ad.title}\" لقائمة المرشحين")
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -564,7 +593,6 @@ def Similarity(APIView):
 3.0 وسرعة نقل بيانات تصل إلى 5 جيجابت في الثانية|20|ماسح ضوئي|وصف المنتج: ماسح ضوئي متعدد الوظائف مع سرعة مسح تصل إلى 30 صفحة في الدقيقة ودقة تصل إلى 600 نقطة لكل بوصة|15|جهاز توجيه (راوتر)|وصف المنتج: جهاز توجيه لاسلكي يدعم ترددات 2.4GHz و 5GHz مع سرعة تصل إلى 1200 ميجابت في الثانية ونظام حماية متقدم|80|يجب تقديم ضمان لمدة سنه على الأقل.|يجب توفير خدمات الصيانة والدعم الفني لمدة عام.|"""
     requirements_1 = tender.split('|')
     requirements_2 = response.split('|')
-    print(requirements_2)
     # List to store similarity scores for this row
     row_similarities = []
     row_similarities_dict =[]
@@ -572,7 +600,6 @@ def Similarity(APIView):
     for req1, req2 in zip(requirements_1, requirements_2):
         if req2==' ' or req2 =='':
             req2='.'*len(req1)
-            print(req2)
             similiarity_score=0
             row_similarities.append(similiarity_score)
             row_similarities_dict.append({
@@ -626,9 +653,6 @@ def Similarity(APIView):
     # response.score=round(mean_similarity_score*100)
     # response.save()
     # return row_similarities
-    print(row_similarities)
-    print(row_similarities_dict)
-    print("Mean is ",np.mean(row_similarities[0:len(row_similarities)-2]))
 
     return Response({"message":"Score will be calculated"})
 import time
@@ -680,7 +704,6 @@ class Contract(APIView):
             arabic_offer_price=arabic_offer_price+' و '+self.number_to_arabic_words(str(number).split('.')[1])+ ' قرش'
             return arabic_offer_price
     # arabic_offer_price=number_to_arabic_words(int(response.offered_price))
-    # print(arabic_offer_price)
     def get_arabic_date(self,date):
         with translation.override('ar'):
             day = date_format(date, format='j', use_l10n=True)
@@ -718,7 +741,6 @@ class Contract(APIView):
                 'order': order})
         products_with_full_price=[]
         for product in products:
-            print(product.product.quantity_unit)
             product_dict = {
                 'product':product.product,
                 'provided_quantity':product.provided_quantity,
@@ -796,6 +818,9 @@ class TransactionView(APIView):
             elif request.data.get('product_review_status') == 'accepted':
                 UserNotification.objects.create(recipient=transaction.response.user,message=f"لقد وافق مالك مناقصه {transaction.tender.ad.title} علي المنتجات المقدمة من شركتكم" )
             elif request.data.get('product_review_status') == 'rejected':
+                print("Prdocut review status is rejected")
+                tender=transaction.tender
+                response=transaction.response
                 UserNotification.objects.create(recipient=transaction.response.user,message=f"لقد رفض مالك مناقصه {transaction.tender.ad.title} علي المنتجات المقدمة من شركتكم" )
                 tender.status='candidate_pool'
                 tender.save()

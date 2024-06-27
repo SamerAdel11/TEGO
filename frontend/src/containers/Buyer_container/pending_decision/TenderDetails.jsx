@@ -191,7 +191,7 @@ function TenderDetails() {
                 <table>
                   <thead>
                     <tr>
-                      <th>معرف المنتج</th>
+                      <th>رقم المنتج</th>
                       <th>اسم المنتج</th>
                       <th>الكمية المقدمة</th>
                       <th style={{ maxWidth: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordWrap: 'break-word' }}>وصف المنتج</th>
@@ -204,7 +204,7 @@ function TenderDetails() {
                         <td>{innerIndex + 1}</td>
                         <td>{product.title}</td>
                         <td>
-                          {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit } {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity }
+                          {product.supplying_status !== 'متوفر' ? '-' : product.provided_quantity } {product.supplying_status !== 'متوفر' ? '' : product.quantity_unit }
                         </td>
                         <td>{product.supplying_status !== 'متوفر' ? '-' : product.product_description } </td>
                         <td>{product.supplying_status }</td>
@@ -244,7 +244,7 @@ function TenderDetails() {
                   type="button"
                   onClick={() => handleSendResponse(tender)}
                 >
-                  إرسال الرد إلى قائمة المرشح
+                  إرسال الرد إلى قائمة المرشحين
                 </button>
                 {index + 1 !== responseDetails.length && (
                   <hr style={{ marginRight: '150px', marginLeft: '150px' }} data-v-7e013592 />

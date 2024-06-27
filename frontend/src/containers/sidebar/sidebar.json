@@ -29,6 +29,10 @@
               "path": "/awating"
             },
             {
+              "title": "المنتهية",
+              "path": "/awating"
+            },
+            {
               "title": "ملغاة",
               "path": "/cancelled_tenders"
             }

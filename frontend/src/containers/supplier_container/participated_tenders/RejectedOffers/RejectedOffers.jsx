@@ -65,7 +65,6 @@ function RejectedOffers() {
             </h1>
             <p className="topic">{tender.ad.topic}</p>
 
-            <h2> اخر موعد لتقديم العروض {tender.ad?.deadline_arabic} </h2>
           </div>
         </Link>
       ))}

@@ -121,7 +121,7 @@ const SignUpPage2 = () => {
       <div className="suplier-signUp section__padding">
         <form onSubmit={handleSubmit}>
           <div className="gradient__text">
-            <h1>بيانات حساب المشتري</h1>
+            <h1>بيانات حساب المُعلِن</h1>
           </div>
           {/* <div className="row">
             <div className="form-group col-md-6">

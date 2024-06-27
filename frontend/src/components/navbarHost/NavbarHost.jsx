@@ -79,13 +79,13 @@ function Navbar() {
           {supplierView && supplierView ? (
             <span className={`toggle-text ${isAnimating ? 'fade-out' : 'fade-in'}`}>{!hideText && 'مورد'}</span>
           ) : (
-            <span style={{ marginRight: '40px' }} className={`toggle-text ${isAnimating ? 'fade-out' : 'fade-in'}`}>{!hideText && 'بائع'}</span>
+            <span style={{ marginRight: '40px' }} className={`toggle-text ${isAnimating ? 'fade-out' : 'fade-in'}`}>{!hideText && 'مُعلِن'}</span>
           )}
           <span className="toggle-circle" />
         </div>
         ) : (
           <div className="toggle-button-buyer">
-            <span style={{ textAlign: 'center' }} className="toggle-text">{!hideText && 'بائع'}</span>
+            <span style={{ textAlign: 'center' }} className="toggle-text">{!hideText && 'مُعلِن'}</span>
           </div>
         )}
 

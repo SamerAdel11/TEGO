@@ -9,9 +9,9 @@ import './sidebar.css';
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
-
+  console.log(location.pathname);
   useEffect(() => {
-    if (location.pathname === '/create_tender') {
+    if (location.pathname.startsWith('/tender/') || location.pathname === '/create_tender' || location.pathname.startsWith('/tender_responses/') || location.pathname.startsWith('/candidate_responses/') || location.pathname.startsWith('/awating_responses/')) {
       setIsCollapsed(true);
     } else {
       setIsCollapsed(false);
