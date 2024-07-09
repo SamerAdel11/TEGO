@@ -226,17 +226,15 @@ class TenderSerializer(serializers.ModelSerializer):
             'products': {'allow_null': True},
         }
     def create(self, validated_data):
-        original_data = validated_data.copy()
         user = self.context['request'].user
         admins_data = validated_data.pop('admins')
         public_conditions_data = validated_data.pop('public_conditions')
         private_conditions_data = validated_data.pop('private_conditions')
         products_data = validated_data.pop('products')
         ad_data = validated_data.pop('ad')
-        ad_instance = TenderAd.objects.create(**ad_data)
         tender = Tender.objects.create(
             **validated_data, user=user, ad=ad_instance)
-        original_data['id']=tender.id
+        ad_instance = TenderAd.objects.create(**ad_data,tender=tender)
         for admin_data in admins_data:
             TenderAdmin.objects.create(tender=tender, **admin_data)
         for public_condition_data in public_conditions_data:
@@ -249,73 +247,8 @@ class TenderSerializer(serializers.ModelSerializer):
             TenderProduct.objects.create(tender=tender, **product_data)
         tender.save()
         return tender
-    def update(self,instance,validated_data):
-        # print(validated_data)
-        original_data = validated_data.copy()
-        user = self.context['request'].user
-        admins_data = validated_data.pop('admins')
-        public_conditions_data = validated_data.pop('public_conditions')
-        private_conditions_data = validated_data.pop('private_conditions')
-        products_data = validated_data.pop('products')
-        ad_data = validated_data.pop('ad')
-        print(ad_data)
-        # update TenderAd
-        # ad_id=ad_data.get('id')
-        # print(ad_id)
-        ad_instance=TenderAd.objects.get(tender=instance)
-        ad_instance.title=ad_data.get('title')
-        ad_instance.topic=ad_data.get('topic')
-        ad_instance.deadline=ad_data.get('deadline')
-        ad_instance.field=ad_data.get('field')
-        ad_instance.finalInsurance=ad_data.get('finalInsurance')
-        ad_instance.save()
-
-        #Update Tender instance Attributes 
-        instance.status=validated_data.get('status')
-        instance.save()
-
-
-        for product in products_data:
-            print(product)
-            product_id=product.pop('id',None)
-            if product_id:
-                product_instance=TenderProduct.objects.get(id=product_id)
-                product_instance.title=product.get('title')
-                product_instance.quantity_unit=product.get('quantity_unit')
-                product_instance.quantity=product.get('quantity')
-                product_instance.description=product.get('description')
-                product_instance.save()
-            else:
-                print("CREATE NEW PRODUCT")
-                TenderProduct.objects.create(**product,tender=instance)
-
-        for admin in admins_data:
-            admin_id=admin.pop('id',None)
-            if admin_id:
-                admin_instance=TenderAdmin.objects.get(id=admin_id)
-                admin_instance.name=admin.get('name')
-                admin_instance.job_title=admin.get('job_title')
-                admin_instance.save()
-            else:
-                TenderAdmin.objects.create(**admin,tender=instance)
-
-        for condition in public_conditions_data:
-            public_condition_id=condition.pop('id',None)
-            if public_condition_id:
-                public_condition_instance=TenderPublicConditions.objects.get(id=public_condition_id)
-                public_condition_instance.condition=condition.get('condition')
-                public_condition_instance.save()
-            else:
-                TenderPublicConditions.objects.create(**condition,tender=instance)
-
-        for condition in private_conditions_data:
-            private_condition_id=condition.pop('id',None)
-            if private_condition_id:
-                private_condition_instance=TenderPrivateConditions.objects.get(id=private_condition_id)
-                private_condition_instance.condition=condition.get('condition')
-                private_condition_instance.save()
-            else:
-                TenderPrivateConditions.objects.create(**condition,tender=instance)
+    def update(self, instance, validated_data):
+        instance.update_fields(validated_data)
         return instance
     def to_representation(self, instance):
         ret = super().to_representation(instance)

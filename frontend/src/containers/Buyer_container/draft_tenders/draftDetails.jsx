@@ -160,6 +160,7 @@ function DraftDetails() {
   useEffect(() => {
     if (tender) {
       setTenderadFormData({
+        id: tender.ad.id,
         title: tender.ad.title,
         topic: tender.ad.topic,
         deadline: tender.ad.deadline,
@@ -360,12 +361,6 @@ function DraftDetails() {
     // }
 
     try {
-      // console.log(e.target.querySelector('#tenderTitle').value);
-      // console.log(e.target.querySelector('#tenderSubject').value);
-      // console.log(e.target.querySelector('#tenderOpeningDate').value);
-      // console.log(e.target.querySelector('#create_tender').value);
-      // console.log(e.target.querySelector('#tenderTitle').value);
-      console.log(submitType);
       const formData = {
         ad: tenderadFormData,
         admins: officials,
@@ -373,7 +368,6 @@ function DraftDetails() {
         private_conditions: privateconditions,
         products,
         status: submitType,
-        id: tender.id,
       };
       const dataToSubmit = { ...formData };
 
@@ -415,7 +409,7 @@ function DraftDetails() {
       }
       if (!hasErrors && !hasErrors2) {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/create_tender/', {
+        const response = await fetch(`http://localhost:8000/create_tender/${tender.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

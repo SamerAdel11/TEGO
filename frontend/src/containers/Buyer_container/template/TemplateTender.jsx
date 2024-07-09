@@ -12,7 +12,7 @@ function TemplateTender() {
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders?status=template', {
+        const response = await fetch('http://localhost:8000/get_host_tenders?status=template', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

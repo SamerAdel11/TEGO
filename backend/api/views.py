@@ -5,14 +5,13 @@ from rest_framework.response import Response
 from .serializer import TransactionSerializer, UserSerializer, CompanySerializer, NotificationnSerializer, TenderSerializer, ResponseSerializer, TenderRetrieveSerializer
 from rest_framework import generics, status, serializers
 from rest_framework.views import APIView
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from tasks.tasks import activate_account
-from joblib import dump, load
+from joblib import load
 import torch
-from tasks.tasks import compute_similarity
 from django.utils.formats import date_format
 from django.utils import translation
+from django.db import transaction
+from . import utils
 class CompanyView(APIView):
 
     permission_classes = []
@@ -49,164 +48,64 @@ class CompanyView(APIView):
         serializer.update(instance, request.data)
         return Response(CompanySerializer(instance).data)
 
-def extract_keys_and_values(data, parent_key='', sep='_'):
-    keys = []
-    values = []
-    if isinstance(data, dict):
-        for k, v in data.items():
-            new_key = f"{parent_key}{sep}{k}" if parent_key else k
-            keys.append(new_key)
-            if isinstance(v, (dict, list)):
-                nested_keys, nested_values = extract_keys_and_values(v, new_key, sep=sep)
-                if keys =='admins' or keys =='public_conditions' or keys=='private_conditions' or keys == 'products' or keys =='ad':
-                    values.extend(nested_values)
-                else:
-                    values.extend(nested_values)
-                    keys.extend(nested_keys)
-            else:
-                values.append(str(v))
-    elif isinstance(data, list):
-        for i, item in enumerate(data):
-            new_key = f"{parent_key}{sep}{i}"
-            nested_keys, nested_values = extract_keys_and_values(item, new_key, sep=sep)
-            keys.extend(nested_keys)
-            values.extend(nested_values)
-    return keys, values
-
-def assign_empty_values_to_json(data):
-    if isinstance(data, dict):
-        for k in data.keys():
-            if isinstance(data[k], (dict, list)):
-                assign_empty_values_to_json(data[k])
-            else:
-                data[k] = ""
-    elif isinstance(data, list):
-        for i in range(len(data)):
-            if isinstance(data[i], (dict, list)):
-                assign_empty_values_to_json(data[i])
-            else:
-                data[i] = ""
-    return data
-
-def assign_values_from_list(json_with_empty_values, values_list):
-    value_index = 0
-    def assign_values(data):
-        nonlocal value_index
-        if isinstance(data, dict):
-            for k in data.keys():
-                if isinstance(data[k], (dict, list)):
-                    assign_values(data[k])
-                else:
-                    if value_index < len(values_list):
-                        data[k] = values_list[value_index].strip()
-                        value_index += 1
-        elif isinstance(data, list):
-            for i in range(len(data)):
-                if isinstance(data[i], (dict, list)):
-                    assign_values(data[i])
-                else:
-                    if value_index < len(values_list):
-                        data[i] = values_list[value_index].strip()
-                        value_index += 1
-    assign_values(json_with_empty_values)
-    return json_with_empty_values
-
-def toggle_anonymity(json_data,anonymize,object_type,object_id):
-    keys,values=extract_keys_and_values(json_data)
-    values_string = (" , ".join(values))
-    empty_json=assign_empty_values_to_json(json_data)
-
-    url=''
-    if anonymize:
-        url = "http://127.0.0.1:9000/predict/"  # Replace with the actual API URL
-    else:
-        url = "http://127.0.0.1:9000/decrypt/"  # Replace with the actual API URL
-    headers = {
-        "Content-Type": "application/json"
-    }
-    params={
-        "input_data":values_string,
-        "object_type":object_type,
-        "object_id":object_id
-    }
-    try:
-        response = requests.post(url, params=params, headers=headers)
-        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")  # Handle HTTP errors
-        return None
-    except Exception as err:
-        print(f"An error occurred: {err}")  # Handle other possible errors
-        return None
-    new_json_data=assign_values_from_list(empty_json,response.json().get('prediction').split(','))
-    return new_json_data
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import Tender
 from .serializer import TenderSerializer
 import json
-class TenderCreateView(generics.CreateAPIView):
-    queryset = Tender.objects.all()
+class TestCreateTender(generics.RetrieveUpdateAPIView):
+    queryset=Tender.objects.all()
     serializer_class = TenderSerializer
-    def post(self, request, *args, **kwargs):
-        serializer = TenderSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            saved_instance = serializer.save()
-            tender_id=saved_instance.id
-            serialized_data = serializer.data
-            admins_data=serialized_data.pop('admins')
-            # Convert serialized data to regular dictionary
-            # converted_data = self.convert_ordered_dict_to_dict(serialized_data)
-            if request.data.get('status') == 'open':
-                # Perform actions specific to 'open' status
-                status_data=serialized_data.pop('status')
-                anonymized_data = toggle_anonymity(serialized_data, True, object_type='t', object_id=tender_id)
-                anonymized_data['admins']=admins_data
-                anonymized_data['status']=status_data
-                serializer_anonymized = TenderSerializer(
-                    instance=Tender.objects.get(id=tender_id),
-                    data=anonymized_data,
-                    context={'request': request}
-                )
-                if serializer_anonymized.is_valid():
-                    serializer_anonymized.save()
-                    return Response({"Message": "Done"}, status=status.HTTP_201_CREATED)
-                else:
-                    return Response(serializer_anonymized.errors, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def update(self,request,*args,**kwargs):
+        print("Entered the funciton")
+        print('kwargs is ',kwargs)
+        instance=self.get_object()
+        serializer=self.get_serializer(instance,data=request.data,partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors)
+
+class TenderCreateView(generics.RetrieveUpdateAPIView):
+    serializer_class = TenderSerializer
+    queryset=Tender.objects.all()
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        saved_instance = Tender.objects.create(user=request.user,status=request.data.get('status'))
+        if request.data.get('status') == 'open':
+            anonymized_data = utils.toggle_anonymity(request.data, True, object_type='t', object_id=saved_instance.id)
+            serializer_anonymized = self.get_serializer(
+                instance=saved_instance,
+                data=anonymized_data,
+                context={'request': request}
+            )
+            if serializer_anonymized.is_valid():
+                serializer_anonymized.save()
+                return Response({"Message": "Done"}, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer_anonymized.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def put(self,request,*args,**kwargs):
-        tender_id= request.data.get('id')
-        try:
-            tender_instance = Tender.objects.get(id=tender_id)
-        except Tender.DoesNotExist:
-            return Response({"error": "Tender not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = TenderSerializer(tender_instance,
-            data=request.data, context={'request': request})
-        if serializer.is_valid():
-                admins_data=request.data.pop('admins')
-                anonymized_data=''
-                if request.data.get('status')=='open':
-                    anonymized_data=toggle_anonymity(request.data,True,object_type='t',object_id=tender_id)
-                else:
-                    anonymized_data=toggle_anonymity(request.data,False,object_type='t',object_id=tender_id)
-                anonymized_data['admins']=admins_data
-                anonymized_data['status']=request.data.get('status')
-                serializer_encrpted_version=TenderSerializer(
-                    instance=tender_instance,
-                    data=anonymized_data,
-                    context={'request': request})
-                if serializer_encrpted_version.is_valid():
-                    response = serializer_encrpted_version.save()
-                    return Response(serializer.data)
-                else :
-                    return Response(serializer_encrpted_version.errors, status=status.HTTP_400_BAD_REQUEST)
+        instance=self.get_object()
+        anonymized_data=''
+        if request.data.get('status')=='open':
+            anonymized_data=utils.toggle_anonymity(request.data,True,object_type='t',object_id=instance.id)
+        else:
+            anonymized_data=utils.toggle_anonymity(request.data,False,object_type='t',object_id=instance.id)
+        serializer_encrpted_version=self.get_serializer(
+            instance=instance,
+            data=anonymized_data,
+            context={'request': request})
+        if serializer_encrpted_version.is_valid():
+            serializer_encrpted_version.save()
+            return Response(serializer_encrpted_version.data)
+        else:
+            return Response(serializer_encrpted_version.errors)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RetrieveTender(generics.RetrieveAPIView):
@@ -235,35 +134,27 @@ class UpdateTenderStatus(APIView):
         responses=TenderResponse.objects.filter(tender=tender_id)
         anonymized_data=''
         tender_data=TenderSerializer(tender_instance).data
-        admins_data=tender_data.pop('admins')
         if new_status=='open':
-            tender_data.pop('status')
-            anonymized_data=toggle_anonymity(tender_data,True,object_type='t',object_id=tender_id)
-            anonymized_data['status']='open'
+            anonymized_data=utils.toggle_anonymity(tender_data,True,object_type='t',object_id=tender_id)
         else:
-            anonymized_data=toggle_anonymity(tender_data,False,object_type='t',object_id=tender_id)
-        anonymized_data['admins']=admins_data
-        serializer_encrpted_version=TenderSerializer(
+            anonymized_data=utils.toggle_anonymity(tender_data,False,object_type='t',object_id=tender_id)
+        serializer_replaced_version=TenderSerializer(
             instance=tender_instance,
             data=anonymized_data,
             context={'request': request})
-        if serializer_encrpted_version.is_valid():
-            response = serializer_encrpted_version.save()
-        if len(responses)>0:
-            UserNotification.objects.create(recipient=tender_instance.user,
-            message=f"تم ازاله العروض التي كانت مقدمه علي مناقصة {tender_instance.ad.title} ")
-        if new_status in ['draft','cancelled']:
-            for response in responses:
-                UserNotification.objects.create(recipient=response.user,
-                message=f"تم ازاله عرضك نظراً لالغاء المناقصة{tender_instance.ad.title} ")
-                response.delete()
-        if tender_id != None and new_status != None:
-            tender_instance.status=new_status
-            tender_instance.save()
+        if serializer_replaced_version.is_valid():
+            serializer_replaced_version.save()
+            if len(responses)>0:
+                UserNotification.objects.create(recipient=tender_instance.user,
+                message=f"تم ازاله العروض التي كانت مقدمه علي مناقصة \"{tender_instance.ad.title}\" ")
+            if new_status in ['draft','cancelled']:
+                for response in responses:
+                    UserNotification.objects.create(recipient=response.user,
+                    message=f"تم ازاله عرضك نظراً لالغاء المناقصة \"{tender_instance.ad.title}\"")
+                    response.delete()
             return Response({"Message":"Done"})
-        else:
-            return Response({"Message":"tender_id or status is missing"},
-            status=status.HTTP_400_BAD_REQUEST)
+        else :
+            return Response(serializer_replaced_version.errors,status=status.HTTP_400_BAD_REQUEST)
 class TenderSupplierView(generics.ListAPIView):
     serializer_class = TenderRetrieveSerializer
     def get_queryset(self):
@@ -279,8 +170,7 @@ class TenderSupplierView(generics.ListAPIView):
         return queryset.filter(status='open').exclude(tenderresponse__user=self.request.user)
 
     def get(self, request, *args, **kwargs):
-        response = super().list(request, *args, **kwargs)
-        return response
+        return self.list(request, *args, **kwargs)
 
 class NotificationView(generics.ListAPIView):
     serializer_class = NotificationnSerializer
@@ -304,7 +194,7 @@ class ResponseView(APIView):
             serialized_data=serializer.data
             
             status_data=serialized_data.pop('status')
-            anonymized_data=toggle_anonymity(serialized_data,True,object_type='r',object_id=response_instance.id)
+            anonymized_data=utils.toggle_anonymity(serialized_data,True,object_type='r',object_id=response_instance.id)
             anonymized_data['status']=status_data
             anonmyized_serializer=ResponseSerializer(
                 instance=response_instance,
@@ -393,7 +283,7 @@ class CancelTender(APIView):
         tender=Tender.objects.get(id=tender_id)
         responses=TenderResponse.objects.filter(tender=tender)
         json_data=TenderSerializer(tender).data
-        anonymized_data=toggle_anonymity(json_data,False,object_type='t',object_id=tender_id)
+        anonymized_data=utils.toggle_anonymity(json_data,False,object_type='t',object_id=tender_id)
         serializer_encrpted_version=TenderSerializer(
             instance=tender,
             data=anonymized_data,
@@ -447,10 +337,10 @@ class SupplierConfirmation(APIView):
             response_data=ResponseSerializer(response).data
             tender_data['status']=new_tender_status
             response_data['status']=new_response_status
-            de_annomyzed_tender=toggle_anonymity(tender_data,False,'t',tender.id)
+            de_annomyzed_tender=utils.toggle_anonymity(tender_data,False,'t',tender.id)
             print("de_annomyzed_tender is ",de_annomyzed_tender)
-            de_annomyzed_response=toggle_anonymity(response_data,False,'r',response.id)
-            de_annomyzed_response=toggle_anonymity(de_annomyzed_response,False,'t',tender.id)
+            de_annomyzed_response=utils.toggle_anonymity(response_data,False,'r',response.id)
+            de_annomyzed_response=utils.toggle_anonymity(de_annomyzed_response,False,'t',tender.id)
 
             de_annomyzed_tender_serializer=TenderSerializer(
                 instance=tender,

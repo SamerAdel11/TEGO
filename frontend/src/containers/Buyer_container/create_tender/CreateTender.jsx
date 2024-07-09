@@ -273,10 +273,6 @@ function CreateTender() {
       }
     }
     // Fetch form values
-    const tenderTitle = e.target.querySelector('#tenderTitle').value;
-    const tenderSubject = e.target.querySelector('#tenderSubject').value;
-    const tenderOpeningDate = e.target.querySelector('#tenderOpeningDate').value;
-
     const cleanedTenderAd = Object.fromEntries(
       Object.entries(tenderadFormData).filter(([_, value]) => value !== '' && value !== null),
     );
@@ -716,7 +712,7 @@ function CreateTender() {
               onClick={() => setSubmitType('open')}
               onSubmit={handleSubmit}
             >
-              {loading ? 'جاري نشر المناقصه......' : 'نشر'}
+              {loading ? 'جاري نشر المناقصه......' : 'نشر' }
             </button>
             <button disabled={loading} type="submit" className="button" onClick={() => setSubmitType('draft')} onSubmit={handleSubmit}>
               حفظ كمسودة

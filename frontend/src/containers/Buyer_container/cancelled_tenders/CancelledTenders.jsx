@@ -11,7 +11,7 @@ const CancelledTenders = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders?status=cancelled', {
+        const response = await fetch('http://localhost:8000/get_host_tenders?status=cancelled', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

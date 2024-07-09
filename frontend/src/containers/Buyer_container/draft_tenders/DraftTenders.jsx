@@ -12,7 +12,7 @@ function Draft() {
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders?status=draft', {
+        const response = await fetch('http://localhost:8000/get_host_tenders?status=draft', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

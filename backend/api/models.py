@@ -1,8 +1,9 @@
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser, User
 import datetime
+from . import utils
 # Create your views here.
 
 class CustomUserManager(BaseUserManager):
@@ -100,19 +101,11 @@ class UserNotification(models.Model):
         return f"{self.message}->{self.recipient}"
 
 
-class TenderAd(models.Model):
-    title=models.TextField(null=True,blank=True)
-    topic=models.TextField(null=True,blank=True)
-    field=models.CharField(max_length=255,null=True,blank=True)
-    deadline=models.DateField(null=True,blank=True)
-    finalInsurance=models.FloatField(null=True,blank=True)
-
 class Tender(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     initial_price = models.IntegerField(null=True,blank=True)
     status = models.CharField(max_length=50)
     date_created = models.DateTimeField(auto_now_add=True)
-    ad = models.OneToOneField(TenderAd, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.id}->{self.user}"
@@ -132,7 +125,43 @@ class Tender(models.Model):
     @property
     def products(self):
         return self.tenderproduct_set.all()
+    @transaction.atomic
+    def update_fields(self, validated_data):
+        if 'ad' in validated_data:
+            utils.update_or_create_related_objects(self,TenderAd,validated_data.pop('ad'), 'tender'
+            )
 
+        if 'status' in validated_data:
+            self.status = validated_data.get('status', self.status)
+            self.save()
+
+        if 'products' in validated_data:
+            utils.update_or_create_related_objects(
+                self,TenderProduct, validated_data.pop('products'), 'tender'
+            )
+
+        if 'admins' in validated_data:
+            utils.update_or_create_related_objects(
+                self,TenderAdmin, validated_data.pop('admins'), 'tender',
+            )
+
+        if 'public_conditions' in validated_data:
+            utils.update_or_create_related_objects(
+                self,TenderPublicConditions, validated_data.pop('public_conditions'), 'tender'
+            )
+
+        if 'private_conditions' in validated_data:
+            utils.update_or_create_related_objects(
+                self,TenderPrivateConditions, validated_data.pop('private_conditions'), 'tender'
+            )
+
+class TenderAd(models.Model):
+    title=models.TextField(null=True,blank=True)
+    topic=models.TextField(null=True,blank=True)
+    field=models.CharField(max_length=255,null=True,blank=True)
+    deadline=models.DateField(null=True,blank=True)
+    finalInsurance=models.FloatField(null=True,blank=True)
+    tender = models.OneToOneField(Tender, on_delete=models.CASCADE,related_name='ad')
 
 class TenderAdmin(models.Model):
     name = models.CharField(max_length=255,null=True,blank=True)
@@ -145,7 +174,6 @@ class TenderPublicConditions(models.Model):
 
     condition = models.TextField(null=True,blank=True)
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
-
 
 class TenderPrivateConditions(models.Model):
 
