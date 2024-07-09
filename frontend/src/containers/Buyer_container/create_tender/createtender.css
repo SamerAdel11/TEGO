@@ -41,6 +41,10 @@
   margin: 0 10px;
   border-radius: 10px;
 }
+.buton_resonpose.submit:disabled {
+  background-color: #c73d1e9d !important;
+  border: none;
+}
 
 button[type="submit"]:hover {
   background-color: #ac1f00;
@@ -62,13 +66,33 @@ button[type="submit"]:hover {
   border-collapse: collapse;
 }
 
-.table-container th,
+.table-container th {
+  background-color: var(--color-bg);
+  padding: 8px;
+  border: 2px solid var(--color-footer); /* Using color-text for borders */
+  border-radius: 10px;
+  text-align: center;
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 30px;
+  color: #ffffff;
+}
 .table-container td {
   padding: 8px;
   border: 1px solid var(--color-text); /* Using color-text for borders */
   text-align: center;
-  color: var(--color-text2); /* Text color */
-  font-size: 2rem;      
+  font-size: 1rem;      
+  background-color: var(--color-bg);
+  padding: 8px;
+  border: 2px solid var(--color-footer); /* Using color-text for borders */
+  border-radius: 10px;
+  text-align: center;
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 30px;
+  color: #ffffff;
 }
 
 .table-container th {
@@ -79,9 +103,39 @@ button[type="submit"]:hover {
   width: 20%;
   margin: 1rem;
 }
-.condition-field{
+.condition-field1{
   margin: 1rem;
 }
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(100%);
 }
+textarea {
+  width: 100%;
+  color: var(--color-text);
+  border-radius: 10px;
+  border: 0px solid var(--color-text);
+  font-family: var(--font-family);
+  background-color: var(--color-footer); /* Define background color */
+  resize: none;  
+  max-lines: 9;
+padding-top: 7px;
+  outline: none;
+
+}
+/* textarea{
+  overflow: hidden;
+    background-color:var(--color-bg);
+    border: 0;
+    outline: none;
+} */
+/* th, td { */
+  /* padding: 8px; */
+  /* border: 2px solid var(--color-footer);  */
+  /* border-radius: 10px; */
+  /* text-align: center; */
+  /* font-family: var(--font-family); */
+  /* font-weight: 500; */
+  /* font-size: 16px; */
+  /* line-height: 30px; */
+  /* color: #ffffff; */
+/* } */

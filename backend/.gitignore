@@ -3,5 +3,6 @@ client.py
 db.sqlite3
 test.rest
 vercel.json
-
-
+api/__pycache__
+tego/settings.py
+api/__pycache__

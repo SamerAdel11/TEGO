@@ -1,78 +1,62 @@
 [
     {
-        "title": "المناقصات",
-        "icon": "bi bi-envelope-open",
-        "childrens": [
+      "title": "المناقصات",
+      "icon": "bi bi-envelope-open",
+      "childrens": [
+        {
+          "title": "انشاء مناقصة",
+          "icon": "bi bi-pen",
+          "path": "/create_tender"
+        },
+        {
+          "title": "جميع المناقصات",
+          "icon": "bi bi-newspaper",
+          "childrens": [
             {
-                "title": "انشاء مناقصة",
-                "icon": "bi bi-pen",
-                "path": "/createtnder"
+              "title": "قبل الموعد المحدد",
+              "path": "/mytender"
             },
             {
-                "title": "المناقصات المنشوره",
-                "icon": "bi bi-newspaper",
-                "path": "/about"
+              "title": "العروض المقدمة",
+              "path": "/pendingdecision"
+            },
+            {
+              "title": "قائمة المرشحين",
+              "path": "/candidate"
+            },
+            {
+              "title": "بانتظار التأكيد",
+              "path": "/awating"
+            },
+            {
+              "title": "المنتهية",
+              "path": "/awating"
+            },
+            {
+              "title": "ملغاة",
+              "path": "/cancelled_tenders"
             }
-        ]
+          ]
+        }
+      ]
+    },
+        {
+      "title": "المسودات",
+      "icon": "bi bi-file-earmark-text",
+      "path": "/draft_tenders",
+      "childrens": []
     },
     {
-        "title": "العقود",
-        "icon": "bi bi-card-heading",
-        "childrens": [
-            {
-                "title": "العقد الاول",
-                "path": "/login"
-            },
-            {
-                "title": "العقد الثاني",
-                "path": "/register"
-            }
-        ]
+      "title": "العقود",
+      "icon": "bi bi-filetype-pdf",
+      "path": "/host_contracts",
+      "childrens": []
     },
     {
-        "title": "المسودات",
-        "icon": "bi bi-basket",
-        "childrens": [
-            {
-                "title": "المسودة رقم 1",
-                "path": "/profile"
-            },
-            {
-                "title": "مسودات اخري",
-                "childrens": [
-                    {
-                        "title": "مسودة رقم 2",
-                        "path": "/settings/account"
-                    },
-                    {
-                        "title": "مسودة رقم 3",
-                        "childrens": [
-                            {
-                                "title": "مسودة رقم 4",
-                                "path": "/settings/billing/payment"
-                            },
-                            {
-                                "title": "مسودة رقم 5",
-                                "path": "/settings/billing/subscription"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "title": "القوالب",
-        "icon": "bi bi-box-seam",
-        "childrens": [
-            {
-                "title": "القالب الاول",
-                "path": "/search"
-            },
-            {
-                "title": "القالب الثاني",
-                "path": "/history"   
-            }
-        ]
+      "title": "نماذج المناقصات",
+      "icon": "bi bi-archive",
+      "path": "/template_tenders",
+      "childrens": []
     }
-]
+  ]
+  

@@ -1,0 +1,14 @@
+{% autoescape off %}
+# Final step...
+
+Follow this link to verify your email address.
+
+<a href="http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+" target="_blank" style="padding: 12px 24px; border-radius: 4px; color: #FFF; background: #2B52F5;display: inline-block;margin: 0.5rem 0;">Confirm now</a>
+
+If you didn’t ask to verify this address, you can ignore this email.
+
+Thanks,
+The Mailmeteor team
+    
+{% endautoescape %}

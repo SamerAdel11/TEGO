@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>Contract Template</title>
+    <style>
+        body {
+            direction: rtl;
+            margin: 40px;
+            font-size: large;
+        }
+        .contract-section {
+            margin-bottom: 20px;
+        }
+        .contract-section h3 {
+            text-align: center;
+        }
+        .contract-section p {
+            text-indent: 40px;
+            line-height: 1.6;
+        }
+        .red-text {
+            color: red;
+        }
+        .fixed-width {
+            display: inline-block;
+            width: 250px; /* Adjust this width as needed */
+        }
+        .span-container {
+            display: inline-block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Ensures table layout does not adjust to content */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+        .description {
+            width: 40%; /* Adjust this width as needed */
+            word-wrap: break-word; /* Ensure long text wraps */
+        }
+        .other-column {
+            width: 20%; /* Adjust this width as needed */
+        }
+        .no-page-break {
+            page-break-inside: avoid;
+        }
+        li {
+            margin-right: 70px;
+        }
+    </style>
+    <script>
+        function calculateTotal(row) {
+            // Get the provided quantity and price elements
+            var quantity = parseFloat(document.getElementById('quantity-' + row).innerText);
+            var price = parseFloat(document.getElementById('price-' + row).innerText);
+            
+            // Calculate the total
+            var total = quantity * price;
+            
+            // Display the result in the total cell
+            document.getElementById('total-' + row).innerText = total.toFixed(2);
+        }
+
+        function calculateAllTotals() {
+            var rows = document.querySelectorAll('tbody tr');
+            rows.forEach(function(row, index) {
+                calculateTotal(index);
+            });
+        }
+
+        window.onload = calculateAllTotals;
+    </script>
+</head>
+<body>
+    <div class="no-page-break contract-section">
+        <h3>عقد شراء منقولات لمناقصة {{ tender_ad.title }}</h3>
+        <p>إنه في يوم : {{ arabic_approval_date }} تم إبرام هذا العقد بين كلٍ من:</p>
+        <p>أولاََ شركة: <span style="text-decoration: underline">{{ host_company.name }}</span> </p>
+        <p>بصفتها الجهة المعنية والمستفيدة من مناقصة {{ tender_ad.title }}.</p>
+        <p>ومقرها: {{ host_company.location }} -{{ host_company.city }} </p>
+        <p>ويمثلها قانونا:-</p>
+        {% for owner in host_owners %}
+        <p style="margin-right: 70px;">السيد/ة <span style="font-weight: 600;"> {{ owner.name }}  </span> بصفته {{ owner.onwer_position }}  – رقم قومي <span>{{ owner.owner_id }}</span></p>
+        {% endfor %}
+        <p>مسوؤلي المناقصة:-</p>
+        {% for admin in admins %}
+        <p style="margin-right: 70px;">السيد/ة <span style="font-weight: 600;"> {{ admin.name }}  </span> بصفته {{ admin.job_title }}</p>
+        {% endfor %}
+        <p>تليفون : {{ host_company.mobile }}</p>
+        <p>تليفون أرضي  : {{ host_company.landline }}</p>
+        <p>فاكس : {{ host_company.fax_number }}</p>
+        <p style="margin-left: 20%; text-align: left;">(طرف اول)</p>
+
+        <p >ثانياََ شركة: <span style="text-decoration: underline">{{supplier_company.name}}</span> </p>
+        <p>الكائن مقـرهـا: {{ supplier_company.location }} - {{ supplier_company.city }}</p>
+        <p>ويمثلها قانونا:-</p>
+        {% for owner in supplier_owners %}
+        <p style="margin-right: 70px;">السيد/ة <span style="font-weight: 600;"> {{ owner.name }}  </span> بصفته {{ owner.onwer_position }}  – رقم قومي <span>{{ owner.owner_id }}</span></p>
+        {% endfor %}
+        <p><span style="margin-right: -4%;" class="fixed-width">وشكلها القانوني: {{supplier_company_details.company_type}}</span><span class="span-container">تليفون : {{ supplier_company.mobile }}</span></p>
+        <p><span style="margin-right: -4%;" class="fixed-width">بطاقه ضريبية : {{supplier_company_details.tax_card_number}}</span><span class="span-container">تليفون أرضي : {{ supplier_company.landline }}</span></p>
+        <p><span style="margin-right: -4%;" class="fixed-width">سجل تجاري : {{ supplier_company_details.commercial_registration_number }}</span><span class="span-container">فاكس : {{ supplier_company.fax_number }}</span></p>
+        <p style="margin-left: 20%; text-align: left;">(طرف ثاني)</p>
+    </div>
+
+    <div class="no-page-break contract-section">
+        <h3>تمهيــــــــــــد</h3>
+        <p>حيث أبدي الطرف الأول رغبته في التعاقد علي{{ tender_ad.title }}، وذلك بغرض تلبية احتياجاته بما يمكنه من تحقيق أهدافه بكفاءة وفعالية، ووفقاً لما تم تخصيصه من اعتمادات مالية، وحيث أبدي الطرف الثاني استعداده للقيام بذلك وإتمامه وفقاً للشروط والمواصفات وكما هو منصوص عليه (العطاء) المقدم منه بمبلغ <span style="font-weight: 700;">{{ response.offered_price }}</span> جم فقط <span style="font-weight: 700;">{{ arabic_offer_price }} </span> لاغير، والذي قبله الطرف الأول باعتباره (الأفضل شروطاً والأقل سعراً) ومطابقته للشروط والمواصفات الفنية. وبعد أن أقر الطرفان بأهليتهما وصفتيهما للتعاقد اتفقا علي الآتي:</p>
+    </div>
+
+    <div class="no-page-break contract-section">
+        <h3>"البنـــد الاول"</h3>
+        <p>يعتبر التمهيد السابق والمواصفات والعرض المقدم من الطرف الثاني وكافة المكاتبات المتبادلة بين الطرفين جزءا لا يتجزأ من هذا العقد ومتمماً ومكملاً لأحكامه.</p>
+    </div>
+
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد الثاني"</h3>
+        <p>يلتزم الطرف الثاني بتسديد مبلغ التأمين النهائي مبلغاً إجمالياً مقداره <span style="font-weight: 700;"> {{finalInsurancePrice}} </span> فقط <span style="font-weight: 700;">{{arabicInsurancePrice}}</span> لا غير بما يعادل  <span style="font-weight: 700;"> {{tender_ad.finalInsurance}}</span> % من إجمالي هذا العقد كتأمين نهائي</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد الثالث"</h3>
+        <p>يلتزم الطرف الأول باستلام الأصناف محل هذا العقد في المواعيد المحددة، وذلك حال مطابقتها للمواصفات والشروط المتفق عليها، ويحق للطرف الثاني حال تقاعس الطرف الأول عن الاستلام التقدم بطلب للسلطة المختصة لتشكيل لجنة محايدة لدراسة أسباب التقاعس، وصورة منه لمكتب شكاوى التعاقدات العمومية وذلك للمتابعة.</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد الرابع"</h3>
+        <p>للطرف الأول زيادة أو نقص الكميات المتعاقد عليها بما لا يجاوز ( 15 % ) من كمية كل بند بذات الشروط والمواصفات والأسعار.</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد الخامس"</h3>
+        <p>لا يجوز للطرف الثاني أثناء تنفيذ هذا العقد أن يقوم بتغيير من عهد إليهم ووافق عليهم الطرف الأول بتنفيذ بعض بنوده من الباطن دون موافقة الطرف الأول، ويظل الطرف الثاني وحدة مسئولاً عن أي أفعال أو أعمال أو أخطاء في تنفيذ العقد، كما يلتزم بإطلاع من عهد إليهم بتنفيذ بعض بنود العملية من الباطن علي ما يخصهم من شروط العقد.</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد السادس"</h3>
+        <p>إذا تأخر الطرف الثاني في تنفيذ هذا العقد عن الميعاد المحدد به لأسباب خارجة عن إرادته يجوز للطرف الأول إعطائه مهلة بما لا يجاوز 10 أيام من المدة الأصلية للتنفيذ دون توقيع مقابل تأخير، وفي حالة تأخره لأسباب راجعه إليه فيوقع عليه مقابل تأخير يحسب من بداية المهلة.</p>
+        <p>ولا يخل توقيع مقابل التأخير بحق الطرف الأول في الرجوع علي الطرف الثاني بكامل التعويض المستحق عما أصابه من أضرار بسبب التأخير.</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد السابع"</h3>
+        <p>يحظر علي الطرف الثاني التنازل للغير عن هذا العقد كلياً أو جزئياً.</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد الثامن"</h3>
+        <p>يلتزم الطرف الثاني والعاملين لديه بالمحافظة علي سرية وخصوصية ما يحصلون عليه من بيانات أو مستندات أيا كانت طبيعتها تكون متعلقة بالعقد ويتعهد بعدم إفشائها للغير وذلك طوال مدة سريان العقد أو بعد أنتهاؤه أو أنهاؤه أو فسخه، وبعد الإخلال بمبدأ السرية والخصوصية بمثابة إخلالاً جسيماً بشروط العقد ودون الأخلال بأيه عقوبة مقررة في هذا الشأن</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد التاسع"</h3>
+        <p>أتفق الطرفان علي بذل أقصي جهد للألتزام ببنود التعاقد طوال مده تنفيذه طبقاً لما أشتمل عليه وبطريقة تتفق مع ما يوجيه حسن النيه، وفي حالة حدوث خلاف بينهما أثناء تنفيذه يتم عقد إجتماع مع مسئول إدارة العقد أو ممثل الجهه الأدارية بحسب الأحوال خلال مدة خمسة عشر يوماً من تاريخ ظهور الخلاف وذلك لمناقشته، وإتخاذ الإجراءات الآتية :-</p>
+        <ol>
+            <li>فحص شروط التعاقد بكل دقة وإتخاذ الحل المناسب للمشكلة.</li>
+            <li>قيام إدارة التعاقدات بإعداد تصور عن موضوع الخلاف وتقديم رأي فني ومالي وقانوني للسلطة المختصة، ويجوز لها الأستعانة بأستشاري متخصص للمساعدة في دراسة الخلاف وتقديم الرأي.</li>
+            <li>تسوية الخلاف الذي نشأ بالطرق الودية بما لا يخل بحقوق وألتزامات طرفي العقد، وإذا ترتب علي التسوية الودية أي أعباء مالية فيتم عرضها علي السلطة المختصة للموافقة عليها بعد تقديم كافة المستندات والبيانات والمبررات لتسوية الخلاف.</li>
+        </ol>
+        <p>وفي جميع الحالات يلتزم طرفي التعاقد بالأستمرار في تنفيذ ألتزاماتها الناشئة عن هذا العقد.</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>البنــــد العاشر</h3>
+        <p>في حالة إخلال الطرف الثاني بأي شرط جوهري من شروط التعاقد يحق للطرف الأول فسخ العقد أو تنفيذه علي حساب الطرف الثاني وفي الحالتين يكون التأمين النهائي من حق الطرف الأول كما يكون له أن يخصم ما يستحقه وقيمة كل خسارة تلحق به من أي مبالغ مستحقة أو تستحق للطرف الثاني لديه، وفي حالة عدم كفايتها يحق للطرف الأول خصمها من مستحقاته لدي أي جهه أخري أيا كان سبب الأستحقاق، دون حاجة إلي إتخاذ أي إجراءات قضائية، وذلك كله مع عدم الإخلال بحق الطرف الأول في الرجوع علي الطرف الثاني قضائياً بما لم يتمكن من أستيفائه من حقوق بالطريق الإداري ولا يحق للطرف الثاني المطالبة بإسترداد ما سبق سداده للطرف الأول.</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد الحادي عشر"</h3>
+        <p>يفسخ هذا العقد تلقائياً في الحالات الآتية :-</p>
+        <ol>
+            <li>إذا تبين أن الطرف الثاني أستعمل بنفسه أو بواسطة غيره الغش أو التلاعب في تعامله مع الطرف الأول أو في حصوله علي العقد.</li>
+            <li>إذا تبين وجود تواطؤ أو ممارسات إحتيال أو فساد أو إحتكار من قبل الطرف الثاني.</li>
+            <li>إذا أفلس الطرف الثاني أو أعسر.</li>
+        </ol>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد الثاني عشر"</h3>
+        <p>يسري علي هذا العقد أحكام قانون تنظيم التعاقدات التي تبرمها الجهات العامة الصادر بالقانون رقم 182 لسنة 2018 ولائحته التنفيذية الصادرة بقرار وزير المالية رقم 692 لسنة 2019 وذلك فيما لم يرد بشأنه نص خاص في هذا العقد.</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد الثالث عشر"</h3>
+        <p>يتم تسوية المنازعات والخلافات التي تنشأ أثناء التنفيذ وفقاً للطرق والشروط والأحكام المنصوص عليها في الماده (91) من قانون تنظيم التعاقدات التي تبرمها الجهات العامة الصادر بالقانون رقم 182 لسنة 2018.</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد الرابع عشر"</h3>
+        <p>أقر الطرفان بان العنوان المبين قرين كل منهما بصدر هذا العقد هو المحل المختار لهما وأن جميع المكاتبات والمرسلات والإعلانات والإخطارات التي توجه أو ترسل أو تعلن أو تخطر عليه تكون صحيحة ومنتجة لكافة آثرها القانونية وفي حاله تغيير احد الطرفين لعنوانه يتعين عليه إخطار الطرف الاخر بهذا العنوان الجديد خلال خمسة عشرة يوماً بخطاب مسجل بعلم الوصول وإلا أعتبرت مكاتباته ومراسلته وإعلاناته وإخطاراته علي هذا العنوان صحيحة ومنتجة لكافة أثارها القانونية.</p>
+    </div>
+    
+    <div class="no-page-break contract-section">
+        <h3>"البنـــد الخامس عشر"</h3>
+        <p>يلتزم الطرف الثاني بتنفيذ محل هذا العقد وطبقاً للمواصفات الفنية والكميات والأسعار الموضحة بعد وبقيمة إجمالية بمبلغ {{ response.offered_price }} جم فقط {{ arabic_offer_price }} لاغير شامل ض14% ضريبة القيمة المضافة شاملة كافة الضرائب والرسوم والتكاليف والنفقات ذات الصلة وذلك علي النحو التالي :</p>
+        <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style= "width: 5% "></th>
+                  <th style="width: 20%;">اسم المنتج</th>
+                  <th style="width: 40%;">وصف المنتج</th>
+                  <th style="width: 10%">وحدة الكمية</th>
+                  <th style="width: 10%;">الكمية</th>
+                  <th style="width: 10%;">سعر الوحده</th>
+                  <th style="width: 10%;">سعر الكميه</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for product in products %}
+                  <tr key={idx}>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                    {{ product.product_title }}
+                    </td>
+                    <td>
+                        {{ product.product_description }}
+                    </td>
+                    <td>
+                    {{ product.quantity_unit }}
+                    </td>
+                    <td id="quantity-{{ forloop.counter0 }}">
+                        {{product.provided_quantity}}
+                    </td>
+                    <td id="price-{{ forloop.counter0 }}">
+                    {{ product.price }}
+                    </td>
+                    <td id="total-{{ forloop.counter0 }}">
+                    {{product.full_price}}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr>
+                    <td style="text-align: right;" colspan="6">الإجمالي فقط {{arabic_offer_price}} لاغير</td>
+                    <td id="grand-total">{{ response.offered_price }}</td>
+                </tr>
+            </tfoot>
+            </table>
+        </div>
+    </div>
+
+        {% for con in public_condition %}
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد {{ con.order }}"</h3>
+        <p>{{con.condition}}</p>
+    </div>
+        {% endfor %}
+
+        {% for con in private_condition %}
+    <div class="no-page-break contract-section">
+        <h3>"البنــــد {{ con.order }}"</h3>
+        <p>{{con.condition}}</p>
+    </div>
+        {% endfor %}

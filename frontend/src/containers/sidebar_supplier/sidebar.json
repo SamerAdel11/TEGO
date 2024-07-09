@@ -1,0 +1,40 @@
+[
+    {
+        "title": "العروض المشارك بها",
+        "icon": "bi bi-envelope-open",
+        "childrens": [
+
+            {
+                "title": "العروض المنتظرة",
+                "path": "/offered_offers"
+            },
+            {
+                "title": "العروض الفائزة",
+                "path": "/awarded_tenders"
+            },
+            {
+                "title": "العروض المرشحه للفوز",
+                "path": "/candidate_pool_offers"
+            },
+            {
+                "title": "العروض المرفوضة",
+                "path": "/rejected_offers"
+            }
+        ]
+    },
+    {
+        "title": "المناقصات المتاحه",
+        "icon": "bi bi-newspaper",
+        "path": "/open_tenders",
+        "childrens": []
+
+    },
+    {
+        "title": "العقود",
+        "icon": "bi bi-filetype-pdf",
+        "path": "/supplier_contracts",
+        "childrens": [
+        ]
+    }
+
+]

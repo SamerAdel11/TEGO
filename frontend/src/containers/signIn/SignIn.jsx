@@ -8,6 +8,8 @@ function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useContext(AuthContext); // Destructure loginUser from the context
+  const [errorMessage, setErrorMessage] = useState(''); // State for error message
+
   // const { getNotification, Notification } = useContext(AuthContext); // Destructure loginUser from the context
 
   const handleEmailChange = (event) => {
@@ -18,10 +20,21 @@ function SignIn() {
     setPassword(event.target.value);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     // Call loginUser function from the context
-    login(event); // Pass the event object to the loginUser function
+    const formData = {
+      email: '',
+      passWord: '',
+    };
+    formData.email = e.target.email.value;
+    formData.passWord = e.target.password.value;
+    const response = await login(formData);
+    if (response.status === 401) {
+      setErrorMessage('لا يوجد حساب بهذه البيانات');
+    } else if (response.status !== 200) {
+      setErrorMessage(response.message);
+    }
   };
 
   return (
@@ -57,6 +70,7 @@ function SignIn() {
                 />
               </label>
             </div>
+            {errorMessage && <div style={{ color: 'red', fontSize: 'x-large' }} className="error-message">{errorMessage}</div>} {/* Display error message */}
             <button className="button_signin" type="submit">تسجيل الدخول</button>
           </form>
         </div>

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode'; // Corrected import for jwtDecode
 import { useHistory } from 'react-router-dom';
 
 const AuthContext = createContext();
@@ -13,91 +13,120 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const history = useHistory();
 
-  const loginUser = async (e) => {
-    e.preventDefault();
-    console.log('form submitted');
+  const fetchUser = async () => {
+    if (authTokens) {
+      try {
+        const response = await fetch('http://localhost:8000/verified/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+        });
+        const data = await response.json();
+        setUser({ ...jwtDecode(authTokens.access), verified: data.verified });
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
+  };
+
+  const loginUser = async (formData) => {
     const response = await fetch('http://localhost:8000/login/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: e.target.email.value,
-        password: e.target.password.value,
+        email: formData.email,
+        password: formData.passWord,
       }),
     });
     const tokens = await response.json();
     if (response.status === 200) {
       setAuthTokens(tokens);
       const loggedUser = jwtDecode(tokens.access);
-      console.log(loggedUser);
       setUser(loggedUser);
       localStorage.setItem('authTokens', JSON.stringify(tokens));
-      history.push('/host');
-    } else if (response.status === 401) {
-      alert(tokens.detail);
-    } else {
-      alert('something went wrong');
+      localStorage.setItem('supplierView', JSON.stringify(true));
+      const supplierView = localStorage.getItem('supplierView');
+
+      if (loggedUser.company_type === 'supplier' && supplierView !== false) {
+        history.push('/open_tenders');
+      } else {
+        history.push('/mytender');
+      }
     }
+    return {
+      status: response.status,
+      message: tokens.detail || 'something went wrong',
+    };
   };
 
   const logoutUser = () => {
     setAuthTokens(null);
     setUser(null);
-    console.log('logged out');
     localStorage.removeItem('authTokens');
+    localStorage.removeItem('supplierView');
     history.push('/');
   };
 
   const updateToken = async () => {
-    if (!authTokens) {
-      console.log('authTokens are empty');
-    } else {
-      const response = await fetch('http://localhost:8000/token/refresh/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          refresh: authTokens?.refresh,
-        }),
-      });
-      const tokens = await response.json();
-      console.log(tokens);
-      console.log('refresh called');
-      if (response.status === 200) {
-        setAuthTokens(tokens);
-        setUser(jwtDecode(tokens.access));
-        localStorage.setItem('authTokens', JSON.stringify(tokens));
-      } else {
-        alert('something went wrong');
+    if (authTokens) {
+      try {
+        const response = await fetch('http://localhost:8000/token/refresh/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: authTokens.refresh }),
+        });
+        const tokens = await response.json();
+        if (response.status === 200) {
+          setAuthTokens(tokens);
+          setUser(jwtDecode(tokens.access));
+          localStorage.setItem('authTokens', JSON.stringify(tokens));
+        } else {
+          logoutUser();
+        }
+      } catch (error) {
+        console.error('Error updating token:', error);
         logoutUser();
       }
-      if (loading) {
-        setLoading(false);
-      }
+    } else {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (loading) {
+      fetchUser();
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (authTokens) {
+        updateToken();
+      }
+    }, 1000 * 60 * 60 * 23); // 23 hours
+
+    return () => clearInterval(interval);
+  }, [authTokens]);
 
   const contextData = {
     user,
     authTokens,
     login: loginUser,
     logout: logoutUser,
+    loading,
   };
-  useEffect(() => {
-    // if (loading) {
-    //   updateToken();
-    // }
-    const delaytime = 1000 * 60 * 60 * 23;
-    const interval = setInterval(() => {
-      if (authTokens) {
-        updateToken();
-      }
-    }, delaytime);
-    return () => {
-      clearInterval(interval);
-    };
-  }, [authTokens]);
 
   return (
-    <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={contextData}>
+      {children}
+    </AuthContext.Provider>
   );
 };
+
 export default AuthContext;
