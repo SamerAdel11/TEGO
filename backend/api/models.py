@@ -127,12 +127,14 @@ class Tender(models.Model):
         return self.tenderproduct_set.all()
     @transaction.atomic
     def update_fields(self, validated_data):
+        print("validated_data is  ",validated_data)
         if 'ad' in validated_data:
             utils.update_or_create_related_objects(self,TenderAd,validated_data.pop('ad'), 'tender'
             )
 
         if 'status' in validated_data:
             self.status = validated_data.get('status', self.status)
+            print("new status i ",self.status)
             self.save()
 
         if 'products' in validated_data:

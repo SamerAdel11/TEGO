@@ -248,6 +248,7 @@ class TenderSerializer(serializers.ModelSerializer):
         tender.save()
         return tender
     def update(self, instance, validated_data):
+        print("ENtered update funmctino")
         instance.update_fields(validated_data)
         return instance
     def to_representation(self, instance):

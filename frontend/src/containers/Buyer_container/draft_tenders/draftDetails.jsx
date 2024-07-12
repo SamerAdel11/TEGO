@@ -409,7 +409,7 @@ function DraftDetails() {
       }
       if (!hasErrors && !hasErrors2) {
         setLoading(true);
-        const response = await fetch(`http://localhost:8000/create_tender/${tender.id}`, {
+        const response = await fetch(`http://localhost:8000/tender/${tender.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

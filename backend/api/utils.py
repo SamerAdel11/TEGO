@@ -110,10 +110,10 @@ def toggle_anonymity(json_data,anonymize,object_type,object_id):
     if object_type =='t':
         admins=json_data.pop('admins',None)
         status=json_data.pop('status',None)
-        field=json_data.get('ad',None).pop('field',None)
+        ad_data=json_data.get('ad',None)
+        field=ad_data.pop('field',None)  if ad_data  else  None
     keys,values=extract_keys_and_values(json_data)
     values_string = (" , ".join(values))
-    pprint(json_data)
     empty_json=assign_empty_values_to_json(json_data)
 
     url= "http://127.0.0.1:9000/predict/" if anonymize else "http://127.0.0.1:9000/decrypt/"

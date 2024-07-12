@@ -79,9 +79,9 @@ function TenderDetails() {
   };
   const CancelTender = async () => {
     const response = await fetch(
-      `http://localhost:8000/cancel_tender?tender_id=${id}`,
+      `http://localhost:8000/tender/${id}`,
       {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authTokens.access}`,

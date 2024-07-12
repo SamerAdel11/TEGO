@@ -96,13 +96,16 @@ function CancelledTenderDetails() {
       setLoading(true);
 
       const response = await fetch(
-        `http://localhost:8000/update_tender_status/?tender_id=${id}&new_status=open`,
+        `http://localhost:8000/tender/${id}`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
           },
+          body: JSON.stringify({
+            status: 'open',
+          }),
         },
       );
 
@@ -116,13 +119,16 @@ function CancelledTenderDetails() {
   };
   const SetTenderToDraft = async () => {
     const response = await fetch(
-      `http://localhost:8000/update_tender_status/?tender_id=${id}&new_status=draft`,
+      `http://localhost:8000/tender/${id}`,
       {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authTokens.access}`,
         },
+        body: JSON.stringify({
+          status: 'draft',
+        }),
       },
     );
 

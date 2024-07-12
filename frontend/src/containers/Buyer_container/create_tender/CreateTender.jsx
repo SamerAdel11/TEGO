@@ -311,7 +311,7 @@ function CreateTender() {
       if (!dataToSubmit.ad.deadline) {
         delete dataToSubmit.ad.deadline;
       }
-      const response = await fetch('http://localhost:8000/create_tender/', {
+      const response = await fetch('http://localhost:8000/tender/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

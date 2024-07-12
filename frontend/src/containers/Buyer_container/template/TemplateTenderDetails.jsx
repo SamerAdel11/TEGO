@@ -286,7 +286,7 @@ function TemplateTenderDetails() {
     setTender(updatedTender);
     console.log(updatedTender);
     updatedTender.status = submitType;
-    const response = await fetch('http://localhost:8000/create_tender/', {
+    const response = await fetch('http://localhost:8000/tender/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -308,22 +308,19 @@ function TemplateTenderDetails() {
   };
   const SetTenderToDraft = async () => {
     try {
-      // Assign 'candidate_pool' to the status variable
-      const status = 'draft';
-
-      // Send only the status in the request body
       const response = await fetch(
-        `http://localhost:8000/update_tender_status/?tender_id=${id}&new_status=draft`,
+        `http://localhost:8000/tender/${id}`,
         {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
           },
+          body: JSON.stringify({
+            status: 'draft',
+          }),
         },
       );
-
-      const data = await response.json();
       if (response.ok) {
         navigate.push(`/draft_tender_details/${id}`);
       }
@@ -331,27 +328,7 @@ function TemplateTenderDetails() {
       console.error('Error sending response:', errr);
     }
   };
-  const CancelTender = async () => {
-    const response = await fetch(
-      `http://localhost:8000/cancel_tender?tender_id=${id}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authTokens.access}`,
-        },
-      },
-    );
 
-    const data = await response.json();
-
-    if (response.ok) {
-      navigate.push('/mytender');
-    }
-
-    console.log(data);
-    // histoyty.push(`/awating_responses/${id}`);
-  };
   if (!tender) {
     return (
       <div>

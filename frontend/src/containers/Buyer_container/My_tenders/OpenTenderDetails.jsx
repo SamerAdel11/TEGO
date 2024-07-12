@@ -97,13 +97,16 @@ function OpenedTenderDetails() {
       setLoading(true);
       // Send only the status in the request body
       const response = await fetch(
-        `http://localhost:8000/update_tender_status/?tender_id=${id}&new_status=draft`,
+        `http://localhost:8000/tender/${id}`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
           },
+          body: JSON.stringify({
+            status: 'draft',
+          }),
         },
       );
       if (response.ok) {
@@ -115,13 +118,16 @@ function OpenedTenderDetails() {
   };
   const CancelTender = async () => {
     const response = await fetch(
-      `http://localhost:8000/cancel_tender?tender_id=${id}`,
+      `http://localhost:8000/tender/${id}`,
       {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authTokens.access}`,
         },
+        body: JSON.stringify({
+          status: 'cancelled',
+        }),
       },
     );
 

@@ -13,9 +13,9 @@ urlpatterns = [
     path('get_host_tenders/', views.TenderHostView.as_view(),
          name='get_host_tenders'),
     path('get_tenders_supplier/', views.TenderSupplierView.as_view()),
-    path('create_tender/', views.TenderCreateView.as_view(), name='create_tender'),
-    path('create_tender/<int:pk>', views.TenderCreateView.as_view(), name='create_tender'),
-    path('update_tender_status/', views.UpdateTenderStatus.as_view()),
+    path('tender/', views.TenderView.as_view(), name='create_tender'),
+    path('tender/<int:pk>', views.TenderView.as_view(), name='create_tender'),
+#     path('update_tender_status/', views.UpdateTenderStatus.as_view()),
     path('get_tender/<int:pk>', views.RetrieveTender.as_view(), name='get_tender'),
     path('add_response/', views.ResponseView.as_view(), name='add_response'),
     path('activate/<str:uidb64>/<str:token>', views.activate, name='activate'),
@@ -40,7 +40,7 @@ urlpatterns = [
     path('list_transactions/', views.TransactionListView.as_view()),
     path('transactions/<int:response_id>/<int:tender_id>/',
          views.TransactionView.as_view()),
-    path('cancel_tender', views.CancelTender.as_view()),
+#     path('cancel_tender', views.CancelTender.as_view()),
 
 
     path('test_update_tender/<int:pk>',views.TestCreateTender.as_view()),

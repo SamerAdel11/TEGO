@@ -67,38 +67,63 @@ class TestCreateTender(generics.RetrieveUpdateAPIView):
         else:
             return Response(serializer.errors)
 
-class TenderCreateView(generics.RetrieveUpdateAPIView):
+class TenderView(generics.RetrieveUpdateAPIView):
     serializer_class = TenderSerializer
     queryset=Tender.objects.all()
+    lookup_field='pk'
+    def tender_anonmyzation_decision (self,new_status,data,instance):
+        anonmyzed_status=['open','pending_decision','candidate_pool','awaiting_confirmation']
+        deanonmyzed_status=['draft','template','cancelled','awarded']
+        toggled_data=None
+        old_status=instance.status
+        if (old_status in anonmyzed_status) & (new_status in deanonmyzed_status):
+            tender_data=self.get_serializer(instance).data
+            toggled_data=utils.toggle_anonymity(tender_data,False,object_type='t',object_id=instance.id)
+        elif (old_status in deanonmyzed_status) & (new_status in anonmyzed_status):
+            tender_data=self.get_serializer(instance).data
+            toggled_data=utils.toggle_anonymity(tender_data,True,object_type='t',object_id=instance.id)
+        else:
+            toggled_data=data
+        if toggled_data is None:
+            print("toggled_data in tender_anonmyzation_decision is  NONNNNNEEEE")
+        toggled_data['status']=new_status
+        return toggled_data
+    def handle_responses(self,instance):
+        responses=TenderResponse.objects.filter(tender=instance)
+        if instance.status in ['draft','cancelled'] and len(responses)>0:
+            UserNotification.objects.create(recipient=instance.user,
+            message=f"تم ازاله العروض التي كانت مقدمه علي مناقصة \"{instance.ad.title}\" ")
+            for response in responses:
+                UserNotification.objects.create(recipient=response.user,
+                message=f"تم ازاله عرضك نظراً لالغاء المناقصة \"{instance.ad.title}\"")
+                response.delete()
+    def get(self,request,*args,**kwargs):
+        return self.retrieve(request)
 
-    @transaction.atomic
     def post(self, request, *args, **kwargs):
         saved_instance = Tender.objects.create(user=request.user,status=request.data.get('status'))
+        tender_data=request.data
         if request.data.get('status') == 'open':
-            anonymized_data = utils.toggle_anonymity(request.data, True, object_type='t', object_id=saved_instance.id)
-            serializer_anonymized = self.get_serializer(
-                instance=saved_instance,
-                data=anonymized_data,
-                context={'request': request}
-            )
-            if serializer_anonymized.is_valid():
-                serializer_anonymized.save()
-                return Response({"Message": "Done"}, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer_anonymized.errors, status=status.HTTP_400_BAD_REQUEST)
+            tender_data = utils.toggle_anonymity(tender_data, True, object_type='t', object_id=saved_instance.id)
+
+        serializer_anonymized = self.get_serializer(
+            instance=saved_instance,
+            data=tender_data,
+            context={'request': request}
+        )
+        if serializer_anonymized.is_valid():
+            serializer_anonymized.save()
+            return Response(serializer_anonymized.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer_anonymized.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self,request,*args,**kwargs):
         instance=self.get_object()
-        anonymized_data=''
-        if request.data.get('status')=='open':
-            anonymized_data=utils.toggle_anonymity(request.data,True,object_type='t',object_id=instance.id)
-        else:
-            anonymized_data=utils.toggle_anonymity(request.data,False,object_type='t',object_id=instance.id)
+        new_status=request.data.get('status')
+        toggled_data=self.tender_anonmyzation_decision(new_status=new_status,data=request.data,instance=instance)
         serializer_encrpted_version=self.get_serializer(
             instance=instance,
-            data=anonymized_data,
+            data=toggled_data,
             context={'request': request})
         if serializer_encrpted_version.is_valid():
             serializer_encrpted_version.save()
@@ -106,7 +131,18 @@ class TenderCreateView(generics.RetrieveUpdateAPIView):
         else:
             return Response(serializer_encrpted_version.errors)
 
-
+    def patch(self,request,*args,**kwargs):
+        new_status=request.data.get('status')
+        instance=self.get_object()
+        toggled_data=self.tender_anonmyzation_decision(new_status=new_status,data=request.data,instance=instance)
+        tender_serializer=self.get_serializer(
+            data=toggled_data,
+            instance=instance,
+            partial=True)
+        if tender_serializer.is_valid(raise_exception=True):
+            tender_serializer.save()
+            self.handle_responses(instance)
+            return Response(tender_serializer.data)
 
 class RetrieveTender(generics.RetrieveAPIView):
     queryset=Tender.objects.all()
@@ -126,35 +162,35 @@ class TenderHostView(generics.ListAPIView):
             return queryset.filter(status__in=status_list)
         return queryset
 
-class UpdateTenderStatus(APIView):
-    def put(self,request):
-        tender_id=request.query_params.get('tender_id',None)
-        new_status=request.query_params.get('new_status',None)
-        tender_instance= Tender.objects.get(id=tender_id)
-        responses=TenderResponse.objects.filter(tender=tender_id)
-        anonymized_data=''
-        tender_data=TenderSerializer(tender_instance).data
-        if new_status=='open':
-            anonymized_data=utils.toggle_anonymity(tender_data,True,object_type='t',object_id=tender_id)
-        else:
-            anonymized_data=utils.toggle_anonymity(tender_data,False,object_type='t',object_id=tender_id)
-        serializer_replaced_version=TenderSerializer(
-            instance=tender_instance,
-            data=anonymized_data,
-            context={'request': request})
-        if serializer_replaced_version.is_valid():
-            serializer_replaced_version.save()
-            if len(responses)>0:
-                UserNotification.objects.create(recipient=tender_instance.user,
-                message=f"تم ازاله العروض التي كانت مقدمه علي مناقصة \"{tender_instance.ad.title}\" ")
-            if new_status in ['draft','cancelled']:
-                for response in responses:
-                    UserNotification.objects.create(recipient=response.user,
-                    message=f"تم ازاله عرضك نظراً لالغاء المناقصة \"{tender_instance.ad.title}\"")
-                    response.delete()
-            return Response({"Message":"Done"})
-        else :
-            return Response(serializer_replaced_version.errors,status=status.HTTP_400_BAD_REQUEST)
+# class UpdateTenderStatus(APIView):
+#     def put(self,request):
+#         tender_id=request.query_params.get('tender_id',None)
+#         new_status=request.query_params.get('new_status',None)
+#         tender_instance= Tender.objects.get(id=tender_id)
+#         responses=TenderResponse.objects.filter(tender=tender_id)
+#         anonymized_data=''
+#         tender_data=TenderSerializer(tender_instance).data
+#         if new_status=='open':
+#             anonymized_data=utils.toggle_anonymity(tender_data,True,object_type='t',object_id=tender_id)
+#         else:
+#             anonymized_data=utils.toggle_anonymity(tender_data,False,object_type='t',object_id=tender_id)
+#         serializer_replaced_version=TenderSerializer(
+#             instance=tender_instance,
+#             data=anonymized_data,
+#             context={'request': request})
+#         if serializer_replaced_version.is_valid():
+#             serializer_replaced_version.save()
+#             if len(responses)>0:
+#                 UserNotification.objects.create(recipient=tender_instance.user,
+#                 message=f"تم ازاله العروض التي كانت مقدمه علي مناقصة \"{tender_instance.ad.title}\" ")
+#             if new_status in ['draft','cancelled']:
+#                 for response in responses:
+#                     UserNotification.objects.create(recipient=response.user,
+#                     message=f"تم ازاله عرضك نظراً لالغاء المناقصة \"{tender_instance.ad.title}\"")
+#                     response.delete()
+#             return Response({"Message":"Done"})
+#         else :
+#             return Response(serializer_replaced_version.errors,status=status.HTTP_400_BAD_REQUEST)
 class TenderSupplierView(generics.ListAPIView):
     serializer_class = TenderRetrieveSerializer
     def get_queryset(self):
