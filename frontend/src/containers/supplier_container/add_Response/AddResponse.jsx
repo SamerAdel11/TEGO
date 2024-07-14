@@ -152,7 +152,7 @@ function AddResponse() {
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/get_tender/${tenderId}`, {
+        const response = await fetch(`http://localhost:8000/tender/${tenderId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -304,7 +304,7 @@ function AddResponse() {
       };
       formData = cleanFormData(formData);
       console.log(formData);
-      const response2 = await fetch('http://localhost:8000/add_response/', {
+      const response2 = await fetch('http://localhost:8000/response/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

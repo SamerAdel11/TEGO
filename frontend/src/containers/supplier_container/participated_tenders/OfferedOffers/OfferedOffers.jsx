@@ -12,7 +12,7 @@ function OfferedOffers() {
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders_supplier?responsestatus=offered', {
+        const response = await fetch('http://localhost:8000/get_tenders_supplier?response_status=offered', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

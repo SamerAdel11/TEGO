@@ -44,7 +44,7 @@ function OpenedTenderDetails() {
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/get_tender/${id}`, {
+        const response = await fetch(`http://localhost:8000/tender/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

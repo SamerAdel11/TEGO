@@ -12,7 +12,7 @@ function CandidatePoolOffers() {
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders_supplier?responsestatus=candidate_pool', {
+        const response = await fetch('http://localhost:8000/get_tenders_supplier?response_status=candidate_pool', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

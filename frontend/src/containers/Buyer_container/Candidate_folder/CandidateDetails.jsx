@@ -23,9 +23,9 @@ function CandidateDetails() {
     try {
       const status = 'awarded';
       const response = await fetch(
-        `http://localhost:8000/award_tender?tender=${id}&response=${tender.id}`,
+        `http://localhost:8000/award_tender/${id}/${tender.id}`,
         {
-          method: 'POST',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
@@ -48,7 +48,7 @@ function CandidateDetails() {
     const fetchTenderDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/get_responses/?tender_id=${id}&status=candidate_pool`,
+          `http://localhost:8000/list_responses/${id}?status=candidate_pool`,
           {
             method: 'GET',
             headers: {

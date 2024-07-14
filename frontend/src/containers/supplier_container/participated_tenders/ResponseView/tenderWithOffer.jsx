@@ -128,7 +128,7 @@ function Response() {
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/get_tender/${tenderId}`, {
+        const response = await fetch(`http://localhost:8000/tender/${tenderId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -175,7 +175,7 @@ function Response() {
     };
     const getResponse = async () => {
       try {
-        const myresponse = await fetch(`http://localhost:8000/get_my_response?tender_id=${tenderId}`, {
+        const myresponse = await fetch(`http://localhost:8000/response/${tenderId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -254,18 +254,23 @@ function Response() {
   const confirmNotification = async (decision) => {
     // e.preventDefault();
     setLoading(true);
-    const confirmationApi = await fetch(`http://localhost:8000/supplier_confirmation?tender_id=${tenderId}&response_id=${offer.id}&confirm_status=${decision}`, {
-      method: 'POST',
+    const confirmationApi = await fetch(`http://localhost:8000/supplier_confirmation/${tenderId}/${offer.id}?confirm_status=${decision}`, {
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authTokens.access}`,
       },
+      body: JSON.stringify({
+        confirm_status: decision,
+      }),
     });
     if (confirmationApi.ok) {
       console.log('Done');
       setLoading(false);
       if (decision === 'rejected') {
         history.push('/rejected_offers');
+      } else {
+        window.location.reload();
       }
     } else {
       setLoading(false);
@@ -305,7 +310,7 @@ function Response() {
       const response = await fetch(
         `http://localhost:8000/transactions/${transaction.response}/${tenderId}/`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
@@ -332,7 +337,7 @@ function Response() {
       const response = await fetch(
         `http://localhost:8000/transactions/${transaction.response}/${tenderId}/`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
@@ -422,7 +427,6 @@ function Response() {
                 onClick={(e) => {
                   e.preventDefault();
                   confirmNotification('confirmed');
-                  window.location.reload();
                 }}
               >
                 موافق

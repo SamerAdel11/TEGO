@@ -71,7 +71,7 @@ function AwatingDetails() {
       const response = await fetch(
         `http://localhost:8000/transactions/${transaction.response}/${id}/`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
@@ -101,7 +101,7 @@ function AwatingDetails() {
       const response = await fetch(
         `http://localhost:8000/transactions/${transaction.response}/${id}/`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
@@ -129,7 +129,7 @@ function AwatingDetails() {
       const response = await fetch(
         `http://localhost:8000/transactions/${transaction.response}/${id}/`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
@@ -159,7 +159,7 @@ function AwatingDetails() {
     const fetchResponseDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/get_responses/?tender_id=${id}&status=awarded,winner`,
+          `http://localhost:8000/list_responses/${id}?status=awarded,winner`,
           {
             method: 'GET',
             headers: {
@@ -244,7 +244,7 @@ function AwatingDetails() {
       const response = await fetch(
         `http://localhost:8000/transactions/${transaction.response}/${id}/`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
@@ -270,7 +270,7 @@ function AwatingDetails() {
     try {
       setLoading(true);
       const response = await fetch(`http://localhost:8000/contract/${id}/${responseDetails[0].id}/`, {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authTokens.access}`,

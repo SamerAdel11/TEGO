@@ -8,23 +8,22 @@ def update_model_fields(instance, **fields):
         setattr(instance, field, value)
     instance.save()
 
-def create_related_objects(self, model, related_data, field_name, many_to_many=False):
+def update_or_create_response_product_objects(self,model,tender_product_model,related_data,field_name):
     for data in related_data:
-        obj_id = data.pop('id', None)
+        obj_id=data.pop('id',None)
         if obj_id:
-            obj = model.objects.get(id=obj_id)
+            obj=model.objects.get(id=obj_id)
             update_model_fields(obj,**data)
         else:
-            model.objects.create(**data, **{field_name: self})
+            tender_product_instance=tender_product_model.objects.get(id=data.pop('productid'))
+            model.objects.create(
+                **data,
+                product=tender_product_instance,
+                **{field_name: self})
 
-def update_or_create_related_objects(self, model, related_data, field_name, many_to_many=False):
-    if many_to_many:
-        objects = []
-        for data in related_data:
-            obj, created = model.objects.get_or_create(**data)
-            objects.append(obj)
-        getattr(self, field_name).set(objects)
-    elif isinstance(related_data,dict):
+def update_or_create_related_objects(self, model, related_data, field_name):
+
+    if isinstance(related_data,dict):
         obj_id = related_data.pop('id', None)
         if obj_id:
             obj = model.objects.get(id=obj_id)
@@ -112,6 +111,8 @@ def toggle_anonymity(json_data,anonymize,object_type,object_id):
         status=json_data.pop('status',None)
         ad_data=json_data.get('ad',None)
         field=ad_data.pop('field',None)  if ad_data  else  None
+    elif object_type =='r':
+        status=json_data.pop('status',None)
     keys,values=extract_keys_and_values(json_data)
     values_string = (" , ".join(values))
     empty_json=assign_empty_values_to_json(json_data)
@@ -122,10 +123,11 @@ def toggle_anonymity(json_data,anonymize,object_type,object_id):
     }
     params={
         "input_data":values_string,
-        "object_type":object_type,
+        "object_type":'t' if object_type== 'r as t' else object_type,
         "object_id":object_id
     }
     try:
+        print(params)
         response = requests.post(url, params=params, headers=headers)
         response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
         annonmyized_data=response.json().get('prediction').split(',')
@@ -134,10 +136,12 @@ def toggle_anonymity(json_data,anonymize,object_type,object_id):
             new_json_data['admins']=admins if admins else None
             new_json_data['status']=status if status else None
             new_json_data['ad']['field']=field if field else None
+        elif object_type =='r':
+            new_json_data['status']=status if status else None
         return new_json_data
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")  # Handle HTTP errors
         return None
     except Exception as err:
-        print(f"An error occurred: {err}")  # Handle other possible errors
+        print(f"An error occurred: {err} {err.text}")  # Handle other possible errors
         return None

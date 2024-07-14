@@ -182,7 +182,6 @@ class TenderPrivateConditions(models.Model):
     condition = models.TextField(null=True,blank=True)
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
 
-
 class TenderProduct(models.Model):
 
     title = models.CharField(max_length=255,null=True,blank=True)
@@ -195,7 +194,6 @@ class TenderProduct(models.Model):
 
 class TenderResponse(models.Model):
 
-    offered_price = models.FloatField()
     status = models.CharField(max_length=255)
     score=models.FloatField(null=True)
     tender = models.ForeignKey(Tender, on_delete=models.CASCADE)
@@ -213,6 +211,22 @@ class TenderResponse(models.Model):
     @property
     def previous_work(self):
         return self.responsepreviouswork_set.all()
+    def update_fields(self,validated_data):
+        if 'offer_products' in validated_data:
+            utils.update_or_create_response_product_objects(
+                self, ResponseProductBid, TenderProduct, validated_data.pop('offer_products'), 'response',
+            )
+        if 'offer_conditions' in validated_data:
+            utils.update_or_create_related_objects(
+                self, ResponsePrivateCondition, validated_data.pop('offer_conditions'), 'response'
+            )
+        if 'previous_work' in validated_data:
+            utils.update_or_create_related_objects(
+                self, ResponsePreviousWork, validated_data.pop('previous_work'), 'response'
+            )
+        if 'status' in validated_data:
+            self.status=validated_data.get('status',self.status)
+            self.save()
 
 class ResponsePreviousWork(models.Model):
     title=models.CharField()
@@ -238,12 +252,6 @@ class Transaction(models.Model):
     transaction_date= models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = ('tender', 'response')
-    # @property
-    # def original_product(self):
-    #     return self.product.
-
-    # def __str__(self):
-    #     return f"{self.id}- {self.product.title} {self.product.id}-> Tender {self.response.tender.id}"
 
 class ResponsePrivateCondition(models.Model):
     offered_condition=models.CharField(max_length=255,blank=True,null=True)

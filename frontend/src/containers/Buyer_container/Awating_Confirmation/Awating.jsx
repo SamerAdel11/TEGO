@@ -12,7 +12,7 @@ function Awating() {
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders?status=awaiting_confirmation,awarded', {
+        const response = await fetch('http://localhost:8000/get_host_tenders?status=awaiting_confirmation,awarded', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

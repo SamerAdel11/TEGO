@@ -12,7 +12,7 @@ function RejectedOffers() {
   useEffect(() => {
     const fetchTenders = async () => {
       try {
-        const response = await fetch('http://localhost:8000/get_tenders_supplier?responsestatus=rejected', {
+        const response = await fetch('http://localhost:8000/get_tenders_supplier?response_status=rejected', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

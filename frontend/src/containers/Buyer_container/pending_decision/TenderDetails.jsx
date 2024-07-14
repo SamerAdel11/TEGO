@@ -19,7 +19,7 @@ function TenderDetails() {
     const fetchTenderDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/get_responses/?tender_id=${id}&status=offered`,
+          `http://localhost:8000/list_responses/${id}?status=offered`,
           {
             method: 'GET',
             headers: {
@@ -58,9 +58,9 @@ function TenderDetails() {
   }, [histoyty]);
   const closeCandidatePool = async () => {
     const response = await fetch(
-      `http://localhost:8000/close_candidate_pool?tender_id=${id}`,
+      `http://localhost:8000/close_candidate_pool/${id}`,
       {
-        method: 'GET',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authTokens.access}`,

@@ -260,19 +260,19 @@ class TenderSerializer(serializers.ModelSerializer):
         ret['products'] = sorted(ret['products'], key=lambda x: x['id'])
         return ret
 
-class TenderRetrieveSerializer(serializers.ModelSerializer):
+# class TenderRetrieveSerializer(serializers.ModelSerializer):
     
-    admins = TenderAdminSerializer(many=True, read_only=True)
-    public_conditions = TenderPublicConditionsSerializer(
-        many=True, read_only=True)
-    private_conditions = TenderPrivateConditionsSerializer(
-        many=True, read_only=True)
-    ad = TenderAdSerializer(read_only=True)
-    products = TenderProductSerializer(many=True, read_only=True)
-    class Meta:
-        model = Tender
-        fields = ['id', 'status', 'admins',
-                'public_conditions', 'private_conditions', 'ad', 'products']
+#     admins = TenderAdminSerializer(many=True, read_only=True)
+#     public_conditions = TenderPublicConditionsSerializer(
+#         many=True, read_only=True)
+#     private_conditions = TenderPrivateConditionsSerializer(
+#         many=True, read_only=True)
+#     ad = TenderAdSerializer(read_only=True)
+#     products = TenderProductSerializer(many=True, read_only=True)
+#     class Meta:
+#         model = Tender
+#         fields = ['id', 'status', 'admins',
+#                 'public_conditions', 'private_conditions', 'ad', 'products']
 
 class ResponsePreviousWorkSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
@@ -340,11 +340,18 @@ class ResponseSerializer(serializers.ModelSerializer):
     offer_conditions = ResponsePrivateConditionSerializer(many=True)
     tender_id = serializers.CharField()
     previous_work=ResponsePreviousWorkSerializer(many=True)
+    offered_price=serializers.SerializerMethodField()
     class Meta:
         model = TenderResponse
         fields = ['id', 'offered_price', 'tender_id','previous_work',
                 'status', 'offer_products', 'offer_conditions']
         extra_kwargs={'offer_products':{"required":False,"allow_null": True}}
+
+    def get_offered_price(self,obj):
+        offered_price=0
+        for product in obj.offer_products:
+            offered_price=offered_price+product.price
+        return offered_price
 
     def create(self, validated_data):
         user = self.context['request'].user
@@ -355,7 +362,6 @@ class ResponseSerializer(serializers.ModelSerializer):
 
         tender = Tender.objects.get(id=validated_data['tender_id'])
         response = TenderResponse.objects.create(
-            offered_price=validated_data.get('offered_price'),
             tender=tender,
             user=user,
             status=validated_data.get('status')
@@ -397,40 +403,41 @@ class ResponseSerializer(serializers.ModelSerializer):
         compute_similarity.delay(tender_data,response_data,response.id,offer_previous_work,tender_ad)
         return response
     def update(self, instance, validated_data):
-        offer_products_data = validated_data.pop('offer_products', [])
-        offer_conditions_data = validated_data.pop('offer_conditions', [])
-        previous_work_data = validated_data.pop('previous_work', [])
-        print("offer_products_data",offer_products_data)
+        instance.update_fields(validated_data)
+        # offer_products_data = validated_data.pop('offer_products', [])
+        # offer_conditions_data = validated_data.pop('offer_conditions', [])
+        # previous_work_data = validated_data.pop('previous_work', [])
+        # print("offer_products_data",offer_products_data)
 
-        instance.offered_price = validated_data.get('offered_price', instance.offered_price)
-        instance.status = validated_data.get('status', instance.status)
-        instance.save()
+        # instance.offered_price = validated_data.get('offered_price', instance.offered_price)
+        # instance.status = validated_data.get('status', instance.status)
+        # instance.save()
 
-        for product_data in offer_products_data:
-            productid = product_data.get('id', None)
-            print("product_id is ",productid)
-            product = ResponseProductBid.objects.get(id=productid)
-            product.provided_quantity=product_data.get('provided_quantity')
-            product.product_title=product_data.get('product_title')
-            product.product_description=product_data.get('product_description')
-            product.supplying_status=product_data.get('supplying_status')
-            product.price=product_data.get('price')
-            product.save()
+        # for product_data in offer_products_data:
+        #     productid = product_data.get('id', None)
+        #     print("product_id is ",productid)
+        #     product = ResponseProductBid.objects.get(id=productid)
+        #     product.provided_quantity=product_data.get('provided_quantity')
+        #     product.product_title=product_data.get('product_title')
+        #     product.product_description=product_data.get('product_description')
+        #     product.supplying_status=product_data.get('supplying_status')
+        #     product.price=product_data.get('price')
+        #     product.save()
 
-        for condition_data in offer_conditions_data:
-            condition_id=condition_data.get('id')
+        # for condition_data in offer_conditions_data:
+        #     condition_id=condition_data.get('id')
 
-            condition=ResponsePrivateCondition.objects.get(id=condition_id)
-            condition.offered_condition=condition_data.get('offered_condition')
-            condition.save()
+        #     condition=ResponsePrivateCondition.objects.get(id=condition_id)
+        #     condition.offered_condition=condition_data.get('offered_condition')
+        #     condition.save()
 
-        for work_data in previous_work_data:
-            work_id=work_data.get('id')
+        # for work_data in previous_work_data:
+        #     work_id=work_data.get('id')
 
-            work=ResponsePreviousWork.objects.get(id=work_id)
-            work.title=work_data.get('title')
-            work.description=work_data.get('description')
-            work.save()
+        #     work=ResponsePreviousWork.objects.get(id=work_id)
+        #     work.title=work_data.get('title')
+        #     work.description=work_data.get('description')
+        #     work.save()
         return instance
 class ProductResponseRetrieveSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='product_title', read_only=True)
@@ -444,21 +451,20 @@ class ProductResponseRetrieveSerializer(serializers.ModelSerializer):
 
 class ResponseDetailSerializer(serializers.ModelSerializer):
     offer_products = ProductResponseRetrieveSerializer(many=True)
-    # Assuming you just want the string representation of conditions
     offer_conditions = ResponsePrivateConditionSerializer(many=True)
     previous_work=ResponsePreviousWorkSerializer(many=True)
+    offered_price=serializers.SerializerMethodField()
 
     class Meta:
         model = TenderResponse
         fields = ['id', 'offered_price','previous_work','score',
                 'status', 'offer_products', 'offer_conditions']
-    def update(self, instance, validated_data):
-        # Check if 'status' is present in validated_data
-        if 'status' in validated_data:
-            # Update only 'status' attribute
-            instance.status = validated_data['status']
-            instance.save(update_fields=['status'])  # Only update 'status' field
-        return instance
+    def get_offered_price(self,obj):
+        offered_price=0
+        for product in obj.offer_products:
+            offered_price=offered_price+product.price
+        return offered_price
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         # If the instance is a queryset, sort it by score in descending order
