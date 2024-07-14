@@ -212,7 +212,6 @@ class TenderSupplierView(generics.ListAPIView):
 
 
 class ResponseView(APIView):
-    
     def calculate_similarity(self,tender,response_anonmyzed_data,response):
         tender_data=''
         response_data=''
@@ -244,7 +243,6 @@ class ResponseView(APIView):
 
         compute_similarity.delay(tender_data,response_data,response.id,offer_previous_work,tender_ad)
 
-
     def get(self, request,pk,*args, **kwargs):
         response = TenderResponse.objects.get(
             user=request.user, tender=Tender.objects.get(id=pk))
@@ -265,7 +263,6 @@ class ResponseView(APIView):
             data=anonymized_data)
         if anonmyized_serializer.is_valid():
             anonmyized_serializer.save()
-            print("anonymized_data",anonymized_data)
             self.calculate_similarity(tender_instance,anonymized_data,response_instance)
             return Response(anonmyized_serializer.data, status=status.HTTP_201_CREATED)
         else:

@@ -104,15 +104,13 @@ def assign_values_from_list(json_with_empty_values, values_list):
 
 def toggle_anonymity(json_data,anonymize,object_type,object_id):
     admins=None
-    status=None
+    status=json_data.pop('status',None)
     field=None
     if object_type =='t':
         admins=json_data.pop('admins',None)
-        status=json_data.pop('status',None)
         ad_data=json_data.get('ad',None)
         field=ad_data.pop('field',None)  if ad_data  else  None
-    elif object_type =='r':
-        status=json_data.pop('status',None)
+
     keys,values=extract_keys_and_values(json_data)
     values_string = (" , ".join(values))
     empty_json=assign_empty_values_to_json(json_data)
@@ -132,12 +130,10 @@ def toggle_anonymity(json_data,anonymize,object_type,object_id):
         response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
         annonmyized_data=response.json().get('prediction').split(',')
         new_json_data=assign_values_from_list(empty_json,annonmyized_data)
+        new_json_data['status']=status if status else None
         if object_type =='t':
             new_json_data['admins']=admins if admins else None
-            new_json_data['status']=status if status else None
             new_json_data['ad']['field']=field if field else None
-        elif object_type =='r':
-            new_json_data['status']=status if status else None
         return new_json_data
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")  # Handle HTTP errors

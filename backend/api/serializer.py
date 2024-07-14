@@ -354,54 +354,61 @@ class ResponseSerializer(serializers.ModelSerializer):
         return offered_price
 
     def create(self, validated_data):
-        user = self.context['request'].user
-        data = validated_data.copy()
-        offer_products_data = validated_data.pop('offer_products')
-        offer_conditions_data = validated_data.pop('offer_conditions')
-        previous_work_data=validated_data.pop('previous_work')
+        
+############################ this function shouldn't be called
+        print("this function shouldn't be called")
 
-        tender = Tender.objects.get(id=validated_data['tender_id'])
-        response = TenderResponse.objects.create(
-            tender=tender,
-            user=user,
-            status=validated_data.get('status')
-            )
 
-        tender_data=''
-        response_data=''
-        for product_data in offer_products_data:
-            productid = product_data.pop('productid',None)
-            if not productid:
-                productid = product_data.pop('id',None)
-            product = TenderProduct.objects.get(id=productid)
-            tender_data=tender_data+product.title+"|"+product.description+"|"+product.quantity+"|"
-            if product_data.get('supplying_status')!="متوفر":
-                response_data=response_data+' '+"|"+' '+"|"+' '+"|"
-            else:
-                response_data=response_data+product_data.get('product_title')+"|"+product_data.get('product_description')+"|"+str(product_data.get('provided_quantity'))+"|"
-            ResponseProductBid.objects.create(
-                product=product,
-                response=response,**product_data)
 
-        offer_previous_work=[]
-        for work in previous_work_data:
-            offer_previous_work.append(work.get('title')+"|"+work.get('description')+"|")
-            ResponsePreviousWork.objects.create(response=response,**work)
-        ad=TenderAd.objects.get(tender=tender)
-        tender_ad=ad.title+"|"+ad.topic+"|"
-        print("offer previous work is",offer_previous_work)
-        for condition_data in offer_conditions_data:
-            condition_instance=condition_data.get('condition')
-            tender_data= tender_data +condition_instance.condition+"|"
-            response_data = response_data+ condition_data.get('offered_condition') + "|"
-            new_condition=ResponsePrivateCondition.objects.create(
-                condition=condition_data.get('condition'),
-                response=response,
-                offered_condition=condition_data.get('offered_condition'))
-            print("new_condition id is ",new_condition)
 
-        compute_similarity.delay(tender_data,response_data,response.id,offer_previous_work,tender_ad)
-        return response
+        # user = self.context['request'].user
+        # data = validated_data.copy()
+        # offer_products_data = validated_data.pop('offer_products')
+        # offer_conditions_data = validated_data.pop('offer_conditions')
+        # previous_work_data=validated_data.pop('previous_work')
+
+        # tender = Tender.objects.get(id=validated_data['tender_id'])
+        # response = TenderResponse.objects.create(
+        #     tender=tender,
+        #     user=user,
+        #     status=validated_data.get('status')
+        #     )
+
+        # tender_data=''
+        # response_data=''
+        # for product_data in offer_products_data:
+        #     productid = product_data.pop('productid',None)
+        #     if not productid:
+        #         productid = product_data.pop('id',None)
+        #     product = TenderProduct.objects.get(id=productid)
+        #     tender_data=tender_data+product.title+"|"+product.description+"|"+product.quantity+"|"
+        #     if product_data.get('supplying_status')!="متوفر":
+        #         response_data=response_data+' '+"|"+' '+"|"+' '+"|"
+        #     else:
+        #         response_data=response_data+product_data.get('product_title')+"|"+product_data.get('product_description')+"|"+str(product_data.get('provided_quantity'))+"|"
+        #     ResponseProductBid.objects.create(
+        #         product=product,
+        #         response=response,**product_data)
+
+        # offer_previous_work=[]
+        # for work in previous_work_data:
+        #     offer_previous_work.append(work.get('title')+"|"+work.get('description')+"|")
+        #     ResponsePreviousWork.objects.create(response=response,**work)
+        # ad=TenderAd.objects.get(tender=tender)
+        # tender_ad=ad.title+"|"+ad.topic+"|"
+        # print("offer previous work is",offer_previous_work)
+        # for condition_data in offer_conditions_data:
+        #     condition_instance=condition_data.get('condition')
+        #     tender_data= tender_data +condition_instance.condition+"|"
+        #     response_data = response_data+ condition_data.get('offered_condition') + "|"
+        #     new_condition=ResponsePrivateCondition.objects.create(
+        #         condition=condition_data.get('condition'),
+        #         response=response,
+        #         offered_condition=condition_data.get('offered_condition'))
+        #     print("new_condition id is ",new_condition)
+
+        # compute_similarity.delay(tender_data,response_data,response.id,offer_previous_work,tender_ad)
+        # return response
     def update(self, instance, validated_data):
         instance.update_fields(validated_data)
         # offer_products_data = validated_data.pop('offer_products', [])
