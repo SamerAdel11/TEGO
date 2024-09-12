@@ -588,7 +588,7 @@ function AwatingDetails() {
                           type="button"
                           onClick={handleClickOpen}
                         >
-                          تحديد موعد لمراجعةالمنتجات
+                          تحديد موعد مراجعة المنتجات
                         </button>
                         <Dialog
                           style={{ backgroundColor: '#073057' }}

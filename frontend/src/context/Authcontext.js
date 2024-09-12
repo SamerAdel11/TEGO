@@ -34,7 +34,30 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
+  const googleLogin = async (googleAccessToken) => {
+    const response = await fetch('http://localhost:8000/login/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        googleAccessToken,
+      }),
+    });
+    const tokens = await response.json();
+    if (response.status === 200) {
+      setAuthTokens(tokens);
+      const loggedUser = jwtDecode(tokens.access);
+      setUser(loggedUser);
+      localStorage.setItem('authTokens', JSON.stringify(tokens));
+      localStorage.setItem('supplierView', JSON.stringify(true));
+      const supplierView = localStorage.getItem('supplierView');
 
+      if (loggedUser.company_type === 'supplier' && supplierView !== false) {
+        history.push('/open_tenders');
+      } else {
+        history.push('/mytender');
+      }
+    }
+  };
   const loginUser = async (formData) => {
     const response = await fetch('http://localhost:8000/login/', {
       method: 'POST',
@@ -120,6 +143,7 @@ export const AuthProvider = ({ children }) => {
     login: loginUser,
     logout: logoutUser,
     loading,
+    googleLogin,
   };
 
   return (

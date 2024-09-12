@@ -226,27 +226,12 @@ class TenderSerializer(serializers.ModelSerializer):
             'products': {'allow_null': True},
         }
     def create(self, validated_data):
-        user = self.context['request'].user
-        admins_data = validated_data.pop('admins')
-        public_conditions_data = validated_data.pop('public_conditions')
-        private_conditions_data = validated_data.pop('private_conditions')
-        products_data = validated_data.pop('products')
-        ad_data = validated_data.pop('ad')
-        tender = Tender.objects.create(
-            **validated_data, user=user, ad=ad_instance)
-        ad_instance = TenderAd.objects.create(**ad_data,tender=tender)
-        for admin_data in admins_data:
-            TenderAdmin.objects.create(tender=tender, **admin_data)
-        for public_condition_data in public_conditions_data:
-            TenderPublicConditions.objects.create(
-                tender=tender, **public_condition_data)
-        for private_condition_data in private_conditions_data:
-            TenderPrivateConditions.objects.create(
-                tender=tender, **private_condition_data)
-        for product_data in products_data:
-            TenderProduct.objects.create(tender=tender, **product_data)
-        tender.save()
-        return tender
+        tender_instance = Tender.objects.create(
+            status=validated_data.get('status'),
+            user=self.context['request'].user
+            )
+        tender_instance.create_fields(validated_data)
+        return tender_instance
     def update(self, instance, validated_data):
         print("ENtered update funmctino")
         instance.update_fields(validated_data)
@@ -357,9 +342,6 @@ class ResponseSerializer(serializers.ModelSerializer):
         
 ############################ this function shouldn't be called
         print("this function shouldn't be called")
-
-
-
 
         # user = self.context['request'].user
         # data = validated_data.copy()

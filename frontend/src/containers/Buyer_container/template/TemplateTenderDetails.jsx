@@ -1,12 +1,7 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable arrow-parens */
-/* eslint-disable quotes */
-/* eslint-disable no-else-return */
-/* eslint-disable no-unused-vars */
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import PulseLoader from "react-spinners/PulseLoader";
+import PulseLoader from 'react-spinners/PulseLoader';
 import AuthContext from '../../../context/Authcontext';
 
 // import './AddResponse.css';
@@ -17,18 +12,6 @@ function TemplateTenderDetails() {
   const { authTokens } = useContext(AuthContext);
   const [tender, setTender] = useState(null);
   const [officials, setOfficials] = useState(['']);
-  const [officialIndex, setOfficialIndex] = useState(1);
-  const [minDate, setMinDate] = useState('');
-  const [maxDate, setMaxDate] = useState('');
-  const [error, setError] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [tenderadFormData, setTenderadFormData] = useState({
-    title: '',
-    topic: '',
-    deadline: '',
-    field: '',
-    finalInsurance: '',
-  });
   useEffect(() => {
     // Get the current date
     const today = new Date();
@@ -37,11 +20,6 @@ function TemplateTenderDetails() {
     console.log(formattedMinDate);
     const nextYear = new Date(today);
     nextYear.setFullYear(today.getFullYear() + 1);
-    const formattedMaxDate = nextYear.toISOString().split('T')[0];
-
-    setMinDate(formattedMinDate);
-    setMaxDate(formattedMaxDate);
-    // Set the minDate state
   }, []);
   useEffect(() => {
     // This effect will run every time the location changes
@@ -52,159 +30,13 @@ function TemplateTenderDetails() {
       unlisten();
     };
   }, [navigate]);
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
-  };
 
-  const handleAddOfficial = () => {
-    const newOfficial = { name: '', job_title: '' };
-    setOfficials([...officials, newOfficial]);
-    setOfficialIndex(officialIndex + 1);
-    console.log(officials);
-  };
-
-  const handleOfficialChange = (idx, field, value) => {
-    const updatedOfficials = [...officials];
-    updatedOfficials[idx][field] = value;
-    setOfficials(updatedOfficials);
-  };
   const [products, setProducts] = useState(tender && tender.products);
-  // const [descriptions, setDescriptions] = useState(['']);
-  // const [index, setIndex] = useState(1);
+
   const [conditions, setConditions] = useState(['']);
   const [privateconditions, setPrivateConditions] = useState(['']);
-  const [selectedTender, setSelectedTender] = useState('');
-  const [selectedFinalPercentage, setSelectedPercentage] = useState('');
-  const [submitType, setSubmitType] = useState('draft');
-  const hasErrors = false;
 
-  const handleSelectChange = (event) => {
-    setSelectedTender(event.target.value);
-  };
-  const handleSelectPercentageChange = (event) => {
-    setSelectedPercentage(event.target.value);
-  };
-  const handleAddProduct = () => {
-    const newProduct = { title: '', quantity_unit: '', quantity: '', description: '' };
-    setProducts([...products, newProduct]);
-    console.log(products);
-    // setDescriptions([...descriptions, '']);
-    // setIndex(index + 1);
-  };
-
-  // const handleAddProduct = () => {
-  //   const newProduct = { id: index + 1, title: '', unit: '', quantity: '' };
-  //   setProducts([...products, newProduct]);
-  //   setDescriptions([...descriptions, '']);
-  //   setIndex(index + 1);
-  // };
-
-  const handleProductChange = (idx, field, value) => {
-    const updatedProducts = [...products];
-    updatedProducts[idx][field] = value;
-    setProducts(updatedProducts);
-  };
-
-  // const handleDescriptionChange = (idx, value) => {
-  //   const updatedDescriptions = [...descriptions];
-  //   updatedDescriptions[idx] = value;
-  //   setDescriptions(updatedDescriptions);
-  // };
-
-  // const handleTitleChange = (idx, value) => {
-  //   const updatedProducts = [...products];
-  //   updatedProducts[idx].title = value;
-  //   setProducts(updatedProducts);
-  // };
-
-  const handleAddCondition = () => {
-    const newCondition = { condition: '' };
-    setConditions([...conditions, newCondition]);
-    console.log(conditions);
-  };
-
-  const handleAddPrivateCondition = () => {
-    const newCondition = { condition: '' };
-    setPrivateConditions([...privateconditions, newCondition]);
-    console.log(privateconditions);
-  };
-
-  const handleConditionChange = (idx, value) => {
-    const updatedConditions = [...conditions];
-    updatedConditions[idx].condition = value;
-    setConditions(updatedConditions);
-  };
-
-  const handlePrivateConditionChange = (idx, value) => {
-    const updatedPrivateConditions = [...privateconditions];
-    updatedPrivateConditions[idx].condition = value;
-    setPrivateConditions(updatedPrivateConditions);
-  };
-
-  useEffect(() => {
-    if (tender) {
-      setTenderadFormData({
-        title: tender.ad.title,
-        topic: tender.ad.topic,
-        deadline: tender.ad.deadline,
-        field: tender.ad.field,
-        finalInsurance: tender.ad.finalInsurance,
-      });
-    }
-  }, [tender]);
-  const handleTextArea = (event) => {
-    const textarea = event.target;
-    textarea.style.height = 'auto'; // Reset height to auto to measure content
-    textarea.style.height = `${textarea.scrollHeight}px`; // Set height to fit content
-  };
-  const handleChangeAd = (e) => {
-    const { name, value } = e.target;
-    if (name === 'deadline') {
-      const date = e.target.value;
-      if (date < minDate) {
-        setError('يرجي اختيار موعد قادم صحيح');
-      } else if (date > maxDate) {
-        setError(`يرجي اختيار موعد قبل ${formatDate(maxDate)}`);
-      } else {
-        setError('');
-      }
-    }
-    handleTextArea(e);
-    setTenderadFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-    console.log(tenderadFormData);
-  };
-  const handleDateTwoMethods = (e) => {
-    const date = e.target.value;
-    handleChangeAd(e);
-    // Check if the selected date is before the min date
-    console.log(date);
-    console.log(minDate);
-    if (date < minDate) {
-      setError('يرجي اختيار موعد قادم صحيح');
-    } else if (date > maxDate) {
-      setError(`يرجي اختيار موعد قبل ${formatDate(maxDate)}`);
-    } else {
-      setError('');
-    }
-  };
   const textareaRefs = useRef([]);
-  const handleTextareaInput = (event, idx) => {
-    const textarea = event.target;
-    textarea.style.height = 'auto';
-    textarea.style.height = `${textarea.scrollHeight}px`;
-
-    const updatedProducts = [...products];
-    updatedProducts[idx] = {
-      ...updatedProducts[idx],
-      [textarea.name]: textarea.value,
-    };
-    setProducts(updatedProducts);
-  };
   useEffect(() => {
     const fetchTenders = async () => {
       try {
@@ -223,8 +55,6 @@ function TemplateTenderDetails() {
         setConditions(tender1.public_conditions);
         setOfficials(tender1.admins);
         setPrivateConditions(tender1.private_conditions);
-        setSelectedPercentage(tender1.ad.finalInsurance);
-        setSelectedTender(tender1.ad.field);
 
         const adjustTextareaHeight = () => {
           const textarea = document.getElementById('tenderSubject');
@@ -257,72 +87,23 @@ function TemplateTenderDetails() {
     };
     fetchTenders();
   }, [authTokens]);
-  const handleSubmit = async (e) => {
-    // Create a copy of the tender state
-    const updatedTender = { ...tender };
 
-    // Remove id from tender.ad and tender
-    delete updatedTender.ad.id;
-    delete updatedTender.id;
-
-    // Remove id from each admin in updatedTender.admins
-    updatedTender.admins = updatedTender.admins.map((admin) => {
-      const newAdmin = { ...admin };
-      delete newAdmin.id;
-      return newAdmin;
-    });
-
-    // Log the updated admins
-    console.log("newAdmins", updatedTender.admins);
-
-    // Remove id from each product in updatedTender.products
-    updatedTender.products = updatedTender.products.map((product) => {
-      const newProduct = { ...product };
-      delete newProduct.id;
-      return newProduct;
-    });
-
-    // Set the updated tender state
-    setTender(updatedTender);
-    console.log(updatedTender);
-    updatedTender.status = submitType;
-    const response = await fetch('http://localhost:8000/tender/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authTokens.access}`,
-      },
-      body: JSON.stringify(updatedTender),
-    });
-    if (response.ok) {
-      console.log('Data sent successfully');
-      if (submitType === 'draft') {
-        navigate.push('/draft_tenders');
-      } else {
-        navigate.push('/mytender');
-      }
-      // You can reset form state or take other actions if needed
-    } else {
-      console.error('Failed to send data to server', response.json());
-    }
-  };
-  const SetTenderToDraft = async () => {
+  const UseTempalte = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8000/tender/${id}`,
+        `http://localhost:8000/use_template/${id}`,
         {
-          method: 'PUT',
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authTokens.access}`,
           },
-          body: JSON.stringify({
-            status: 'draft',
-          }),
         },
       );
       if (response.ok) {
-        navigate.push(`/draft_tender_details/${id}`);
+        const data = await response.json();
+        console.log(data.id);
+        navigate.push(`/draft_tender_details/${data.id}`);
       }
     } catch (errr) {
       console.error('Error sending response:', errr);
@@ -345,26 +126,10 @@ function TemplateTenderDetails() {
       </div>
     );
   }
-  if (!tender) {
-    return (
-      <div>
-        <PulseLoader
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: '50vh',
-            width: '135vh' }}
-          color="#77E6FD"
-          size="20"
-        />
-      </div>
-    );
-  }
   return (
     <>
       <div className="container_create_tender">
-        <form onSubmit={handleSubmit}>
+        <form>
           <div className="tender_announcement">
             <div className="gradient__text">
               <h1>إعلان  المناقصة</h1>
@@ -538,8 +303,8 @@ function TemplateTenderDetails() {
           <button
             style={{ width: '30%' }}
             className="buton_resonpose"
-            type="submit"
-            onClick={SetTenderToDraft}
+            type="button"
+            onClick={UseTempalte}
           >
             استعمال هذا النموذج
           </button>

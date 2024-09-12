@@ -1,6 +1,5 @@
 /* eslint-disable arrow-body-style */
 /* eslint-disable operator-linebreak */
-/* eslint-disable no-unused-vars */
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import './AddResponse.css';

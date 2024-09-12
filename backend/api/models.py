@@ -108,7 +108,7 @@ class Tender(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.id}->{self.user}"
+        return f"{self.id}->{self.user}-{self.status}"
 
     @property
     def admins(self):
@@ -125,10 +125,39 @@ class Tender(models.Model):
     @property
     def products(self):
         return self.tenderproduct_set.all()
+    
+    @transaction.atomic
+    def create_fields(self, validated_data):
+        print("validated_data is  ",validated_data)
+        if 'ad' in validated_data:
+            print("AD is exist in the validated data")
+            utils.create_related_objects(self,TenderAd,validated_data.pop('ad'), 'tender'
+            )
+
+        if 'products' in validated_data:
+            utils.create_related_objects(
+                self,TenderProduct, validated_data.pop('products'), 'tender'
+            )
+
+        if 'admins' in validated_data:
+            utils.create_related_objects(
+                self,TenderAdmin, validated_data.pop('admins'), 'tender',
+            )
+
+        if 'public_conditions' in validated_data:
+            utils.create_related_objects(
+                self,TenderPublicConditions, validated_data.pop('public_conditions'), 'tender'
+            )
+
+        if 'private_conditions' in validated_data:
+            utils.create_related_objects(
+                self,TenderPrivateConditions, validated_data.pop('private_conditions'), 'tender'
+            )
     @transaction.atomic
     def update_fields(self, validated_data):
         print("validated_data is  ",validated_data)
         if 'ad' in validated_data:
+            print("AD is exist in the validated data")
             utils.update_or_create_related_objects(self,TenderAd,validated_data.pop('ad'), 'tender'
             )
 
@@ -201,7 +230,7 @@ class TenderResponse(models.Model):
     class Meta:
         unique_together = ('user', 'tender')
     def __str__(self):
-        return f"{self.id}- {self.user}->Tender {self.tender.id}"
+        return f"{self.id}- {self.user}->Tender {self.tender.id}-{self.status}"
     @property
     def offer_products(self):
         return self.responseproductbid_set.all()

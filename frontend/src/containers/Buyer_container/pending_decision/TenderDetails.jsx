@@ -148,7 +148,7 @@ function TenderDetails() {
     <div className="tender-details-container">
       <div className="center-content">
         <div style={{ marginBottom: '20px' }} className="gradient__text mytender">
-          <h1>العروض المقدمة</h1>
+          <h1>التقييم الفني</h1>
         </div>
         {responseDetails !== null ? (
           <div>
@@ -244,7 +244,7 @@ function TenderDetails() {
                   type="button"
                   onClick={() => handleSendResponse(tender)}
                 >
-                  إرسال الرد إلى قائمة المرشحين
+                  إرسال العرض إلى  مرحلة التقيم المالي
                 </button>
                 {index + 1 !== responseDetails.length && (
                   <hr style={{ marginRight: '150px', marginLeft: '150px' }} data-v-7e013592 />
@@ -266,7 +266,7 @@ function TenderDetails() {
                   type="button"
                   onClick={closeCandidatePool}
                 >
-                  إغلاق قائمه المرشحين
+                  إنهاء التقييم الفني
                 </button>
                 <button
                   style={{ marginLeft: '150px' }}

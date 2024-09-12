@@ -21,6 +21,16 @@ def update_or_create_response_product_objects(self,model,tender_product_model,re
                 product=tender_product_instance,
                 **{field_name: self})
 
+def create_related_objects(self, model, related_data, field_name):
+
+    if isinstance(related_data,dict):
+        related_data.pop('id', None)
+        model.objects.create(**related_data, **{field_name: self})
+    else:
+        for data in related_data:
+            data.pop('id', None)
+            model.objects.create(**data, **{field_name: self})
+
 def update_or_create_related_objects(self, model, related_data, field_name):
 
     if isinstance(related_data,dict):

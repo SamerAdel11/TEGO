@@ -17,11 +17,11 @@
               "path": "/mytender"
             },
             {
-              "title": "العروض المقدمة",
+              "title": "التقيم الفني",
               "path": "/pendingdecision"
             },
             {
-              "title": "قائمة المرشحين",
+              "title": "التقيم المالي",
               "path": "/candidate"
             },
             {

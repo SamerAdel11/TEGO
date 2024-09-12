@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+// /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useContext } from 'react';
 import './my_tender.css';
 import { useHistory, Link } from 'react-router-dom';
@@ -32,15 +32,6 @@ const MyTenders = () => {
     fetchData();
   }, [authTokens]);
 
-  const [expandedTender, setExpandedTender] = useState(null);
-
-  // const toggleExpand = (index) => {
-  //   if (expandedTender === index) {
-  //     setExpandedTender(null);
-  //   } else {
-  //     setExpandedTender(index);
-  //   }
-  // };
   if (!tendersData) {
     return (
       <div>

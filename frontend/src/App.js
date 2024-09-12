@@ -40,6 +40,7 @@ import CancelledTenders from './containers/Buyer_container/cancelled_tenders/Can
 import CancelledTenderDetails from './containers/Buyer_container/cancelled_tenders/CancelledTendersDetails.jsx';
 import TemplateTender from './containers/Buyer_container/template/TemplateTender.jsx';
 import TemplateTenderDetails from './containers/Buyer_container/template/TemplateTenderDetails.jsx';
+import OAuth2Callback from './containers/signIn/googleAuth.jsx';
 
 function HostComponent() {
   return (
@@ -353,6 +354,7 @@ const App = () => (
           <Route path="/activate/:uidb64/:token" component={ActivationPage} />
           <Route path="/waiting_for_verification" component={EmailVerificationMessage} />
           <Route path="/notification" component={WebSocketExample} />
+          <Route path="/google_auth" component={OAuth2Callback} />
           <Route path="/" exact>
             <div className="gradient__bg">
               <Navbar />

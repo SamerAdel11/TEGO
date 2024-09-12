@@ -1,8 +1,8 @@
-from pathlib import Path
 from datetime import timedelta
 from rest_framework.permissions import IsAuthenticated
 import os
 from celery.schedules import crontab
+from pathlib import Path
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -53,6 +53,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'tego.urls'
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
+GOOGLE_REDIRECT_URI='http://localhost:3000/google_auth'
+LOGIN_REDIRECT_URL = '/'
+LOSOUT_REDIRECT_URL = '/'
+GOOGLE_CLIENT_ID = '749857093501-ehv1dipdc73kp2mfbhbv8elq7b9avsqo.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET = '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'
 
 # CORS_ALLOWED_ORIGINS = [
 #     'http://localhost:3000',
@@ -151,12 +157,14 @@ AUTH_USER_MODEL = 'api.CustomUser'
 # DRF configurations
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated',
-                                   ],
+                                  ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
-
+BASE_FRONTEND_URL = os.environ.get('DJANGO_BASE_FRONTEND_URL', default='http://localhost:3000')
+GOOGLE_OAUTH2_CLIENT_ID = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID')
+GOOGLE_OAUTH2_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET')
 # JWT Token configuration
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=5),

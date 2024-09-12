@@ -14,8 +14,7 @@ function DraftDetails() {
   const navigate = useHistory();
   const { authTokens } = useContext(AuthContext);
   const [tender, setTender] = useState(null);
-  const [officials, setOfficials] = useState(['']);
-  const [officialIndex, setOfficialIndex] = useState(1);
+
   const [minDate, setMinDate] = useState('');
   const [maxDate, setMaxDate] = useState('');
   const [error, setError] = useState('');
@@ -70,17 +69,21 @@ function DraftDetails() {
   //   }
   // };
 
-  const handleAddOfficial = () => {
-    const newOfficial = { name: '', job_title: '' };
-    setOfficials([...officials, newOfficial]);
-    setOfficialIndex(officialIndex + 1);
-    console.log(officials);
+  /* --------------------------------------- */
+
+  const handleAddAdmin = () => {
+    const newAdmin = { name: '', job_title: '' };
+    const updatedAdmins = [...tender.admins, newAdmin];
+    const updatedTender = { ...tender, admins: updatedAdmins };
+    setTender(updatedTender);
+    console.log(updatedTender.admins);
   };
 
-  const handleOfficialChange = (idx, field, value) => {
-    const updatedOfficials = [...officials];
-    updatedOfficials[idx][field] = value;
-    setOfficials(updatedOfficials);
+  const handleAdminChange = (idx, field, value) => {
+    const updatedAdmins = [...tender.admins];
+    updatedAdmins[idx][field] = value;
+    const updatedTender = { ...tender, admins: updatedAdmins };
+    setTender(updatedTender);
   };
   const [products, setProducts] = useState(tender && tender.products);
   // const [descriptions, setDescriptions] = useState(['']);
@@ -93,69 +96,58 @@ function DraftDetails() {
   const [loading, setLoading] = useState(false);
 
   let hasErrors = false;
-
-  const handleSelectChange = (event) => {
-    setSelectedTender(event.target.value);
-  };
-  const handleSelectPercentageChange = (event) => {
-    setSelectedPercentage(event.target.value);
-  };
+  /* --------------------------------------- */
   const handleAddProduct = () => {
     const newProduct = { title: '', quantity_unit: '', quantity: '', description: '' };
-    setProducts([...products, newProduct]);
-    console.log(products);
-    // setDescriptions([...descriptions, '']);
-    // setIndex(index + 1);
+    const updatedProducts = [...tender.products, newProduct];
+    const updatedTender = { ...tender, products: updatedProducts };
+    setTender(updatedTender);
+    console.log(tender);
   };
-
-  // const handleAddProduct = () => {
-  //   const newProduct = { id: index + 1, title: '', unit: '', quantity: '' };
-  //   setProducts([...products, newProduct]);
-  //   setDescriptions([...descriptions, '']);
-  //   setIndex(index + 1);
-  // };
 
   const handleProductChange = (idx, field, value) => {
-    const updatedProducts = [...products];
+    const updatedProducts = [...tender.products];
     updatedProducts[idx][field] = value;
-    setProducts(updatedProducts);
+    const updatedTender = { ...tender, products: updatedProducts };
+    setTender(updatedTender);
+    console.log("UPDATEDTENDEFROMPRRODUCT", tender);
   };
 
-  // const handleDescriptionChange = (idx, value) => {
-  //   const updatedDescriptions = [...descriptions];
-  //   updatedDescriptions[idx] = value;
-  //   setDescriptions(updatedDescriptions);
-  // };
+  /* --------------------------------------- */
 
-  // const handleTitleChange = (idx, value) => {
-  //   const updatedProducts = [...products];
-  //   updatedProducts[idx].title = value;
-  //   setProducts(updatedProducts);
-  // };
-
-  const handleAddCondition = () => {
+  const handleAddPublicCondition = () => {
     const newCondition = { condition: '' };
-    setConditions([...conditions, newCondition]);
+    const updatedPublicCondition = [...tender.public_conditions, newCondition];
+    const updatedTender = { ...tender, public_conditions: updatedPublicCondition };
+    setTender(updatedTender);
     console.log(conditions);
   };
 
-  const handleAddPrivateCondition = () => {
-    const newCondition = { condition: '' };
-    setPrivateConditions([...privateconditions, newCondition]);
-    console.log(privateconditions);
+  const handlePublicConditionChange = (idx, value) => {
+    const updatedPublicCondition = [...tender.public_conditions];
+    updatedPublicCondition[idx].condition = value;
+    const updatedTender = { ...tender, public_conditions: updatedPublicCondition };
+    setTender(updatedTender);
   };
 
-  const handleConditionChange = (idx, value) => {
-    const updatedConditions = [...conditions];
-    updatedConditions[idx].condition = value;
-    setConditions(updatedConditions);
+  /* --------------------------------------- */
+
+  const handleAddPrivateCondition = () => {
+    const newPrivateCondition = { condition: '' };
+    const updatedPrivateCondition = [...tender.private_conditions, newPrivateCondition];
+    const updatedTender = { ...tender, private_conditions: updatedPrivateCondition };
+    setTender(updatedTender);
+    console.log(conditions);
   };
 
   const handlePrivateConditionChange = (idx, value) => {
-    const updatedPrivateConditions = [...privateconditions];
-    updatedPrivateConditions[idx].condition = value;
-    setPrivateConditions(updatedPrivateConditions);
+    const updatedPrivateCondition = [...tender.private_conditions];
+    updatedPrivateCondition[idx].condition = value;
+    const updatedTender = { ...tender, private_conditions: updatedPrivateCondition };
+    setTender(updatedTender);
   };
+
+  /* --------------------------------------- */
 
   useEffect(() => {
     if (tender) {
@@ -193,20 +185,7 @@ function DraftDetails() {
     }));
     console.log(tenderadFormData);
   };
-  const handleDateTwoMethods = (e) => {
-    const date = e.target.value;
-    handleChangeAd(e);
-    // Check if the selected date is before the min date
-    console.log(date);
-    console.log(minDate);
-    if (date < minDate) {
-      setError('يرجي اختيار موعد قادم صحيح');
-    } else if (date > maxDate) {
-      setError(`يرجي اختيار موعد قبل ${formatDate(maxDate)}`);
-    } else {
-      setError('');
-    }
-  };
+
   const [errors, setErrors] = useState({});
   const validate = (e) => {
     const newErrors = {
@@ -237,7 +216,7 @@ function DraftDetails() {
       newErrors.deadline = ' معاد فتح المظاريف مطلوب';
     }
 
-    products.forEach((product, idx) => {
+    tender.products.forEach((product, idx) => {
       if (!product.title) {
         hasErrors = true;
         if (!newErrors.products[idx]) newErrors.products[idx] = {};
@@ -260,7 +239,7 @@ function DraftDetails() {
       }
     });
 
-    officials.forEach((official, idx) => {
+    tender.admins.forEach((official, idx) => {
       if (!newErrors.admins[idx]) newErrors.admins[idx] = {};
 
       if (!official.name) {
@@ -273,14 +252,14 @@ function DraftDetails() {
         newErrors.admins[idx].position = 'المنصب مطلوب';
       }
     });
-    conditions.forEach((condition, idx) => {
+    tender.public_conditions.forEach((condition, idx) => {
       if (!newErrors.public_conditions[idx]) newErrors.public_conditions[idx] = {};
       if (!condition.condition) {
         hasErrors = true;
         newErrors.public_conditions[idx].condition = 'هذا الشرط مطلوب';
       }
     });
-    privateconditions.forEach((condition, idx) => {
+    tender.private_conditions.forEach((condition, idx) => {
       if (!newErrors.private_conditions[idx]) newErrors.private_conditions[idx] = {};
       if (!condition.condition) {
         hasErrors = true;
@@ -294,13 +273,6 @@ function DraftDetails() {
     const textarea = event.target;
     textarea.style.height = 'auto';
     textarea.style.height = `${textarea.scrollHeight}px`;
-
-    const updatedProducts = [...products];
-    updatedProducts[idx] = {
-      ...updatedProducts[idx],
-      [textarea.name]: textarea.value,
-    };
-    setProducts(updatedProducts);
   };
   useEffect(() => {
     const fetchTenders = async () => {
@@ -316,12 +288,11 @@ function DraftDetails() {
         const tender1 = await response.json();
         console.log('tender1', tender1);
         setTender(tender1);
-        setProducts(tender1.products);
-        setConditions(tender1.public_conditions);
-        setOfficials(tender1.admins);
-        setPrivateConditions(tender1.private_conditions);
-        setSelectedPercentage(tender1.ad.finalInsurance);
-        setSelectedTender(tender1.ad.field);
+        // setProducts(tender1.products);
+        // setConditions(tender1.public_conditions);
+        // setPrivateConditions(tender1.private_conditions);
+        // setSelectedPercentage(tender1.ad.finalInsurance);
+        // setSelectedTender(tender1.ad.field);
 
         const adjustTextareaHeight = () => {
           const textarea = document.getElementById('tenderSubject');
@@ -356,17 +327,14 @@ function DraftDetails() {
   }, [authTokens]);
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // if (submitType === 'open') {
-
-    // }
 
     try {
       const formData = {
         ad: tenderadFormData,
-        admins: officials,
-        public_conditions: conditions,
-        private_conditions: privateconditions,
-        products,
+        admins: tender.admins,
+        public_conditions: tender.public_conditions,
+        private_conditions: tender.private_conditions,
+        products: tender.products,
         status: submitType,
       };
       const dataToSubmit = { ...formData };
@@ -560,7 +528,7 @@ function DraftDetails() {
             <div className="gradient__text">
               <h1>مسوؤلي المناقصة</h1>
             </div>
-            {officials.map((official, idx) => (
+            {tender.admins.map((official, idx) => (
               <div key={idx} className="form-fields row">
                 <div className="col-md-6">
                   <label htmlFor={`officialName_${idx}`}>الاسم
@@ -568,7 +536,7 @@ function DraftDetails() {
                       type="text"
                       id={`officialName_${idx}`}
                       value={official.name}
-                      onChange={(e) => handleOfficialChange(idx, 'name', e.target.value)}
+                      onChange={(e) => handleAdminChange(idx, 'name', e.target.value)}
                     />
                   </label>
                   {errors.admins && errors.admins[idx] && errors.admins[idx].name && (
@@ -583,7 +551,7 @@ function DraftDetails() {
                       type="text"
                       id={`officialPosition_${idx}`}
                       value={official.job_title}
-                      onChange={(e) => handleOfficialChange(idx, 'job_title', e.target.value)}
+                      onChange={(e) => handleAdminChange(idx, 'job_title', e.target.value)}
                     />
                   </label>
                   {errors.admins && errors.admins[idx] && errors.admins[idx].position && (
@@ -597,7 +565,7 @@ function DraftDetails() {
             <button
               type="button"
               className="button condition"
-              onClick={handleAddOfficial}
+              onClick={handleAddAdmin}
             >
               إضافة مسؤول جديد
             </button>
@@ -622,7 +590,7 @@ function DraftDetails() {
                 </tr>
               </thead>
               <tbody>
-                { products && products.map((product, idx) => (
+                { tender && tender.products.map((product, idx) => (
                   <tr key={idx}>
                     <td>{idx + 1}</td>
                     <td style={{ position: 'relative', paddingBottom: '20px' }}>
@@ -711,12 +679,12 @@ function DraftDetails() {
           </div>
 
           <div className="condition-section">
-            {conditions.map((condition, idx) => (
+            {tender.public_conditions.map((condition, idx) => (
               <div key={idx} className="condition-field1">
                 <input
                   type="text"
                   value={condition.condition}
-                  onChange={(e) => handleConditionChange(idx, e.target.value)}
+                  onChange={(e) => handlePublicConditionChange(idx, e.target.value)}
                   placeholder={` الشرط رقم ${idx + 1}`}
                 />
                 {errors.public_conditions && errors.public_conditions[idx] && errors.public_conditions[idx].condition && <p style={{ fontSize: '20px', color: 'red' }}>{errors.public_conditions[idx].condition}</p>}
@@ -726,7 +694,7 @@ function DraftDetails() {
             <button
               type="button"
               className="button condition"
-              onClick={handleAddCondition}
+              onClick={handleAddPublicCondition}
             >
               اضافة شرط
             </button>
@@ -737,7 +705,7 @@ function DraftDetails() {
           </div>
 
           <div className="condition-section">
-            {privateconditions.map((privateCondition, idx) => (
+            {tender.private_conditions.map((privateCondition, idx) => (
               <div key={idx} className="condition-field1">
                 <input
                   type="text"

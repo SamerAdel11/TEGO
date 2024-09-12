@@ -309,7 +309,7 @@ class CloseCandidatePool(generics.RetrieveUpdateAPIView):
             tender.save()
             UserNotification.objects.create(
             recipient=tender.user,
-            message=f"لقد تم نقل مناقصة \"{tender.ad.title}\" لمرحلة قائمة المرشحين"
+            message=f"لقد تم نقل مناقصة \"{tender.ad.title}\" لمرحلة التقييم المالي"
             )
             return Response({"Message": "candidate_pool"})
         else:
@@ -328,10 +328,31 @@ class CloseCandidatePool(generics.RetrieveUpdateAPIView):
             tender.save()
             UserNotification.objects.create(
                 recipient=tender.user,
-                message=f'تم الغاء مناقصة \"{tender.ad.title}\" لعدم اختيار عروض لمرحلة قائمة المرشحين ')
+                message=f'تم الغاء مناقصة \"{tender.ad.title}\" لعدم اختيار عروض لمرحلة التقييم المالي ')
             return Response({"Message": "cancelled"})
         else:
             return Response(tender_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class UseTemplate(generics.RetrieveAPIView):
+    serializer_class=TenderSerializer
+    queryset= Tender.objects.filter(status='template')
+    lookup_field='pk'
+    def post(self,request,pk):
+        try:
+            tender_instance=self.get_object()
+            tender_data=self.get_serializer(tender_instance).data
+            tender_data['status']='draft'
+            tender_serializer=self.get_serializer(
+                data=tender_data,
+                context={'request': request}
+            )
+            if tender_serializer.is_valid(raise_exception=True):
+                tender_serializer.save()
+                return Response(tender_serializer.data)
+        except Tender.DoesNotExist:
+            return Response({"Message": "Tender not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
 
 class AwardResponse(APIView):
     def patch(self, request,tender_id,response_id):
@@ -412,7 +433,7 @@ class SupplierConfirmation(APIView):
             tender.save()
             response.save()
             UserNotification.objects.create(
-                recipient=tender.user, message=f'للأسف لقد رفض المورد التأكيد علي قبول مناقصة "{tender.ad.title}", لقد تم إعاده تحويل مناقصتك لمرحلة قائمة المرشحين لإختيار عرض اخر')
+                recipient=tender.user, message=f'للأسف لقد رفض المورد التأكيد علي قبول مناقصة "{tender.ad.title}", لقد تم إعاده تحويل مناقصتك لمرحلة التقييم المالي لإختيار عرض اخر')
             return Response({"Message": "Done"})
 
 
@@ -631,6 +652,7 @@ class Contract(APIView):
             private_c.append({'condition': condition.offered_condition,
                               'order': order})
         products_with_full_price = []
+        total_price=0
         for product in products:
             product_dict = {
                 'product': product.product,
@@ -641,17 +663,18 @@ class Contract(APIView):
                 'product_description': product.product_description,
                 'response': product.response,
                 'quantity_unit': product.product.quantity_unit,
-
             }
             # Calculate the full price
             full_price = product_dict['provided_quantity'] * \
                 product_dict['price']
             # Add the new key-value pair to the product dictionary
             product_dict['full_price'] = full_price
+            total_price=total_price+full_price
             # Append the updated dictionary to the list
             products_with_full_price.append(product_dict)
             arabic_approval_date = self.get_arabic_date(
                 transaction.product_review_date)
+        
         context = {
             'tender_ad': tenderad,
             'tender': tender,
@@ -662,11 +685,11 @@ class Contract(APIView):
             'supplier_company': supplier_company,
             'supplier_owners': supplier_owners,
             'supplier_company_details': supplier_company_details,
-            'arabic_offer_price': self.get_written_number(response.offered_price),
+            'arabic_offer_price': self.get_written_number(total_price),
             'products': products_with_full_price,
             'arabic_ordinals': arabic_ordinals,
-            'finalInsurancePrice': tenderad.finalInsurance*0.01*response.offered_price,
-            'arabicInsurancePrice': self.get_written_number(tenderad.finalInsurance*0.01*response.offered_price),
+            'finalInsurancePrice': tenderad.finalInsurance*0.01*total_price,
+            'arabicInsurancePrice': self.get_written_number(tenderad.finalInsurance*0.01*total_price),
             'public_condition': pc,
             'private_condition': private_c,
             'transaction': transaction,
@@ -727,7 +750,7 @@ class TransactionView(APIView):
                 response.status = 'rejected'
                 response.save()
                 UserNotification.objects.create(
-                    recipient=transaction.tender.user, message=f"لقد تم اعاده فتح قائمة المرشحين مرة أخري")
+                    recipient=transaction.tender.user, message=f"لقد تم اعاده فتح التقييم المالي مرة أخري")
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -767,3 +790,46 @@ class model(APIView):
     def post(self, request):
         prediction = self.get_model_prediction('شركة احمد محمد ابراهيم')
         return Response({'prediction': prediction})
+from django.conf import settings
+class googleAuth(APIView):
+    permission_classes=[]
+    def get(self,request):
+        # Google's OAuth 2.0 authorization endpoint
+        authorization_base_url = "https://accounts.google.com/o/oauth2/auth"
+        scope = "openid email profile"
+        redirect_uri = settings.GOOGLE_REDIRECT_URI
+
+        authorization_url = (
+            f"{authorization_base_url}?response_type=code&client_id={settings.GOOGLE_CLIENT_ID}"
+            f"&redirect_uri={redirect_uri}&scope={scope}&access_type=offline&prompt=consent"
+        )
+        print(authorization_url)
+        return Response({"url":authorization_url})
+
+from pprint import pprint
+class oauth2callback(APIView):
+    permission_classes=[]
+    def get(self,request):
+        code = request.data.get('code')
+        print("CODE IS ",code)
+        token_url = "https://oauth2.googleapis.com/token"
+        redirect_uri = settings.GOOGLE_REDIRECT_URI
+        token_data = {
+            'code': code,
+            'client_id': settings.GOOGLE_CLIENT_ID,
+            'client_secret': settings.GOOGLE_CLIENT_SECRET,
+            'redirect_uri': redirect_uri,
+            'grant_type': 'authorization_code'
+        }
+        token_response = requests.post(token_url, data=token_data)
+        token_json = token_response.json()
+        access_token = token_json.get('access_token')
+        
+        user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+        user_info_response = requests.get(user_info_url, headers={'Authorization': f'Bearer {access_token}'})
+        user_info = user_info_response.json()
+
+        # Process user info and log the user in
+        # You need to implement this part according to your application's requirements.
+        return Response({"User Info:": user_info})
+        

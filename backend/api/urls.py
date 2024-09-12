@@ -36,5 +36,8 @@ urlpatterns = [
      path('list_transactions/', views.TransactionListView.as_view()),
      path('transactions/<int:response_id>/<int:tender_id>/',
           views.TransactionView.as_view()),
+     path('use_template/<int:pk>',views.UseTemplate.as_view()),
+     path('google_login/', views.googleAuth.as_view(), name='google_login'),
+     path('oauth2callback/', views.oauth2callback.as_view(), name='oauth2callback'),
 
 ]

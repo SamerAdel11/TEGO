@@ -101,7 +101,7 @@ function CandidateDetails() {
     <div className="tender-details-container">
       <div className="center-content">
         <div className="gradient__text mytender">
-          <h1 style={{ marginBottom: '20px' }}>قائمه المرشحين</h1>
+          <h1 style={{ marginBottom: '20px' }}>التقييم المالي</h1>
         </div>
         {/* eslint-disable-next-line no-nested-ternary */}
         {responseDetails !== null ? (
